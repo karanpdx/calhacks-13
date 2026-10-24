@@ -1,0 +1,69 @@
+{
+  "_status": 200,
+  "_latency_s": 0.1,
+  "_headers": {
+    "RequestID": "55073cac-9621-42d6-a196-00e04c30b7b9",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "88",
+    "x-ratelimit-reset": "24"
+  },
+  "body": {
+    "requestData": {
+      "firstName": "ELENA",
+      "lastName": "CASTELLANOS",
+      "ssn": "666701017",
+      "addresses": [
+        {
+          "borrowerResidencyType": "Current",
+          "addressLine1": "4400 N CENTRAL EXPY STE 100",
+          "city": "DALLAS",
+          "state": "TX",
+          "postalCode": "75206"
+        }
+      ]
+    },
+    "repositoryIncluded": {
+      "transunion": false,
+      "experian": false,
+      "equifax": true
+    },
+    "responseDetail": {
+      "dateRequested": "2026-10-24T21:44:40.886063Z",
+      "requestingParty": {
+        "name": "CALHACKS13"
+      },
+      "creditBureauContact": {
+        "name": "CREDIT REPORTING SERVICES, INC",
+        "address": {
+          "addressLine1": "1024 IRON POINT ROAD",
+          "city": "FOLSOM",
+          "state": "CA",
+          "postalCode": "95630"
+        }
+      }
+    },
+    "responseAlertMessages": [
+      {
+        "borrowerSourceType": "Borrower",
+        "sourceType": "Equifax",
+        "responseAlertMessageCategoryType": "DemographicsVerification",
+        "responseAlertMessageServiceType": "EquifaxIdentityScanAlert",
+        "responseAlertMessageCode": "S",
+        "responseAlertMessageText": "ID Scan: S - IDENTITY SCAN DID NOT DETECT ANY ALERTS"
+      }
+    ],
+    "creditFiles": [
+      {
+        "creditFileDetail": {
+          "borrowerSourceType": "Borrower",
+          "creditFileResultStatusType": "NoFileReturnedNoHit",
+          "sourceType": "Equifax"
+        }
+      }
+    ],
+    "summaries": {
+      "tradeSummary": {},
+      "derogatorySummary": {}
+    }
+  }
+}

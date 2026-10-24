@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.15,
+  "_headers": {
+    "RequestID": "5fb72b01-396d-41fe-a5e4-52080be32756",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "92",
+    "x-ratelimit-reset": "21"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "ANAND,VICTOR"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

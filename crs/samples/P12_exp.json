@@ -1,0 +1,61 @@
+{
+  "_status": 200,
+  "_latency_s": 0.1,
+  "_headers": {
+    "RequestID": "deccb2ec-fc3d-4c99-8ce3-0a11ef1ddf34",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "95",
+    "x-ratelimit-reset": "19"
+  },
+  "body": {
+    "requestData": {
+      "firstName": "VICTOR",
+      "lastName": "ANAND",
+      "ssn": "666701012",
+      "addresses": [
+        {
+          "borrowerResidencyType": "Current",
+          "addressLine1": "55 WATER ST FL 20",
+          "city": "NEW YORK",
+          "state": "NY",
+          "postalCode": "10041"
+        }
+      ]
+    },
+    "repositoryIncluded": {
+      "transunion": false,
+      "experian": true,
+      "equifax": false
+    },
+    "responseDetail": {
+      "dateRequested": "2026-10-24T21:44:39.905042Z",
+      "requestingParty": {
+        "name": "CALHACKS13"
+      },
+      "creditBureauContact": {
+        "name": "CREDIT REPORTING SERVICES, INC",
+        "address": {
+          "addressLine1": "1024 IRON POINT ROAD",
+          "city": "FOLSOM",
+          "state": "CA",
+          "postalCode": "95630"
+        }
+      }
+    },
+    "responseAlertMessages": [],
+    "creditFiles": [
+      {
+        "creditFileDetail": {
+          "borrowerSourceType": "Borrower",
+          "creditFileInfileDate": "2026-10-18",
+          "creditFileResultStatusType": "NoFileReturnedNoHit",
+          "sourceType": "Experian"
+        }
+      }
+    ],
+    "summaries": {
+      "tradeSummary": {},
+      "derogatorySummary": {}
+    }
+  }
+}

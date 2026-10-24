@@ -1,0 +1,70 @@
+{
+  "_status": 200,
+  "_latency_s": 0.16,
+  "_headers": {
+    "RequestID": "d76adeb1-07da-4d69-950f-fedca5911b1b",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "94",
+    "x-ratelimit-reset": "20"
+  },
+  "body": {
+    "eam": {
+      "date_first_seen": "2024-10-01",
+      "longevity": 3,
+      "velocity": 6,
+      "popularity": 2
+    },
+    "dam": {
+      "date_first_seen": "1995-08-13",
+      "longevity": 10,
+      "velocity": 1,
+      "popularity": 10
+    },
+    "risk": {
+      "score": 85,
+      "tumbling_risk": 1,
+      "query_id": "calhacks-P12-0001",
+      "domain": {
+        "domain_risk_score": 0
+      },
+      "ip": {
+        "routing_type": "fixed",
+        "organization": "comcast cable communications llc",
+        "proxy_type": "",
+        "hosting_facility": false,
+        "latitude": "51.51",
+        "longitude": "-0.13"
+      },
+      "postal": {
+        "first_name_match": "match",
+        "last_name_match": "match",
+        "street_match": "match",
+        "city_match": "match",
+        "zip_match": "match",
+        "address_type": "Street",
+        "deliverability": "deliverable",
+        "ip_postal_distance": "> 1000 miles"
+      },
+      "phone": {
+        "line_type": "mobile",
+        "carrier": "VERIZON WIRELESS",
+        "status": "valid",
+        "prepaid": false,
+        "owner": {
+          "first_name_match": "no_match",
+          "last_name_match": "no_match",
+          "street_match": "no_match",
+          "city_match": "no_match",
+          "zip_match": "no_match",
+          "type": "person"
+        }
+      }
+    },
+    "email_validation": {
+      "address": "v.anand.1968@example.com",
+      "status": "valid",
+      "status_code": 50,
+      "domain_type": "freeisp"
+    }
+  }
+}

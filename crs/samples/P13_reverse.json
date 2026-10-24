@@ -1,0 +1,18 @@
+{
+  "_status": 200,
+  "_latency_s": 0.12,
+  "_headers": {
+    "RequestID": "aa325ebb-6f3e-4a45-b3f9-04a9e8b41024",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "97",
+    "x-ratelimit-reset": "17"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": []
+    }
+  }
+}

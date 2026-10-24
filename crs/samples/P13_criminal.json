@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.13,
+  "_headers": {
+    "RequestID": "0560f968-5f27-41a3-af4d-5d867e6f45e4",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "99",
+    "x-ratelimit-reset": "16"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "BRENNAN,KAYLA"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

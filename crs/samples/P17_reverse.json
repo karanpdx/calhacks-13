@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.1,
+  "_headers": {
+    "RequestID": "cb75c3cb-8c94-42ea-95d9-5b5677f3714d",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "82",
+    "x-ratelimit-reset": "28"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": [
+        {
+          "firstName": "ELENA",
+          "lastName": "CASTELLANOS",
+          "houseNo": "4400",
+          "streetName": "N CENTRAL EXPY STE 100",
+          "address": "4400 N CENTRAL EXPY STE 100",
+          "city": "DALLAS",
+          "state": "TX",
+          "postalCode": "75206"
+        }
+      ]
+    }
+  }
+}

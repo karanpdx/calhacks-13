@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.13,
+  "_headers": {
+    "RequestID": "9e128d69-7e72-4191-94b1-ebad7c93577f",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "106",
+    "x-ratelimit-reset": "10"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "DALTON,RICKY"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

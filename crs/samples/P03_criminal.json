@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.16,
+  "_headers": {
+    "RequestID": "e14dcd04-0695-4c14-b20c-fda560895298",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "114",
+    "x-ratelimit-reset": "5"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "REYES,JASMINE"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.13,
+  "_headers": {
+    "RequestID": "5e1b7385-679c-43a1-97e8-10a357b10d2c",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "112",
+    "x-ratelimit-reset": "6"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": [
+        {
+          "firstName": "JASMINE",
+          "lastName": "REYES",
+          "houseNo": "2210",
+          "streetName": "UNIVERSITY AVE APT 4B",
+          "address": "2210 UNIVERSITY AVE APT 4B",
+          "city": "BERKELEY",
+          "state": "CA",
+          "postalCode": "94704"
+        }
+      ]
+    }
+  }
+}

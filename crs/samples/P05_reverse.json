@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.1,
+  "_headers": {
+    "RequestID": "b4f67d1c-4c02-4574-ae06-3d977486a9e2",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "105",
+    "x-ratelimit-reset": "12"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": [
+        {
+          "firstName": "RICKY",
+          "lastName": "DALTON",
+          "houseNo": "7031",
+          "streetName": "SUNSET RIDGE RD",
+          "address": "7031 SUNSET RIDGE RD",
+          "city": "ORLANDO",
+          "state": "FL",
+          "postalCode": "32819"
+        }
+      ]
+    }
+  }
+}

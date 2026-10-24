@@ -1,0 +1,5 @@
+*Sandbox*.json
+calhacks13-*.json
+.env
+__pycache__/
+*.pyc

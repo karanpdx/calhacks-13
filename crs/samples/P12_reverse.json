@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.13,
+  "_headers": {
+    "RequestID": "c59ae395-ca5e-4583-b5ad-dd3caa4eb988",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "90",
+    "x-ratelimit-reset": "23"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-P12",
+      "records": [
+        {
+          "firstName": "RAJESH",
+          "lastName": "MENON",
+          "houseNo": "55",
+          "streetName": "WATER ST FL 20",
+          "address": "55 WATER ST FL 20",
+          "city": "NEW YORK",
+          "state": "NY",
+          "postalCode": "10041"
+        }
+      ]
+    }
+  }
+}
