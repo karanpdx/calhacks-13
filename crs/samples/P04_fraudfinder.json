@@ -1,0 +1,70 @@
+{
+  "_status": 200,
+  "_latency_s": 0.11,
+  "_headers": {
+    "RequestID": "73948d54-3554-416b-9265-ca3ca7c0cc7f",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "102",
+    "x-ratelimit-reset": "14"
+  },
+  "body": {
+    "eam": {
+      "date_first_seen": "2025-09-05",
+      "longevity": 2,
+      "velocity": 2,
+      "popularity": 1
+    },
+    "dam": {
+      "date_first_seen": "1995-08-13",
+      "longevity": 10,
+      "velocity": 1,
+      "popularity": 10
+    },
+    "risk": {
+      "score": 18,
+      "tumbling_risk": 0,
+      "query_id": "calhacks-P04-0001",
+      "domain": {
+        "domain_risk_score": 0
+      },
+      "ip": {
+        "routing_type": "fixed",
+        "organization": "comcast cable communications llc",
+        "proxy_type": "",
+        "hosting_facility": false,
+        "latitude": "47.61",
+        "longitude": "-122.33"
+      },
+      "postal": {
+        "first_name_match": "match",
+        "last_name_match": "match",
+        "street_match": "match",
+        "city_match": "match",
+        "zip_match": "match",
+        "address_type": "Street",
+        "deliverability": "deliverable",
+        "ip_postal_distance": "5 miles"
+      },
+      "phone": {
+        "line_type": "mobile",
+        "carrier": "VERIZON WIRELESS",
+        "status": "valid",
+        "prepaid": false,
+        "owner": {
+          "first_name_match": "match",
+          "last_name_match": "match",
+          "street_match": "match",
+          "city_match": "match",
+          "zip_match": "match",
+          "type": "person"
+        }
+      }
+    },
+    "email_validation": {
+      "address": "tomas.lindqvist@example.com",
+      "status": "valid",
+      "status_code": 50,
+      "domain_type": "freeisp"
+    }
+  }
+}

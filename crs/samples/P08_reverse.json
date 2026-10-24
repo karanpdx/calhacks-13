@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.09,
+  "_headers": {
+    "RequestID": "e5a3bfe5-b60b-472b-9556-08256f14740e",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "75",
+    "x-ratelimit-reset": "34"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": [
+        {
+          "firstName": "PRIYA",
+          "lastName": "VENKATESAN",
+          "houseNo": "3300",
+          "streetName": "N LAKE SHORE DR APT 15C",
+          "address": "3300 N LAKE SHORE DR APT 15C",
+          "city": "CHICAGO",
+          "state": "IL",
+          "postalCode": "60657"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "_status": 200,
+  "_latency_s": 0.09,
+  "_headers": {
+    "RequestID": "1fbd0ebc-88a3-42bd-b2ca-0b034d070018",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "72",
+    "x-ratelimit-reset": "36"
+  },
+  "body": {
+    "eam": {
+      "date_first_seen": "2015-11-20",
+      "longevity": 9,
+      "velocity": 1,
+      "popularity": 6
+    },
+    "dam": {
+      "date_first_seen": "1995-08-13",
+      "longevity": 10,
+      "velocity": 1,
+      "popularity": 10
+    },
+    "risk": {
+      "score": 11,
+      "tumbling_risk": 0,
+      "query_id": "calhacks-P09-0001",
+      "domain": {
+        "domain_risk_score": 0
+      },
+      "ip": {
+        "routing_type": "fixed",
+        "organization": "comcast cable communications llc",
+        "proxy_type": "",
+        "hosting_facility": false,
+        "latitude": "39.74",
+        "longitude": "-104.99"
+      },
+      "postal": {
+        "first_name_match": "match",
+        "last_name_match": "match",
+        "street_match": "match",
+        "city_match": "match",
+        "zip_match": "match",
+        "address_type": "Street",
+        "deliverability": "deliverable",
+        "ip_postal_distance": "5-100 miles"
+      },
+      "phone": {
+        "line_type": "mobile",
+        "carrier": "VERIZON WIRELESS",
+        "status": "valid",
+        "prepaid": false,
+        "owner": {
+          "first_name_match": "match",
+          "last_name_match": "match",
+          "street_match": "match",
+          "city_match": "match",
+          "zip_match": "match",
+          "type": "person"
+        }
+      }
+    },
+    "email_validation": {
+      "address": "derek.holloway@example.com",
+      "status": "valid",
+      "status_code": 50,
+      "domain_type": "freeisp"
+    }
+  }
+}

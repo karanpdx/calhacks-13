@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.12,
+  "_headers": {
+    "RequestID": "7c3c24a0-39c9-4abb-afaa-d49031afc70b",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "47",
+    "x-ratelimit-reset": "55"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "PETTIGREW,HAROLD"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

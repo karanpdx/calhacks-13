@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.11,
+  "_headers": {
+    "RequestID": "f6934962-2bce-4703-9602-2e36d40f3386",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "31",
+    "x-ratelimit-reset": "67"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": [
+        {
+          "firstName": "SAMUEL",
+          "lastName": "OYELARAN",
+          "houseNo": "1200",
+          "streetName": "BRICKELL BAY DR APT 2203",
+          "address": "1200 BRICKELL BAY DR APT 2203",
+          "city": "MIAMI",
+          "state": "FL",
+          "postalCode": "33131"
+        }
+      ]
+    }
+  }
+}

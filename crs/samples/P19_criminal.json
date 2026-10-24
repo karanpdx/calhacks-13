@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.1,
+  "_headers": {
+    "RequestID": "b64abac4-8d37-40ff-9d3f-84c7ee15ac4a",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "17",
+    "x-ratelimit-reset": "77"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "NAKAMURA,GRACE"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

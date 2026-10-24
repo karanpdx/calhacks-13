@@ -1,0 +1,53 @@
+{
+  "_status": 200,
+  "_latency_s": 0.11,
+  "_headers": {
+    "RequestID": "2a1a27dd-0d26-44da-9af6-f60520921116",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "52",
+    "x-ratelimit-reset": "51"
+  },
+  "body": {
+    "requestData": {
+      "firstName": "HAROLD",
+      "lastName": "PETTIGREW",
+      "ssn": "666701014",
+      "addresses": [
+        {
+          "borrowerResidencyType": "Current",
+          "addressLine1": "310 ELM ST",
+          "city": "DAYTON",
+          "state": "OH",
+          "postalCode": "45402"
+        }
+      ]
+    },
+    "repositoryIncluded": {
+      "transunion": true,
+      "experian": false,
+      "equifax": false
+    },
+    "responseDetail": {
+      "dateRequested": "2026-10-24T22:22:10.548955Z",
+      "requestingParty": {
+        "name": "CALHACKS13"
+      },
+      "creditBureauContact": {
+        "name": "CREDIT REPORTING SERVICES, INC",
+        "address": {
+          "addressLine1": "1024 IRON POINT ROAD",
+          "city": "FOLSOM",
+          "state": "CA",
+          "postalCode": "95630"
+        }
+      }
+    },
+    "errorMessages": [
+      {
+        "creditErrorMessageCode": "E1200",
+        "creditErrorMessageSourceType": "CreditBureau",
+        "creditErrorMessageText": "This is a deceased file and cannot be shared without additional addendums. Please contact CRS at support@crscreditapi.com"
+      }
+    ]
+  }
+}

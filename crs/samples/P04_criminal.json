@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.11,
+  "_headers": {
+    "RequestID": "85dd0644-1c86-46dd-bbab-8b4b253c482f",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "99",
+    "x-ratelimit-reset": "16"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "LINDQVIST,TOMAS"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.1,
+  "_headers": {
+    "RequestID": "9bee3804-a22c-4662-a845-5e11ec1bcbe7",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "46",
+    "x-ratelimit-reset": "56"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": [
+        {
+          "firstName": "HAROLD",
+          "lastName": "PETTIGREW",
+          "houseNo": "310",
+          "streetName": "ELM ST",
+          "address": "310 ELM ST",
+          "city": "DAYTON",
+          "state": "OH",
+          "postalCode": "45402"
+        }
+      ]
+    }
+  }
+}

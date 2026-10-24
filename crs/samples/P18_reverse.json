@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.13,
+  "_headers": {
+    "RequestID": "c1cfa164-3114-4423-830c-2ae214cf7c0f",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "23",
+    "x-ratelimit-reset": "73"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": [
+        {
+          "firstName": "TERRENCE",
+          "lastName": "ABERNATHY",
+          "houseNo": "2102",
+          "streetName": "S HALSTED ST",
+          "address": "2102 S HALSTED ST",
+          "city": "CHICAGO",
+          "state": "IL",
+          "postalCode": "60608"
+        }
+      ]
+    }
+  }
+}

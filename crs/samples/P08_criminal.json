@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.11,
+  "_headers": {
+    "RequestID": "9efc27e3-7ed8-45a9-9cea-8aacb31cc5f8",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "77",
+    "x-ratelimit-reset": "33"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "VENKATESAN,PRIYA"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

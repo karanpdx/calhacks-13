@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.11,
+  "_headers": {
+    "RequestID": "28b8d929-be91-499e-a3e2-b80fd938c12a",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "90",
+    "x-ratelimit-reset": "23"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": [
+        {
+          "firstName": "ANGELA",
+          "lastName": "MORRISSEY",
+          "houseNo": "960",
+          "streetName": "MAPLEWOOD AVE",
+          "address": "960 MAPLEWOOD AVE",
+          "city": "COLUMBUS",
+          "state": "OH",
+          "postalCode": "43209"
+        }
+      ]
+    }
+  }
+}

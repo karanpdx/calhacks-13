@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.12,
+  "_headers": {
+    "RequestID": "57aaaeeb-dc88-410e-ba2c-7ed5cb366169",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "105",
+    "x-ratelimit-reset": "11"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": [
+        {
+          "firstName": "DANIEL",
+          "lastName": "WHITFIELD",
+          "houseNo": "88",
+          "streetName": "LAKESHORE BLVD",
+          "address": "88 LAKESHORE BLVD",
+          "city": "AUSTIN",
+          "state": "TX",
+          "postalCode": "78746"
+        }
+      ]
+    }
+  }
+}

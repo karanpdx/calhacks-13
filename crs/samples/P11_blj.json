@@ -1,0 +1,67 @@
+{
+  "_status": 200,
+  "_latency_s": 0.12,
+  "_headers": {
+    "RequestID": "e48fe5c1-7b4b-4008-a50d-2e75f92e1206",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "55",
+    "x-ratelimit-reset": "49"
+  },
+  "body": {
+    "DetailedBLJReport": {
+      "JudgmentsFound": 1,
+      "Filters": {
+        "ExcludeBankruptcies": false,
+        "FilterVerbiage": "Judgment satisfied = 7 years; Judgment unsatisfied = 7 years; Lien released = 7 years; Lien unreleased = 10 years; Bankruptcy chapter 7 or 11 dismissed or discharged = 10 years; Bankruptcy chapter 7 or 11 not dismissed or discharged = 10 years; Bankruptcy chapter 13 dismissed or discharged = 7 years; Bankruptcy chapter 13 not dismissed or discharged = 10 years",
+        "SkipNameValidation": false
+      },
+      "Messages": {
+        "Message": {
+          "Text": "No Errors",
+          "Code": 0
+        }
+      },
+      "Results": {
+        "Judgments": {
+          "JudgmentRecord": {
+            "Plaintiff": {
+              "Name": {
+                "UnparsedName": "HARBORSIDE RESIDENTIAL LP",
+                "LastName": "HARBORSIDE RESIDENTIAL LP"
+              }
+            },
+            "Status": "Unsatisfied",
+            "CourtCaseNumber": "37-2024-00031877-CL-UD-CTL",
+            "FilingDate": {
+              "month": 11,
+              "year": 2024,
+              "day": "08"
+            },
+            "Defendant": {
+              "Name": {
+                "FirstName": "BRANDON",
+                "UnparsedName": "BRANDON SZABO",
+                "LastName": "SZABO"
+              }
+            },
+            "DamarDocumentType": "Judgment",
+            "JudgmentType": "Civil Judgment - Unlawful Detainer",
+            "FilingLocation": "San Diego County, CA",
+            "TotalJudgmentAmount": 4850,
+            "FilingType": "Judgment",
+            "Court": {
+              "Address": {
+                "State": "CA",
+                "City": "SAN DIEGO"
+              },
+              "Id": "CASDSC",
+              "Name": "SAN DIEGO COUNTY SUPERIOR COURT"
+            }
+          }
+        }
+      },
+      "BankruptciesFound": 0,
+      "LiensFound": 0
+    }
+  }
+}

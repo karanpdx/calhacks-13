@@ -1,0 +1,107 @@
+{
+  "_status": 200,
+  "_latency_s": 0.15,
+  "_headers": {
+    "RequestID": "5225ad1f-f7fc-4fc8-be72-60a25d5b957e",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "78",
+    "x-ratelimit-reset": "32"
+  },
+  "body": {
+    "DetailedBLJReport": {
+      "JudgmentsFound": 1,
+      "Filters": {
+        "ExcludeBankruptcies": false,
+        "FilterVerbiage": "Judgment satisfied = 7 years; Judgment unsatisfied = 7 years; Lien released = 7 years; Lien unreleased = 10 years; Bankruptcy chapter 7 or 11 dismissed or discharged = 10 years; Bankruptcy chapter 7 or 11 not dismissed or discharged = 10 years; Bankruptcy chapter 13 dismissed or discharged = 7 years; Bankruptcy chapter 13 not dismissed or discharged = 10 years",
+        "SkipNameValidation": false
+      },
+      "Messages": {
+        "Message": {
+          "Text": "No Errors",
+          "Code": 0
+        }
+      },
+      "Results": {
+        "Judgments": {
+          "JudgmentRecord": {
+            "Plaintiff": {
+              "Name": {
+                "UnparsedName": "LAKEVIEW CONTRACTORS INC",
+                "LastName": "LAKEVIEW CONTRACTORS INC"
+              }
+            },
+            "Status": "Unsatisfied",
+            "CourtCaseNumber": "2023-M1-104455",
+            "FilingDate": {
+              "month": "03",
+              "year": 2023,
+              "day": 15
+            },
+            "Defendant": {
+              "Name": {
+                "FirstName": "PRIYA",
+                "UnparsedName": "PRIYA VENKATESAN",
+                "LastName": "VENKATESAN"
+              }
+            },
+            "DamarDocumentType": "Judgment",
+            "JudgmentType": "Civil Judgment",
+            "FilingLocation": "Cook County, IL",
+            "TotalJudgmentAmount": 12300,
+            "FilingType": "Judgment",
+            "Court": {
+              "Address": {
+                "State": "IL",
+                "City": "CHICAGO"
+              },
+              "Id": "ILCOOK",
+              "Name": "CIRCUIT COURT OF COOK COUNTY"
+            }
+          }
+        },
+        "Liens": {
+          "LienRecord": {
+            "Plaintiff": {
+              "Name": {
+                "UnparsedName": "ILLINOIS DEPARTMENT OF REVENUE",
+                "LastName": "ILLINOIS DEPARTMENT OF REVENUE"
+              }
+            },
+            "Status": "Unreleased",
+            "Debtor": {
+              "Name": {
+                "FirstName": "PRIYA",
+                "UnparsedName": "PRIYA VENKATESAN",
+                "LastName": "VENKATESAN"
+              }
+            },
+            "CourtCaseNumber": "IL-2024-0088123",
+            "KindOfTax": "ST",
+            "FilingDate": {
+              "month": "08",
+              "year": 2024,
+              "day": 21
+            },
+            "TotalLienAmount": 7450,
+            "DamarDocumentType": "Lien",
+            "FilingLocation": "Cook County, IL",
+            "TaxLienDate": {
+              "month": "08",
+              "year": 2024,
+              "day": 21
+            },
+            "FilingType": "Lien",
+            "Court": {
+              "Address": {
+                "State": "IL"
+              },
+              "Id": 17031
+            }
+          }
+        }
+      },
+      "BankruptciesFound": 0,
+      "LiensFound": 1
+    }
+  }
+}

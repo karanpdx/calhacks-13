@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.12,
+  "_headers": {
+    "RequestID": "e6b6619a-708a-4ada-bb1d-26b6b8b3a7c0",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "92",
+    "x-ratelimit-reset": "21"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "MORRISSEY,ANGELA"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

@@ -1,0 +1,564 @@
+{
+  "_status": 200,
+  "_latency_s": 0.13,
+  "_headers": {
+    "RequestID": "f21ffee0-d4df-434e-b180-193a2d43be0a",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "88",
+    "x-ratelimit-reset": "24"
+  },
+  "body": {
+    "requestData": {
+      "firstName": "MARCUS",
+      "lastName": "BELLAMY",
+      "ssn": "666701007",
+      "addresses": [
+        {
+          "borrowerResidencyType": "Current",
+          "addressLine1": "1507 PEACHTREE INDUSTRIAL BLVD",
+          "city": "ATLANTA",
+          "state": "GA",
+          "postalCode": "30341"
+        }
+      ]
+    },
+    "repositoryIncluded": {
+      "transunion": false,
+      "experian": true,
+      "equifax": false
+    },
+    "responseDetail": {
+      "dateRequested": "2026-10-24T22:22:04.955185Z",
+      "requestingParty": {
+        "name": "CALHACKS13"
+      },
+      "creditBureauContact": {
+        "name": "CREDIT REPORTING SERVICES, INC",
+        "address": {
+          "addressLine1": "1024 IRON POINT ROAD",
+          "city": "FOLSOM",
+          "state": "CA",
+          "postalCode": "95630"
+        }
+      }
+    },
+    "responseAlertMessages": [],
+    "creditFiles": [
+      {
+        "creditFileDetail": {
+          "borrowerSourceType": "Borrower",
+          "creditFileInfileDate": "2024-11-19",
+          "creditFileResultStatusType": "FileReturned",
+          "sourceType": "Experian"
+        },
+        "aliases": [
+          {
+            "firstName": "MARCUS",
+            "lastName": "BELLAMY",
+            "middleName": "J"
+          }
+        ]
+      }
+    ],
+    "inquiries": [],
+    "tradelines": [
+      {
+        "accountClosedDate": "2026-02-19",
+        "accountIdentifier": "CALHACKS-CO-1",
+        "accountOpenedDate": "2017-04-12",
+        "accountOwnershipType": "Individual",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Closed",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": true,
+        "highBalanceAmount": "2200",
+        "lastActivityDate": "2026-02-19",
+        "monthsReviewedCount": "99",
+        "creditorName": "METRO BANK CARD 1",
+        "subscriberCode": "1982977",
+        "originalCreditorName": "SBC",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Banking",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "9",
+        "currentRatingType": "ChargeOff",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Experian",
+        "comments": [
+          {
+            "commentSourceType": "CreditBureau",
+            "commentType": "BureauRemarks",
+            "commentText": "Original Creditor: SBC"
+          }
+        ]
+      },
+      {
+        "accountClosedDate": "2026-02-19",
+        "accountIdentifier": "CALHACKS-CO-2",
+        "accountOpenedDate": "2017-04-12",
+        "accountOwnershipType": "Individual",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Closed",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": true,
+        "highBalanceAmount": "2500",
+        "lastActivityDate": "2026-02-19",
+        "monthsReviewedCount": "99",
+        "creditorName": "METRO BANK CARD 2",
+        "subscriberCode": "1982977",
+        "originalCreditorName": "SBC",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Banking",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "9",
+        "currentRatingType": "ChargeOff",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Experian",
+        "comments": [
+          {
+            "commentSourceType": "CreditBureau",
+            "commentType": "BureauRemarks",
+            "commentText": "Original Creditor: SBC"
+          }
+        ]
+      },
+      {
+        "accountIdentifier": "CALHACKS-REV-1",
+        "accountOpenedDate": "2007-10-20",
+        "accountOwnershipType": "Individual",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Open",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "creditLimitAmount": "5000",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "2750",
+        "lastActivityDate": "2026-09-19",
+        "monthsReviewedCount": "99",
+        "creditorName": "NORTHSTAR BANK VISA",
+        "subscriberCode": "1982977",
+        "originalCreditorName": "SBC",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "2750",
+        "businessType": "Banking",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Experian",
+        "comments": [
+          {
+            "commentSourceType": "CreditBureau",
+            "commentType": "BureauRemarks",
+            "commentText": "Original Creditor: SBC"
+          }
+        ]
+      },
+      {
+        "accountIdentifier": "CALHACKS-REV-2",
+        "accountOpenedDate": "2023-04-20",
+        "accountOwnershipType": "Individual",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Open",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "creditLimitAmount": "5000",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "2750",
+        "lastActivityDate": "2026-09-19",
+        "monthsReviewedCount": "42",
+        "creditorName": "CAPITAL REWARDS MC",
+        "subscriberCode": "1982977",
+        "originalCreditorName": "SBC",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "2750",
+        "businessType": "Banking",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Experian",
+        "comments": [
+          {
+            "commentSourceType": "CreditBureau",
+            "commentType": "BureauRemarks",
+            "commentText": "Original Creditor: SBC"
+          }
+        ]
+      },
+      {
+        "accountIdentifier": "CALHACKS-INST-1",
+        "accountOpenedDate": "2025-04-20",
+        "accountOwnershipType": "Individual",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Open",
+        "accountType": "Installment",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "57800",
+        "lastActivityDate": "2026-09-19",
+        "monthlyPaymentAmount": "740",
+        "monthsReviewedCount": "18",
+        "creditorName": "LAKESIDE AUTO FINANCE",
+        "subscriberCode": "1982977",
+        "originalCreditorName": "SBC",
+        "pastDueAmount": "0",
+        "termsDescription": "60 months at $740 per month",
+        "termsMonthsCount": "60",
+        "currentBalanceAmount": "35500",
+        "businessType": "Finance",
+        "loanType": "Automobile",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Experian",
+        "comments": [
+          {
+            "commentSourceType": "CreditBureau",
+            "commentType": "BureauRemarks",
+            "commentText": "Original Creditor: SBC"
+          }
+        ]
+      },
+      {
+        "accountClosedDate": "2025-10-19",
+        "accountIdentifier": "CALHACKS-CLOSED-1",
+        "accountOpenedDate": "2020-10-19",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2025-10-19",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "4000",
+        "lastActivityDate": "2025-10-19",
+        "monthsReviewedCount": "72",
+        "creditorName": "FORMER LENDER 1",
+        "subscriberCode": "1982977",
+        "originalCreditorName": "SBC",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Banking",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Experian",
+        "comments": [
+          {
+            "commentSourceType": "CreditBureau",
+            "commentType": "BureauRemarks",
+            "commentText": "Original Creditor: SBC"
+          }
+        ]
+      },
+      {
+        "accountClosedDate": "2025-04-20",
+        "accountIdentifier": "CALHACKS-CLOSED-2",
+        "accountOpenedDate": "2019-10-20",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2025-04-20",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Installment",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "4900",
+        "lastActivityDate": "2025-04-20",
+        "monthsReviewedCount": "84",
+        "creditorName": "FORMER LENDER 2",
+        "subscriberCode": "1982977",
+        "originalCreditorName": "SBC",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "Automobile",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Experian",
+        "comments": [
+          {
+            "commentSourceType": "CreditBureau",
+            "commentType": "BureauRemarks",
+            "commentText": "Original Creditor: SBC"
+          }
+        ]
+      },
+      {
+        "accountClosedDate": "2024-10-19",
+        "accountIdentifier": "CALHACKS-CLOSED-3",
+        "accountOpenedDate": "2018-10-19",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2024-10-19",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "5800",
+        "lastActivityDate": "2024-10-19",
+        "monthsReviewedCount": "96",
+        "creditorName": "FORMER LENDER 3",
+        "subscriberCode": "1982977",
+        "originalCreditorName": "SBC",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Banking",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Experian",
+        "comments": [
+          {
+            "commentSourceType": "CreditBureau",
+            "commentType": "BureauRemarks",
+            "commentText": "Original Creditor: SBC"
+          }
+        ]
+      },
+      {
+        "accountClosedDate": "2024-04-19",
+        "accountIdentifier": "CALHACKS-CLOSED-4",
+        "accountOpenedDate": "2017-10-19",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2024-04-19",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Installment",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "6700",
+        "lastActivityDate": "2024-04-19",
+        "monthsReviewedCount": "99",
+        "creditorName": "FORMER LENDER 4",
+        "subscriberCode": "1982977",
+        "originalCreditorName": "SBC",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "Automobile",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Experian",
+        "comments": [
+          {
+            "commentSourceType": "CreditBureau",
+            "commentType": "BureauRemarks",
+            "commentText": "Original Creditor: SBC"
+          }
+        ]
+      },
+      {
+        "accountClosedDate": "2023-10-20",
+        "accountIdentifier": "CALHACKS-CLOSED-5",
+        "accountOpenedDate": "2016-10-19",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2023-10-20",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "7600",
+        "lastActivityDate": "2023-10-20",
+        "monthsReviewedCount": "99",
+        "creditorName": "FORMER LENDER 5",
+        "subscriberCode": "1982977",
+        "originalCreditorName": "SBC",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Banking",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Experian",
+        "comments": [
+          {
+            "commentSourceType": "CreditBureau",
+            "commentType": "BureauRemarks",
+            "commentText": "Original Creditor: SBC"
+          }
+        ]
+      }
+    ],
+    "publicRecords": [
+      {
+        "accountOwnershipType": "Individual",
+        "borrowerSourceType": "Borrower",
+        "bankruptcyType": "Personal",
+        "courtName": "US BANKRUPTCY COURT N.D. GEORGIA",
+        "dispositionDate": "2025-04-02",
+        "dispositionType": "Filed",
+        "filedDate": "2025-02-14",
+        "sourceType": "Experian",
+        "publicRecordType": "BankruptcyChapter13"
+      }
+    ],
+    "scores": [
+      {
+        "borrowerSourceType": "Borrower",
+        "modelName": "VantageScore 4.0",
+        "modelNameType": "V4",
+        "sourceType": "Experian",
+        "factaInquiriesIndicator": false,
+        "scoreValue": "560",
+        "scoreRankPercentileValue": "9",
+        "scoreMaximumValue": "850",
+        "scoreMinimumValue": "300",
+        "scoreFactors": [
+          {
+            "scoreFactorCode": "68",
+            "scoreFactorText": "Lack of real estate secured loan information"
+          },
+          {
+            "scoreFactorCode": "4",
+            "scoreFactorText": ""
+          },
+          {
+            "scoreFactorCode": "37",
+            "scoreFactorText": "No open bankcards in your credit file"
+          },
+          {
+            "scoreFactorCode": "87",
+            "scoreFactorText": "Unpaid collections"
+          }
+        ]
+      }
+    ],
+    "summaries": {
+      "tradeSummary": {
+        "mortgageTradesCount": "0",
+        "mortgageBalanceTotal": "0",
+        "mortgageHighCreditTotal": "0",
+        "mortgagePaymentsTotal": "0",
+        "mortgagePastDueTotal": "0",
+        "autoTradesCount": "3",
+        "autoBalanceTotal": "35500",
+        "autoHighCreditTotal": "69400",
+        "autoPaymentsTotal": "740",
+        "autoPastDueTotal": "0",
+        "educationTradesCount": "0",
+        "educationBalanceTotal": "0",
+        "educationHighCreditTotal": "0",
+        "educationPaymentsTotal": "0",
+        "educationPastDueTotal": "0",
+        "openTradesCount": "0",
+        "openBalanceTotal": "0",
+        "openHighCreditTotal": "0",
+        "openPaymentsTotal": "0",
+        "openPastDueTotal": "0",
+        "revolvingTradesCount": "7",
+        "revolvingBalanceTotal": "5500",
+        "revolvingHighCreditTotal": "32100",
+        "revolvingPaymentsTotal": "0",
+        "revolvingPastDueTotal": "0",
+        "unknownTradesCount": "0",
+        "unknownBalanceTotal": "0",
+        "unknownHighCreditTotal": "0",
+        "unknownPaymentsTotal": "0",
+        "unknownPastDueTotal": "0",
+        "installmentOtherTradesCount": "0",
+        "installmentOtherBalanceTotal": "0",
+        "installmentOtherHighCreditTotal": "0",
+        "installmentOtherPaymentsTotal": "0",
+        "installmentOtherPastDueTotal": "0",
+        "applicableMortgagePaymentsTotal": "0",
+        "applicableAutoPaymentsTotal": "740",
+        "applicableEducationPaymentsTotal": "0",
+        "applicableOpenPaymentsTotal": "0",
+        "applicableRevolvingPaymentsTotal": "0",
+        "applicableUnknownPaymentsTotal": "0",
+        "applicableInstallmentPaymentsTotal": "740",
+        "applicableInstallmentOtherPaymentsTotal": "0",
+        "applicableMortgageHighCreditTotal": "0",
+        "applicableAutoHighCreditTotal": "57800",
+        "applicableEducationHighCreditTotal": "0",
+        "applicableOpenHighCreditTotal": "0",
+        "applicableRevolvingHighCreditTotal": "10000",
+        "applicableUnknownHighCreditTotal": "0",
+        "applicableInstallmentHighCreditTotal": "57800",
+        "applicableInstallmentOtherHighCreditTotal": "0",
+        "tradesCount": "10",
+        "balanceTotal": "41000",
+        "applicablePaymentsTotal": "740",
+        "applicableHighCreditTotal": "67800",
+        "highCreditTotal": "101500",
+        "paymentsTotal": "740",
+        "pastDueTotal": "0",
+        "securedDebtBalanceTotal": "35500",
+        "unsecuredDebtBalanceTotal": "5500",
+        "oldestTradelineDate": "2007-10-20",
+        "oldestTradelineCreditorName": "NORTHSTAR BANK VISA",
+        "revolvingCreditUtilization": "55",
+        "totalDebtHighCreditRatio": "60"
+      },
+      "derogatorySummary": {
+        "chargeOffsCount": "2",
+        "collectionsCount": "0",
+        "bankruptciesCount": "0",
+        "publicRecordsCount": "1",
+        "satisfactoryTradelineCount": "8",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "inquiriesCount": "0",
+        "mostRecentLateDate": "2026-09-19",
+        "disputesCount": "0",
+        "currentAdverseTradelineCount": "0",
+        "priorAdverseTradelineCount": "0",
+        "otherCount": "0",
+        "securedDebtBalanceTotal": "35500",
+        "unsecuredDebtBalanceTotal": "5500"
+      }
+    }
+  }
+}
