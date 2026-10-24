@@ -1,4 +1,4 @@
-# Cal Hacks 13.0 project (Karan + Mohammed)
+# Cal Hacks 13.0 project (Karan + Mohammed + Nick)
 
 Credit-file trust agent built on the CRS Credit API sandbox. Working notes live in `crs/`.
 
