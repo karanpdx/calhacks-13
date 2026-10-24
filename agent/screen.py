@@ -11,7 +11,8 @@ explanation for the underwriter and a message for the applicant. It cannot chang
 Usage:
   python -m agent.screen P13                 # one persona, from saved samples
   python -m agent.screen --all               # every sample persona
-  python -m agent.screen P05 --use-case rental --json
+  python -m agent.screen P05 --use-case rental --json   # "full" also runs the criminal search
+  python -m agent.scorecard                  # all 20 personas vs CRS expected decisions (offline)
   python -m agent.screen P12 --live          # call the real sandbox (needs CRS creds)
 """
 import argparse, json, os, sys
@@ -23,11 +24,11 @@ from .sources import SampleSource, LiveSource
 MODEL = os.environ.get("CLAUDE_MODEL", "claude-sonnet-5-5")
 
 
-def screen(source, persona, use_case="loan", explain=True):
+def screen(source, persona, use_case="loan", explain=True, as_of=None):
     trail = []  # human-readable log of what the agent did and why
 
     # ---- stage 1: identity, before touching anyone's credit file
-    ff = S.fraud_finder(source.get(persona, "fraudfinder"))
+    ff = S.fraud_finder(source.get(persona, "fraudfinder"), today=as_of)
     idv = S.identity(source.get(persona, "idv"))
     applicant = source.applicant(persona)  # what the applicant told us; compared against lookups
     rev = S.reverse(source.get(persona, "reverse"), applicant)
@@ -47,13 +48,15 @@ def screen(source, persona, use_case="loan", explain=True):
     # ---- stage 3: public records, only for rentals and only once identity is trusted
     rec = {}
     decision, ident_pts = R.decide(findings)
-    if use_case == "rental" and decision not in ("STOP_FRAUD", "VERIFY"):
-        rec = S.records(source.get(persona, "blj"), source.get(persona, "eviction"), None)
+    if use_case in ("rental", "full") and decision not in ("STOP_FRAUD", "VERIFY"):
+        crim = source.get(persona, "criminal") if use_case == "full" else None
+        rec = S.records(source.get(persona, "blj"), source.get(persona, "eviction"), crim)
         findings += R.record_findings(rec)
         decision, ident_pts = R.decide(findings)
-        trail.append("Stage 3 records: evictions, liens and judgments checked. Criminal search not run "
-                     "(restricted for housing in many places, incl. California).")
-    elif use_case == "rental":
+        trail.append("Stage 3 records: evictions, liens and judgments checked. "
+                     + ("Criminal search run (use case 'full')." if use_case == "full" else
+                        "Criminal search not run (restricted for housing in many places, incl. California)."))
+    elif use_case in ("rental", "full"):
         trail.append("Stage 3 skipped: identity not trusted, so records would describe the victim, not the applicant.")
 
     name = " ".join(x for x in [applicant.get("firstName"), applicant.get("lastName")] if x).title()
@@ -129,7 +132,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("personas", nargs="*")
     ap.add_argument("--all", action="store_true", help="run every persona that has samples")
-    ap.add_argument("--use-case", choices=["loan", "rental"], default="loan")
+    ap.add_argument("--use-case", choices=["loan", "rental", "full"], default="loan")
     ap.add_argument("--live", action="store_true", help="call the CRS sandbox instead of reading samples")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--no-explain", action="store_true")

@@ -30,6 +30,7 @@ def credit(body):
         "inquiry_dates": sorted(i.get("inquiryDate") for i in body.get("inquiries", []) if i.get("inquiryDate")),
         "collections": _int(derog.get("collectionsCount")),
         "chargeoffs": _int(derog.get("chargeOffsCount")),
+        "public_records": len(body.get("publicRecords") or []),
         "bankruptcies": _int(derog.get("bankruptciesCount")),
         "lates_30": _int(derog.get("_30DayLates")),
         "lates_60": _int(derog.get("_60DayLates")),
@@ -90,8 +91,10 @@ def identity(body):
         "dob_mismatch": any(m.get("code") == "2202" for m in msgs),
         "address_mismatch": any(m.get("code") == "2101" for m in msgs),
         "frozen": bool((status.get("freeze") or {}).get("indicator")),
-        "deceased": bool(sum(len((a.get("idManagerVerification") or {}).get("deceases", []))
-                             for a in body.get("addOnProducts", []))),
+        # the sandbox reports a deceased SSN as message code 2301 (the `deceases` list is empty)
+        "deceased": any(m.get("code") == "2301" for m in msgs) or bool(sum(
+            len((a.get("idManagerVerification") or {}).get("deceases", [])) for a in body.get("addOnProducts", []))),
+        "fraud_alert": any(m.get("code") == "2401" for m in msgs),   # FACTA fraud alert on file: step-up ID recommended
     }
 
 
@@ -120,5 +123,20 @@ def records(blj, eviction, criminal):
     if eviction:
         out["evictions"] = _int((eviction.get("response") or {}).get("count"))
     if criminal is not None:
-        out["criminal_records"] = _int(((criminal.get("cicCriminal") or {}).get("candidates") or {}).get("count"))
+        offenses = _offenses(criminal)
+        convicted = [o for o in offenses if "CONVICT" in (o.get("disposition") or "").upper()]
+        out.update(criminal_records=len(offenses),   # everything found, including dismissed cases
+                   felony_convictions=sum(1 for o in convicted if (o.get("caseType") or "").upper() == "FELONY"),
+                   other_convictions=sum(1 for o in convicted if (o.get("caseType") or "").upper() != "FELONY"))
+    return out
+
+
+def _offenses(criminal):
+    """Flatten cicCriminal candidates -> offenses (CRS returns a dict for one item and a list for several)."""
+    cands = (criminal.get("cicCriminal") or {}).get("candidates") or {}
+    cands = cands.get("candidate") or []
+    out = []
+    for c in [cands] if isinstance(cands, dict) else cands:
+        offs = (c.get("offenses") or {}).get("offense") or []
+        out += [offs] if isinstance(offs, dict) else offs
     return out

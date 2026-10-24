@@ -10,7 +10,9 @@ DECISIONS = {
     "STOP_FRAUD": "Hold: likely identity fraud",
     "VERIFY": "Step-up verification required",
     "DECLINE_CREDIT": "Decline: credit risk (identity checks out)",
-    "REVIEW": "Manual review: the bureaus disagree",
+    "DECLINE_RECORDS": "Decline: disqualifying public record (identity checks out)",
+    "NO_FILE": "No file: no credit file at any bureau, and no sign of fraud",
+    "REVIEW": "Manual review: the file needs a human look",
     "APPROVE": "Approve",
 }
 
@@ -30,6 +32,9 @@ def identity_findings(ff, idv, rev):
                          "TransUnion identity verification", "code 2202"))
         if idv["deceased"]:
             out.append(F("DECEASED", "identity", 3, "SSN is linked to a deceased person.", "TransUnion identity verification"))
+        if idv.get("fraud_alert"):
+            out.append(F("FRAUD_ALERT_ON_FILE", "identity", 2, "A fraud alert is on file; the bureau recommends step-up authentication.",
+                         "TransUnion identity verification", "code 2401"))
         if idv["frozen"]:
             out.append(F("FROZEN", "identity", 2, "Credit file is frozen; the real owner may not have applied.",
                          "TransUnion identity verification"))
@@ -75,13 +80,20 @@ def credit_findings(bureaus):
     for b, c in avail.items():
         for a in c["alerts"]:
             if "NO SSN ON FILE" in (a or "").upper():
-                out.append(F("SSN_NOT_ON_FILE", "identity", 3, "The bureau has no record of this SSN.", b, a))
+                if hits:   # other bureaus do have a file: the bureaus disagree, which is a human question, not proof of fraud
+                    out.append(F("SSN_NOT_ON_FILE", "consistency", 2,
+                                 f"{b} has no record of this SSN, but {', '.join(hits)} do.", b, a))
+                else:      # a file-level fact; whether it is fraud is decided by the identity checks, not by this alone
+                    out.append(F("SSN_NOT_ON_FILE", "file", 3, "The bureau has no record of this SSN.", b, a))
     if avail and not hits:
-        out.append(F("NO_CREDIT_FILE", "identity", 2, "None of the bureaus has a credit file for this person.",
+        out.append(F("NO_CREDIT_FILE", "file", 2, "None of the bureaus has a credit file for this person.",
                      "/".join(avail), "no hit"))
         return out
 
     scores = {b: c["score"] for b, c in hits.items() if c["score"] is not None}
+    if not scores:
+        out.append(F("NO_SCORE", "credit", 2, "There is a file but no bureau could produce a score (unscorable).",
+                     "/".join(hits), "no score"))
     if scores:
         low_b, low = min(scores.items(), key=lambda kv: kv[1])
         if low < 580:
@@ -96,6 +108,9 @@ def credit_findings(bureaus):
         out.append(F("LATE_PAYMENTS", "credit", 2 if worst["lates_90"] else 1,
                      f"{lates} late payments ({worst['lates_90']} at 90+ days), most recent {worst['most_recent_late']}.",
                      "credit report", lates))
+    chargeoffs = max(c["chargeoffs"] for c in hits.values())
+    if chargeoffs:
+        out.append(F("CHARGEOFFS", "credit", 2, f"{chargeoffs} account(s) charged off.", "credit report", chargeoffs))
     if worst["collections"]:
         out.append(F("COLLECTIONS", "credit", 2, f"{worst['collections']} account(s) in collections.", "credit report",
                      worst["collections"]))
@@ -139,10 +154,16 @@ def record_findings(rec):
     if rec.get("evictions"):
         out.append(F("EVICTION", "records", 2, f"{rec['evictions']} eviction record(s).", "Eviction search", rec["evictions"]))
     if rec.get("judgments") or rec.get("liens"):
-        out.append(F("JUDGMENTS_LIENS", "records", 1, f"{rec.get('judgments', 0)} judgment(s), {rec.get('liens', 0)} lien(s).",
+        out.append(F("JUDGMENTS_LIENS", "records", 2, f"{rec.get('judgments', 0)} judgment(s), {rec.get('liens', 0)} lien(s).",
                      "PitchPoint liens/judgments"))
     if rec.get("bankruptcies"):
         out.append(F("BANKRUPTCY", "records", 2, f"{rec['bankruptcies']} bankruptcy record(s).", "PitchPoint liens/judgments"))
+    if rec.get("felony_convictions"):
+        out.append(F("FELONY_CONVICTION", "records", 3, f"{rec['felony_convictions']} felony conviction(s).", "Criminal search",
+                     rec["felony_convictions"]))
+    elif rec.get("other_convictions"):
+        out.append(F("CONVICTION", "records", 1, f"{rec['other_convictions']} non-felony conviction(s).", "Criminal search"))
+    # dismissed / non-conviction cases are deliberately ignored
     return out
 
 
@@ -157,9 +178,13 @@ def decide(findings, identity_only=False):
         d = "VERIFY"
     elif identity_only:
         d = None  # identity is fine; caller should continue to credit
+    elif any(f["code"] == "NO_CREDIT_FILE" for f in findings):
+        d = "NO_FILE"  # nobody to score, and the identity evidence is not bad enough to call it fraud
     elif max_sev("credit") >= 3 or (max_sev("credit") == 2 and sum(f["severity"] for f in findings if f["axis"] == "credit") >= 5):
         d = "DECLINE_CREDIT"
-    elif max_sev("consistency") >= 2 or max_sev("records") >= 2:
+    elif max_sev("records") >= 3:
+        d = "DECLINE_RECORDS"
+    elif max_sev("credit") >= 2 or max_sev("consistency") >= 2 or max_sev("records") >= 2:
         d = "REVIEW"
     else:
         d = "APPROVE"
@@ -181,6 +206,14 @@ NEXT_STEPS = {
         "Identity checks passed, so this is a credit decision, not a fraud case.",
         "Send an adverse-action notice listing the key reasons below (the FCRA requires the main factors).",
         "Offer an alternative if your policy allows: co-signer, larger deposit, or a secured product.",
+    ],
+    "DECLINE_RECORDS": [
+        "Identity checks passed, so this is about the applicant's own public record.",
+        "Check local fair-chance rules before relying on a criminal record (individualized assessment, adverse-action notice).",
+    ],
+    "NO_FILE": [
+        "Nothing to score: ask for an alternative (ITIN / thin-file / bank-statement underwriting) or a co-signer.",
+        "Identity evidence did not point to fraud, so do not treat this as a fraud case.",
     ],
     "REVIEW": [
         "Ask the applicant about the item that appears at only one bureau. It may be a reporting error they can dispute.",

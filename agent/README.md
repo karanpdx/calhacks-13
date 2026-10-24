@@ -9,6 +9,7 @@ python -m agent.screen --all                    # all 5 sample personas, offline
 python -m agent.screen P13                      # one persona
 python -m agent.screen P03 --use-case rental    # adds eviction / liens / judgments
 python -m agent.screen P17 --json               # machine-readable, for a UI
+python -m agent.scorecard                       # all 20 personas vs CRS expected decisions, see SCORECARD.md
 python -m agent.screen P12 --live               # real sandbox calls (CRS_USER, CRS_PASS, collection file)
 ```
 
@@ -31,7 +32,9 @@ Each finding has a severity (1 note, 2 concern, 3 blocker) and an axis: `identit
 | Hold: likely identity fraud | any identity blocker, or 6+ identity points |
 | Step-up verification | 3-5 identity points (ID + live selfie / liveness check goes here) |
 | Decline: credit risk | identity is fine, credit is poor (adverse-action reasons listed) |
-| Manual review | bureaus disagree, or a serious record on a rental |
+| No file | no bureau has a file and identity evidence doesn't point to fraud |
+| Decline: public record | felony conviction (`--use-case full` only) |
+| Manual review | bureaus disagree, charge-offs, unscorable file, a fraud alert, or a judgment/lien/eviction/bankruptcy on a rental |
 | Approve | none of the above |
 
 ## What the 5 sample personas show
