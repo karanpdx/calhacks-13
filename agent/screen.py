@@ -68,6 +68,7 @@ def screen(source, persona, use_case="loan", explain=True, as_of=None):
         "headline": R.DECISIONS[decision],
         "identity_risk_points": ident_pts,
         "scores": {b: c.get("score") for b, c in bureaus.items() if c.get("available")},
+        "signals": {"fraud_finder": ff, "id_codes": idv.get("messages", [])},  # raw-ish signals for UIs
         "findings": sorted(findings, key=lambda f: -f["severity"]),
         "next_steps": R.NEXT_STEPS[decision],
         "trail": trail,
