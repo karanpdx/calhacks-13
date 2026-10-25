@@ -104,6 +104,7 @@ def scorecard():
 
 
 # ---------------------------------------------------------------- agent credit exchange
+from exchange.lenders import POLICIES  # noqa: E402
 from exchange.messages import Mandate  # noqa: E402
 from exchange.referee import Exchange  # noqa: E402
 from exchange.scenarios import build as build_scenario, SCENARIOS  # noqa: E402
@@ -111,7 +112,7 @@ from exchange.scenarios import build as build_scenario, SCENARIOS  # noqa: E402
 
 @app.get("/api/exchange/scenarios")
 def exchange_scenarios():
-    return {"scenarios": SCENARIOS}
+    return {"scenarios": SCENARIOS, "lenders": {i: name for i, (name, _) in POLICIES.items()}}
 
 
 @app.get("/api/exchange/{persona}")
@@ -142,6 +143,16 @@ def exchange(persona: str, scenario: str = "normal", amount: float = 5000, min_a
 @app.get("/")
 def index():
     return FileResponse(os.path.join(STATIC, "index.html"))
+
+
+@app.get("/exchange")
+def exchange_page():
+    return FileResponse(os.path.join(STATIC, "exchange.html"))
+
+
+@app.get("/demo")
+def demo_page():
+    return FileResponse(os.path.join(STATIC, "demo.html"))
 
 
 app.mount("/static", StaticFiles(directory=STATIC), name="static")

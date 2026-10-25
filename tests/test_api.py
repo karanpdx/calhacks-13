@@ -82,3 +82,21 @@ def test_live_error_falls_back_and_leaks_nothing(monkeypatch):
 def test_index_served():
     r = client.get("/")
     assert r.status_code == 200 and "fictional" in r.text.lower()
+
+
+def test_exchange_page_served():
+    r = client.get("/exchange")
+    assert r.status_code == 200 and "simulated" in r.text.lower() and "/api/exchange/" in r.text
+
+
+def test_scenarios_include_lender_names():
+    d = client.get("/api/exchange/scenarios").json()
+    assert "normal" in d["scenarios"]
+    assert d["lenders"]["campus_cu"] == "Campus Credit Union"
+
+
+def test_demo_page_served_and_its_data_loads():
+    r = client.get("/demo")
+    assert r.status_code == 200 and "scenario=demo" in r.text
+    d = client.get("/api/exchange/P03?scenario=demo").json()
+    assert [b["code"] for b in d["blocked"]] == ["OUTSIDE_MANDATE"] and d["deal"]["lender"] == "campus_cu"

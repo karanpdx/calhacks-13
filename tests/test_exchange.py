@@ -93,3 +93,9 @@ def test_api_exchange_endpoint():
     assert d["deal"]["lender"] == "campus_cu" and d["events"][0]["kind"] == "gate"
     assert client.get("/api/exchange/P01?scenario=injection").json()["blocked"]
     assert client.get("/api/exchange/P01?scenario=nope").status_code == 404
+
+
+def test_demo_story_blocks_the_attack_once_then_deals():
+    r = run("P03", "demo")
+    assert codes(r) == ["OUTSIDE_MANDATE"]
+    assert r["deal"]["lender"] == "campus_cu" and r["deal"]["terms"]["apr"] <= 18

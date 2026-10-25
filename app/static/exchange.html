@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent credit exchange</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --ink:#1b2430; --mute:#667085; --line:#e4e7ec;
+          --red:#c0262d; --amber:#b86e00; --green:#1a7f45; --grey:#556070; --blue:#2457c5; }
+  * { box-sizing:border-box; }
+  html, body { height:100%; }
+  body { margin:0; font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink); background:var(--bg);
+         display:flex; flex-direction:column; }
+  header { background:#10243e; color:#fff; padding:8px 16px; display:flex; gap:14px; align-items:center; }
+  header h1 { font-size:17px; margin:0; }
+  header a { color:#cfe0ff; font-size:13px; }
+  header .grow { flex:1; }
+  .tag { display:inline-block; font-size:12px; padding:1px 8px; border-radius:99px; border:1px solid var(--line); }
+  header .tag { color:#fff; border-color:#fff; }
+  form#ctl { background:#fff; border-bottom:1px solid var(--line); padding:8px 16px; display:flex; flex-wrap:wrap; gap:6px 10px; align-items:end; }
+  form#ctl label { display:flex; flex-direction:column; font-size:11px; color:var(--mute); gap:2px; }
+  form#ctl label.check { flex-direction:row; align-items:center; gap:5px; font-size:13px; color:var(--ink); padding-bottom:5px; }
+  input, select, button { font:inherit; font-size:13px; }
+  input[type=number] { width:64px; padding:4px 6px; border:1px solid var(--line); border-radius:6px; }
+  select { padding:4px 6px; border:1px solid var(--line); border-radius:6px; background:#fff; max-width:210px; }
+  button { border:1px solid var(--line); background:#fff; border-radius:6px; padding:5px 14px; cursor:pointer; }
+  button.primary { background:var(--blue); color:#fff; border-color:var(--blue); font-weight:600; }
+  button:disabled { opacity:.6; cursor:default; }
+  #scDesc { flex-basis:100%; font-size:12px; color:var(--mute); }
+  #formErr { color:var(--red); font-size:12px; }
+  .banner { background:#fff4d6; color:#5c4300; padding:5px 16px; font-size:12.5px; border-bottom:1px solid #ecd9a0; }
+  .banner .warn { color:var(--red); font-weight:600; margin-left:8px; }
+  main { flex:1; min-height:0; display:grid; grid-template-columns:300px minmax(0,1fr) 300px; gap:12px; padding:12px 16px; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:auto; min-height:0; padding:12px 14px; }
+  @media (max-width:1100px) {
+    body { display:block; height:auto; }
+    main { grid-template-columns:280px minmax(0,1fr); }
+    #audit { grid-column:1 / -1; }
+    .panel { max-height:none; }
+    #feedPanel { max-height:75vh; }
+  }
+  @media (max-width:760px) { main { grid-template-columns:1fr; } }
+  h2 { font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--mute); margin:14px 0 6px; }
+  h2:first-child { margin-top:0; }
+  .muted { color:var(--mute); } .small { font-size:12px; }
+  .kv { display:grid; grid-template-columns:1fr auto; gap:2px 10px; font-size:13px; }
+  .kv .k { color:var(--mute); } .kv .v { font-weight:600; text-align:right; }
+  .kv .v.hot { color:var(--red); }
+  .card { border:1px solid var(--line); border-radius:8px; padding:10px; margin-bottom:8px; }
+  .card.sees { border-color:#b9cdf5; background:#f5f8ff; }
+  .card.ok { border-color:var(--green); background:#effaf3; }
+  .card.bad { border-color:var(--red); background:#fff1f1; }
+  .card.none { background:#f6f7f9; }
+  .card h3 { margin:0 0 6px; font-size:14px; }
+  .withheld span { display:inline-block; text-decoration:line-through; color:var(--mute); background:#f2f4f7; border-radius:4px;
+                   padding:0 6px; margin:0 4px 4px 0; font-size:12px; }
+  .sim { display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.03em; color:#7a5200; background:#fff4d6;
+         border:1px solid #ecd9a0; border-radius:4px; padding:0 5px; vertical-align:1px; }
+  ul.plain { list-style:none; margin:0; padding:0; }
+  ul.plain li { padding:5px 0; border-bottom:1px solid var(--line); }
+  ul.plain li:last-child { border-bottom:0; }
+  .badge { display:inline-block; font-weight:700; color:#fff; padding:3px 10px; border-radius:6px; font-size:13px; }
+  .b-red { background:var(--red); } .b-amber { background:var(--amber); } .b-green { background:var(--green); } .b-grey { background:var(--grey); }
+  .sev { display:inline-block; font-size:10px; font-weight:700; border-radius:4px; padding:0 5px; color:#fff; margin-right:6px; }
+  .s3 { background:var(--red); } .s2 { background:var(--amber); } .s1 { background:#98a2b3; }
+  .chips span { display:inline-block; font-size:12px; border:1px solid var(--line); border-radius:99px; padding:1px 8px; margin:0 4px 4px 0; background:#fff; }
+  #feedHead { display:flex; justify-content:space-between; align-items:baseline; position:sticky; top:-12px; background:#fff;
+              margin:-12px -14px 8px; padding:12px 14px 8px; border-bottom:1px solid var(--line); z-index:1; }
+  #feedHead h2 { margin:0; }
+  .msg { border:1px solid var(--line); border-left:4px solid var(--green); border-radius:8px; padding:7px 10px; margin-bottom:8px;
+         animation:pop .25s ease-out; }
+  .msg.bad { border-left-color:var(--red); background:#fff5f5; }
+  .msg.deal { border-left-color:var(--green); background:#e9f8ef; border-color:var(--green); }
+  .msg.sys { border-left-color:var(--grey); background:#f6f7f9; }
+  @keyframes pop { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+  .msg .top { display:flex; flex-wrap:wrap; gap:4px 8px; align-items:center; font-size:13px; }
+  .msg .rnd { font-size:11px; color:var(--mute); width:24px; }
+  .msg .type { font-family:ui-monospace,Consolas,monospace; font-size:11.5px; font-weight:700; background:#eef2f6; border-radius:4px; padding:0 5px; }
+  .msg .verdict { margin-left:auto; font-size:12px; font-weight:700; color:var(--green); }
+  .msg.bad .verdict { color:var(--red); }
+  .msg .terms { font-weight:600; margin:3px 0 0 32px; }
+  .msg .text { margin:2px 0 0 32px; color:#344054; white-space:pre-wrap; overflow-wrap:anywhere; }
+  .msg .why { margin:4px 0 0 32px; color:var(--red); font-size:13px; }
+  .msg .code { font-family:ui-monospace,Consolas,monospace; }
+  .empty { color:var(--mute); padding:30px 10px; text-align:center; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Agent credit exchange</h1>
+  <a href="/">Screening view</a>
+  <span class="grow"></span>
+  <span class="tag" id="srcTag">source: saved CRS sandbox responses</span>
+</header>
+
+<form id="ctl" autocomplete="off">
+  <label>Persona <select id="persona"></select></label>
+  <label>Scenario <select id="scenario"></select></label>
+  <label>Amount $ <input type="number" id="amount" value="5000" min="100" step="100"></label>
+  <label>Min amount $ <input type="number" id="min_amount" value="3000" min="0" step="100"></label>
+  <label>Max APR % <input type="number" id="max_apr" value="18" min="0" max="36" step="0.5"></label>
+  <label>Min term (mo) <input type="number" id="min_term" value="12" min="1" step="1"></label>
+  <label>Max term (mo) <input type="number" id="max_term" value="48" min="1" step="1"></label>
+  <label>Max fee $ <input type="number" id="max_fee" value="0" min="0" step="25"></label>
+  <label class="check"><input type="checkbox" id="autopay" checked> Allow autopay</label>
+  <label class="check"><input type="checkbox" id="live"> Live CRS sandbox</label>
+  <label>Replay <select id="speed"><option value="450">Normal</option><option value="120">Fast</option><option value="0">Skip to end</option></select></label>
+  <button class="primary" id="run" type="submit">Run market</button>
+  <span id="formErr"></span>
+  <div id="scDesc"></div>
+</form>
+
+<div class="banner"><b>Demo data:</b> every borrower is a CRS sandbox test persona (fictional, not a real person).
+  Lenders and their offers are <b>simulated</b>. Settlement (hard pull, funding, bureau reporting, step-up verification) is <b>simulated</b>.
+  The referee is deterministic code; agent message text is untrusted and never acted on.<span class="warn" id="liveNote"></span></div>
+
+<main>
+  <section class="panel" id="borrower">
+    <h2>Borrower's mandate</h2><div id="mandate" class="muted small">Set the mandate above and run the market.</div>
+    <h2>Credit passport</h2><div id="passport" class="muted small">Built by the referee from CRS data after the gate.</div>
+    <h2 id="outcomeH">Outcome</h2><div id="outcome" class="muted small">Waiting for the market.</div>
+  </section>
+
+  <section class="panel" id="feedPanel">
+    <div id="feedHead"><h2>Live negotiation</h2><span class="small muted" id="status">Not started</span></div>
+    <div id="feed"><div class="empty">Pick a persona and scenario, then <b>Run market</b>.<br>
+      Try P03 (thin file), P13 (fraud), or P01 with the injection scenario.</div></div>
+  </section>
+
+  <section class="panel" id="audit">
+    <h2>CRS gate</h2><div id="gate" class="muted small">Runs first: fraud, identity and three credit bureaus.</div>
+    <h2>CRS products called</h2><div id="products" class="chips muted small">-</div>
+    <h2>Findings</h2><div id="findings" class="muted small">-</div>
+    <h2>Referee</h2><div id="stats" class="kv"></div>
+  </section>
+</main>
+
+<script>
+const $ = s => document.querySelector(s);
+// Build DOM nodes. Strings become text nodes, so agent text can never inject markup.
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") el.className = v; else if (v !== false && v != null) el.setAttribute(k, v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) el.append(k instanceof Node ? k : String(k));
+  return el;
+}
+const fill = (sel, ...kids) => { const el = $(sel); el.className = el.className.replace(/\bmuted small\b/, ""); el.replaceChildren(...kids.flat()); };
+const sim = () => h("span", {class: "sim"}, "SIMULATED");
+const money = n => "$" + Number(n).toLocaleString("en-US", {maximumFractionDigits: 2});
+const get = async u => { const r = await fetch(u); if (!r.ok) throw new Error(`${r.status} ${await r.text()}`); return r.json(); };
+
+const BADGE = {STOP_FRAUD:"b-red", VERIFY:"b-amber", DECLINE_CREDIT:"b-red", DECLINE_RECORDS:"b-red", NO_FILE:"b-grey", REVIEW:"b-amber", APPROVE:"b-green"};
+const PRODUCTS = {fraudfinder:"AtData FraudFinder", idv:"TransUnion identity verification", reverse:"AccurateAppend reverse lookup",
+                  tu:"TransUnion credit (soft pull)", efx:"Equifax credit (soft pull)", exp:"Experian credit (soft pull)",
+                  criminal:"Criminal records", eviction:"Eviction records", blj:"PitchPoint bankruptcies, liens, judgments"};
+let LENDERS = {}, SCENARIOS = {}, runId = 0, stats = {checked: 0, passed: 0, blocked: 0};
+const who = id => id === "borrower" ? "Borrower's agent" : (LENDERS[id] || id || "market");
+
+async function init() {
+  const [p, s] = await Promise.all([get("/api/personas"), get("/api/exchange/scenarios")]);
+  LENDERS = s.lenders || {}; SCENARIOS = s.scenarios;
+  $("#persona").replaceChildren(...p.personas.map(x => h("option", {value: x.id}, `${x.id} ${x.name} (CRS: ${x.crs_expected})`)));
+  $("#persona").value = "P03";
+  $("#scenario").replaceChildren(...Object.keys(SCENARIOS).map(k => h("option", {value: k}, k.replace("_", " "))));
+  const desc = () => $("#scDesc").textContent = "Scenario: " + SCENARIOS[$("#scenario").value];
+  $("#scenario").onchange = desc; desc();
+  renderStats();
+}
+
+function params() {
+  const v = id => Number($("#" + id).value);
+  const m = {amount: v("amount"), min_amount: v("min_amount"), max_apr: v("max_apr"), min_term: v("min_term"),
+             max_term: v("max_term"), max_fee: v("max_fee")};
+  if (!(m.amount > 0)) return "Amount must be above $0.";
+  if (!(m.min_amount >= 0 && m.min_amount <= m.amount)) return "Min amount must be between $0 and the amount.";
+  if (!(m.max_apr >= 0 && m.max_apr <= 36)) return "Max APR must be between 0% and 36% (the exchange's cap).";
+  if (!(m.min_term >= 1 && m.min_term <= m.max_term)) return "Min term must be at least 1 and no more than max term.";
+  if (!(m.max_fee >= 0)) return "Max fee can't be negative.";
+  return new URLSearchParams({scenario: $("#scenario").value, ...m, autopay: $("#autopay").checked ? 1 : 0,
+                              live: $("#live").checked ? 1 : 0});
+}
+
+$("#ctl").onsubmit = async e => {
+  e.preventDefault();
+  const q = params();
+  $("#formErr").textContent = typeof q === "string" ? q : "";
+  if (typeof q === "string") return;
+  const id = ++runId, persona = $("#persona").value;
+  reset(`Running ${persona}...`);
+  $("#run").disabled = true;
+  let r;
+  try { r = await get(`/api/exchange/${persona}?${q}`); }
+  catch (err) { $("#feed").replaceChildren(h("div", {class: "msg bad"}, "Couldn't run the market: " + err.message)); $("#status").textContent = "Error"; $("#run").disabled = false; return; }
+  $("#run").disabled = false;
+  $("#liveNote").textContent = r.live_note || "";
+  const live = (r.events[0] && r.events[0].data.source) === "live";
+  $("#srcTag").textContent = "source: " + (live ? "live CRS sandbox" : "saved CRS sandbox responses");
+  showMandate(r.mandate);
+  await replay(r, id, Number($("#speed").value));
+};
+
+function reset(status) {
+  stats = {checked: 0, passed: 0, blocked: 0};
+  $("#feed").replaceChildren();
+  for (const [sel, txt] of [["#passport", "Waiting for the CRS gate."], ["#outcome", "Waiting for the market."], ["#gate", "Running..."],
+                            ["#products", "-"], ["#findings", "-"]]) {
+    $(sel).className = ($(sel).className.replace(/\bmuted small\b/, "") + " muted small").trim(); $(sel).textContent = txt;
+  }
+  $("#status").textContent = status; renderStats();
+}
+
+const sleep = ms => new Promise(res => setTimeout(res, ms));
+async function replay(r, id, delay) {
+  const settle = {};
+  for (const e of r.events) {
+    if (id !== runId) return;  // a newer run started
+    $("#status").textContent = e.round ? `Round ${e.round} of ${r.mandate.max_rounds}` : "Opening";
+    if (e.kind === "gate") showGate(e.data);
+    else if (e.kind === "passport") showPassport(e.data.passport);
+    else if (e.kind === "blocked") { feedSys("Referee", "Blocked at the gate: " + e.data.reason, true); showBlocked(e.data); }
+    else if (e.kind === "message") feedMessage(e);
+    else if (e.kind === "settlement") settle.steps = e.data.steps;
+    else if (e.kind === "disclosure") settle.disclosure = e.data;
+    else if (e.kind === "no_deal") { feedSys("Referee", "Market closed with no deal: " + e.data.reason); showNoDeal(e.data); }
+    if (delay && (e.kind === "message" || e.kind === "gate" || e.kind === "passport")) await sleep(e.kind === "message" ? delay : delay * 1.5);
+  }
+  if (r.deal) { feedSys("Referee", "Deal settled. Settlement steps are simulated."); showDeal(r.deal, settle); }
+  showOutcomeHeading();
+  $("#status").textContent = r.deal ? "Deal reached" : r.admitted ? "No deal" : "Blocked at gate";
+}
+
+// ---------------------------------------------------------------- left: borrower view
+// the outcome sits below the passport; bring it into view in the left column when the market ends
+function showOutcomeHeading() { const p = $("#borrower"); p.scrollTo({top: $("#outcomeH").offsetTop - p.offsetTop - 8, behavior: "smooth"}); }
+function kv(rows) { return h("div", {class: "kv"}, rows.flatMap(([k, v, hot]) => [h("div", {class: "k"}, k), h("div", {class: "v" + (hot ? " hot" : "")}, v)])); }
+const yn = b => b ? "yes" : "no";
+
+function showMandate(m) {
+  fill("#mandate", kv([["Amount", `${money(m.min_amount)} to ${money(m.amount)}`], ["Max APR (private to the agent)", m.max_apr + "%"],
+                      ["Term", `${m.min_term}-${m.max_term} months`], ["Autopay allowed", yn(m.allow.includes("autopay"))],
+                      ["Max fee", money(m.max_fee)], ["Rounds", m.max_rounds]]));
+}
+
+function showPassport(p) {
+  const scores = Object.entries(p.scores_by_bureau || {}).map(([b, s]) => [`${b} score`, s ?? "no score", s === "no file"]);
+  const rows = [
+    ["Score band (lowest bureau)", p.score_band ?? "none"], ["Lowest score", p.score_low ?? "none"], ...scores,
+    ["Bureaus with a file", p.bureaus_with_file], ["File age", p.file_age_years != null ? p.file_age_years + " yrs" : "n/a"],
+    ["Accounts", p.accounts], ["Late payments", p.late_payments, p.late_payments > 0], ["90+ day lates", p.serious_lates_90d, p.serious_lates_90d > 0],
+    ["Collections", p.collections, p.collections > 0], ["Charge-offs", p.chargeoffs, p.chargeoffs > 0], ["Bankruptcies", p.bankruptcies, p.bankruptcies > 0],
+    ["Inquiries (6 months)", p.inquiries_6m, p.inquiries_6m >= 4], ["Thin file", yn(p.thin_file)], ["No score", yn(p.no_score)],
+    ["No file", yn(p.no_file)], ["Identity strength", p.identity, p.identity === "weak"],
+    ["Verification required", yn(p.verification_required), p.verification_required], ["Frozen at a bureau", yn(p.frozen_somewhere), p.frozen_somewhere],
+  ];
+  const dis = (p.bureau_disagreements || []).length
+    ? h("div", {class: "small", style: "margin-top:6px;color:var(--red)"}, "Bureaus disagree: ", p.bureau_disagreements.join(" ")) : null;
+  fill("#passport",
+    h("div", {class: "card sees"}, h("h3", {}, "What lenders see"), kv(rows), dis),
+    h("div", {class: "card"}, h("h3", {}, "Withheld from lenders"), h("div", {class: "withheld"}, (p.withheld || []).map(w => h("span", {}, w))),
+      h("div", {class: "small muted"}, "Lenders get the full file only after the borrower accepts (simulated).")));
+}
+
+function showBlocked(d) {
+  $("#passport").textContent = "Not built: no lender sees anything about this application.";
+  fill("#outcome", h("div", {class: "card bad"}, h("h3", {}, "Blocked before the market"), h("div", {}, d.reason),
+    h("h2", {}, "Next steps"), h("ul", {class: "plain small"}, d.next_steps.map(s => h("li", {}, s)))));
+}
+
+function showNoDeal(d) {
+  fill("#outcome", h("div", {class: "card none"}, h("h3", {}, "No deal"), h("div", {}, d.reason),
+    d.lender_reasons.length ? [h("h2", {}, "Why lenders passed"), h("ul", {class: "plain small"}, d.lender_reasons.map(s => h("li", {}, s)))] : null));
+}
+
+function showDeal(deal, s) {
+  const t = deal.terms, steps = (s.steps || []).map(x => x.replace(/: simulated \(not available in the CRS sandbox\)$/, ""));
+  fill("#outcome",
+    h("div", {class: "card ok"}, h("h3", {}, deal.lender_name, " ", sim()),
+      h("div", {style: "font-size:16px;font-weight:700"}, `${money(t.amount)} at ${t.apr}% for ${t.term_months} months`),
+      s.disclosure ? kv([["Monthly payment", money(s.disclosure.monthly_payment)],
+                         ["Total interest and fees", money(s.disclosure.total_interest_and_fees)],
+                         ["Autopay", yn(t.autopay)], ["Fee", money(t.fee)]]) : null),
+    s.disclosure ? h("div", {class: "card"}, h("h3", {}, "What your agent did"), h("ul", {class: "plain"}, s.disclosure.summary.map(x => h("li", {}, x)))) : null,
+    steps.length ? h("div", {class: "card"}, h("h3", {}, "Settlement"), h("ul", {class: "plain small"}, steps.map(x => h("li", {}, sim(), " ", x)))) : null);
+}
+
+// ---------------------------------------------------------------- center: live feed
+function feedAdd(el) { $("#feed").append(el); el.scrollIntoView({block: "end", behavior: "smooth"}); }
+function feedSys(actor, text, bad) {
+  feedAdd(h("div", {class: "msg " + (bad ? "bad" : "sys")}, h("div", {class: "top"}, h("span", {class: "rnd"}, ""), h("b", {}, actor)),
+    h("div", {class: "text"}, text)));
+}
+
+function termsText(d) {
+  if (d.terms) {
+    const t = d.terms;
+    return `${money(t.amount)} @ ${t.apr}% · ${t.term_months} mo` + (t.autopay ? " · autopay" : "") + (t.fee ? ` · ${money(t.fee)} fee` : "");
+  }
+  if (d.ask) return `Wants ${money(d.ask.amount)} over ${d.ask.term_range[0]}-${d.ask.term_range[1]} months (${d.ask.purpose})`;
+  return null;
+}
+
+function feedMessage(e) {
+  const d = e.data, v = e.verdict, ok = v.ok, isDeal = ok && d.type === "ACCEPT";
+  stats.checked++; ok ? stats.passed++ : stats.blocked++; renderStats();
+  const lender = d.sender !== "borrower";
+  feedAdd(h("div", {class: "msg " + (isDeal ? "deal" : ok ? "" : "bad")},
+    h("div", {class: "top"}, h("span", {class: "rnd"}, "R" + e.round), h("b", {}, who(d.sender)), lender ? sim() : null,
+      h("span", {class: "muted small"}, "→ " + (d.to ? who(d.to) : "all lenders")), h("span", {class: "type"}, d.type),
+      d.offer_id ? h("span", {class: "muted small"}, d.offer_id) : null,
+      h("span", {class: "verdict"}, isDeal ? "✓ DEAL" : ok ? "✓ passed" : h("span", {class: "code"}, "BLOCKED " + v.code))),
+    termsText(d) ? h("div", {class: "terms"}, termsText(d)) : null,
+    d.text ? h("div", {class: "text"}, "“" + d.text + "”") : null,
+    ok ? null : h("div", {class: "why"}, "Referee: " + v.reason)));
+}
+
+// ---------------------------------------------------------------- right: audit log
+function showGate(g) {
+  fill("#gate", h("div", {}, h("span", {class: "badge " + (BADGE[g.decision] || "b-grey")}, g.decision.replace("_", " "))),
+    h("div", {style: "margin-top:6px"}, h("b", {}, g.applicant || ""), h("span", {class: "muted small"}, " (fictional test persona)")),
+    h("div", {class: "small"}, g.headline),
+    h("div", {class: "small", style: "margin-top:4px;font-weight:600;color:" + (g.admitted ? "var(--green)" : "var(--red)")},
+      g.admitted ? "Admitted to the market" : "Not admitted: no lender sees this application"));
+  fill("#products", (g.crs_products || []).map(p => h("span", {}, PRODUCTS[p] || p)),
+    h("div", {class: "small muted"}, g.source === "live" ? "Called live against the CRS sandbox." : "From saved CRS sandbox responses."));
+  fill("#findings", g.findings.length
+    ? h("ul", {class: "plain small"}, g.findings.map(f => h("li", {}, h("span", {class: "sev s" + f.severity}, ["", "NOTE", "CONCERN", "BLOCKER"][f.severity]),
+        f.text, h("div", {class: "muted"}, f.source))))
+    : h("div", {class: "small"}, "No findings: identity and credit checks are clean."));
+}
+
+function renderStats() {
+  $("#stats").replaceChildren(...[["Messages checked", stats.checked], ["Passed", stats.passed], ["Blocked", stats.blocked, stats.blocked > 0]]
+    .flatMap(([k, v, hot]) => [h("div", {class: "k"}, k), h("div", {class: "v" + (hot ? " hot" : "")}, v)]));
+}
+
+init().catch(err => { $("#feed").replaceChildren(h("div", {class: "msg bad"}, "Couldn't load personas or scenarios: " + err.message)); });
+</script>
+</body>
+</html>

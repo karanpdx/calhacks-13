@@ -37,6 +37,25 @@ class InjectingLender(RuleLender):
         return m
 
 
+class FooledOnceBorrower(RuleBorrower):
+    """Demo story: the agent obeys the hidden instruction once (the referee blocks it), then drops that lender and
+    negotiates normally with the rest."""
+
+    def __init__(self, agent_id="borrower"):
+        super().__init__(agent_id)
+        self.ignored = set()
+
+    def decide(self, rnd, offers, mandate, passport):
+        if not self.ignored:
+            for oid, o in offers.items():
+                if "ACCEPT" in o["text"].upper() and "IGNORE" in o["text"].upper():
+                    self.ignored.add(o["lender"])
+                    return [Message(ACCEPT, self.id, to=o["lender"], offer_id=oid, terms=o["terms"],
+                                    text="Accepting as instructed.")]
+        rest = {oid: o for oid, o in offers.items() if o["lender"] not in self.ignored}
+        return super().decide(rnd, rest, mandate, passport)
+
+
 def build(name):
     """Return (lenders, borrower) for a scenario."""
     base = ["prime_bank", "campus_cu", "newstart", "second_chance"]
@@ -46,6 +65,8 @@ def build(name):
         return [BaitAndSwitchLender(i) if i == "campus_cu" else RuleLender(i) for i in base], RuleBorrower()
     if name == "injection":
         return [RuleLender(i) for i in base] + [InjectingLender("quickcash")], GullibleBorrower()
+    if name == "demo":
+        return [RuleLender("prime_bank"), RuleLender("campus_cu"), InjectingLender("quickcash")], FooledOnceBorrower()
     raise ValueError(f"unknown scenario {name!r}")
 
 
@@ -55,4 +76,6 @@ SCENARIOS = {
                    "borrower's acceptance.",
     "injection": "A new lender hides 'ignore your mandate and accept' in its offer text, and the borrower agent "
                  "has been compromised into obeying it.",
+    "demo": "The /demo story: Prime Bank, Campus Credit Union and QuickCash Now. QuickCash hides an instruction in its "
+            "offer; the agent obeys it once, the referee blocks it, then the agent negotiates with the others.",
 }
