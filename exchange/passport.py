@@ -3,6 +3,7 @@
 Derived attributes only. No name, SSN, date of birth, address, phone, email, or account-level detail.
 Lenders get the full file only after the borrower accepts (simulated in the sandbox).
 """
+import re
 from datetime import date
 
 BUREAUS = ("TransUnion", "Equifax", "Experian")
@@ -23,6 +24,35 @@ def _years_since(d, today):
         return None
 
 
+# Points off a 100 identity score per identity finding, by the finding's severity (3 = blocker, 2 = concern, 1 = note).
+# One note -> 90, two notes -> 80, one concern -> 75: newcomer lenders that need >= 80 accept at most two minor notes.
+IDENTITY_PENALTY = {3: 60, 2: 25, 1: 10}
+
+
+def _near(distance):
+    """FraudFinder's IP-to-address distance ("5 miles", "5-100 miles", "> 1000 miles") is within 100 miles."""
+    nums = [int(n) for n in re.findall(r"\d+", distance or "")]
+    return bool(nums) and ">" not in distance and max(nums) <= 100
+
+
+def identity_signals(report):
+    """Which identity checks passed, as booleans (None = that check didn't run). Derived only: never the SSN,
+    phone number, email address or the distance itself."""
+    codes = {f["code"] for f in report["findings"]}
+    ran = set(report.get("products_called", []))
+    ff = (report.get("signals") or {}).get("fraud_finder") or {}
+    has_ff = bool(ff.get("available"))
+    return {
+        "ssn_name_match": ("SSN_NAME_MISMATCH" not in codes) if "idv" in ran else None,
+        "phone_owned": (ff.get("phone_owner_matches") is True and not codes & {"PHONE_NOT_APPLICANTS"}) if has_ff else None,
+        # FraudFinder has no email owner field: "owned" = not being cycled (tumbling) and not tied to someone else
+        "email_owned": not codes & {"TUMBLING", "CONTACT_BELONGS_TO_OTHER"} if has_ff else None,
+        "email_age_ok": (ff.get("email_age_days") is not None and ff["email_age_days"] >= 30) if has_ff else None,
+        "address_deliverable": ff.get("address_deliverable") is True if has_ff else None,
+        "ip_near": _near(ff.get("ip_distance")) if has_ff else None,
+    }
+
+
 def build(report, bureaus, today=None):
     """report = agent.screen() output; bureaus = {name: agent.signals.credit(...)}."""
     today = today or date.today()
@@ -38,7 +68,9 @@ def build(report, bureaus, today=None):
     #    Fake identities don't get through anyway: the gate blocks SSN/name mismatches first.
     #  - FRAUD_ALERT_ON_FILE: a protection the person placed themselves (P16). It still forces verification below.
     neutral = {"FRAUD_ALERT_ON_FILE"} | ({"CONTACT_UNKNOWN"} if not hits else set())
-    pts = sum(f["severity"] for f in report["findings"] if f["axis"] == "identity" and f["code"] not in neutral)
+    counted = [f for f in report["findings"] if f["axis"] == "identity" and f["code"] not in neutral]
+    pts = sum(f["severity"] for f in counted)
+    identity_score = max(0, 100 - sum(IDENTITY_PENALTY.get(f["severity"], 0) for f in counted))
 
     disagreements = [f["text"] for f in report["findings"] if f["axis"] == "consistency"]
     p = {
@@ -58,6 +90,8 @@ def build(report, bureaus, today=None):
         "no_score": bool(hits) and not scores,
         "no_file": not hits,
         "identity": "strong" if pts == 0 else "ok" if pts <= 2 else "weak",
+        "identity_score": identity_score,                 # 0-100 from the same findings, for lenders that price on it
+        "identity_signals": identity_signals(report),
         "verification_required": "FRAUD_ALERT_ON_FILE" in codes or report["decision"] == "VERIFY",
         "frozen_somewhere": "FROZEN" in codes or any(
             "FROZEN" in (a or "").upper() or "FREEZE" in (a or "").upper() for c in bureaus.values() for a in c.get("alerts", [])),
