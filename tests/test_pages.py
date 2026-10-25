@@ -55,3 +55,16 @@ def test_chat_javascript_parses():
     for script in scripts:
         result = subprocess.run([node, "--check"], input=script, text=True, encoding="utf8", capture_output=True)
         assert result.returncode == 0, result.stderr
+
+
+def test_every_borrower_path_on_the_phone_asks_the_person_before_settling():
+    html = client.get('/phone').text
+    # the chat and the form both request approval=1; only the laptop story view replays without it
+    assert html.count('await loadExchange(true)') == 2
+    assert 'async function formDecision' in html and 'await decide(choice)' in html
+
+
+def test_spanish_translation_note_only_shows_in_spanish():
+    js = client.get('/static/chat-access.js').text
+    css = client.get('/static/chat-access.css').text
+    assert "footer.hidden=lang!=='es'" in js and '.borrower-translation[hidden]{display:none!important}' in css

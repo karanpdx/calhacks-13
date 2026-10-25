@@ -1063,7 +1063,7 @@ function phoneForm() {
     Object.assign(M, {min_term: a, max_term: b, autopay: ap.checked ? 1 : 0, max_fee: fee.checked ? 0 : 150});
     go.disabled = true; go.textContent = BorrowerUI.message("Starting...");
     M.max_payment = null; M.min_amount = 3000;
-    try { await loadExchange(); } catch (err) { go.textContent = BorrowerUI.message("Couldn't reach the exchange"); go.disabled = false; go.focus(); return; }
+    try { await loadExchange(true); } catch (err) { go.textContent = BorrowerUI.message("Couldn't reach the exchange"); go.disabled = false; go.focus(); return; }
     shareWithLaptop();
     phoneRun();
   };
@@ -1281,6 +1281,8 @@ async function phoneStory() {
       drow(BorrowerUI.message("Monthly payment"), money(pending.preview.monthly_payment)),
       drow(BorrowerUI.message("Yearly rate"), pct(t.apr)),
       drow(BorrowerUI.message("Fee"), money(t.fee || 0))), detailDone));
+    // The person decides here, on the phone; a paired laptop only mirrors it.
+    if (new URLSearchParams(location.search).get("follow") !== "1") await formDecision(area, pending);
     resultControls(area);
     return;
   }
@@ -1313,6 +1315,36 @@ async function phoneStory() {
   resultControls(area);
 }
 
+
+// Form path: the agent recommended an offer; the person accepts or turns it down (the same approval the chat uses).
+async function formDecision(area, pending) {
+  const yes = h("button", {type: "button", class: "ios-btn"}, BorrowerUI.message("Accept this loan"));
+  const no = h("button", {type: "button", class: "ios-btn ghost"}, BorrowerUI.message("Not now"));
+  const row = h("div", {style: "display:flex;flex-direction:column;gap:8px"}, yes, no);
+  await add(area, row);
+  const choice = await new Promise(resolve => { yes.onclick = () => resolve(true); no.onclick = () => resolve(false); });
+  yes.disabled = no.disabled = true;
+  try { await decide(choice); } catch (err) {
+    row.replaceWith(h("div", {class: "alert"}, BorrowerUI.message("I couldn't confirm your decision with the exchange. Its status is unknown; don't assume the loan was accepted or declined.")));
+    return;
+  }
+  shareWithLaptop();
+  row.remove();
+  const deal = D.ex.deal;
+  if (deal) {
+    const t = deal.terms, dis = D.ex.events.find(x => x.kind === "disclosure");
+    logAdd(BorrowerUI.message("You → {v0}", {v0: deal.lender_name}), BorrowerUI.message("Accepted {v0}.", {v0: pct(t.apr)}), "good", "check");
+    const card = await add(area, h("div", {class: "good-card"},
+      h("div", {class: "ios-sub"}, BorrowerUI.message("{v0} · simulated lender · accepted", {v0: deal.lender_name})),
+      h("div", {class: "big-pay"}, money(dis ? dis.data.monthly_payment : monthly(t.amount, t.apr, t.term_months)), h("span", {class: "ios-sub", style: "font-size:0.9375rem"}, " / month")),
+      h("div", {}, BorrowerUI.message("{v0} at {v1} for {v2} months", {v0: money(t.amount), v1: pct(t.apr), v2: t.term_months})),
+      h("div", {class: "ios-sub", style: "color:var(--ios-blue);font-weight:600"}, BorrowerUI.message("Tap for the full breakdown"))));
+    tappable(card, detailDone); pop(card);
+  } else {
+    logAdd(BorrowerUI.message("You"), BorrowerUI.message("You turned down your agent's recommendation. Nothing was signed."), "", "robot");
+    await add(area, h("div", {class: "ios-group"}, h("div", {class: "ios-row"}, BorrowerUI.message("You turned down your agent's recommendation. Nothing was signed."))));
+  }
+}
 
 function sourceRecord(text) {
   return h("details", {class: "source-message"}, h("summary", {}, BorrowerUI.message("Original agent message")),
