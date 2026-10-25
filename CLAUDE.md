@@ -93,7 +93,7 @@ uvicorn app.main:app --reload                 # http://127.0.0.1:8000
 
 ## Conventions
 - Python 3, small modules, plain functions; no new heavy dependencies without asking the team.
-- Work on branch `decision-agent` (or a feature branch off it) and open PRs to `main`. Pull before you push.
+- Commit straight to `main`. No PRs needed. Pull before you push, run `pytest`, and push only when every test passes.
 - When you change behaviour, add or update a test in `tests/`.
 
 ## gstack (recommended)
