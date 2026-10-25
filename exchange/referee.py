@@ -7,6 +7,10 @@ Agents can say anything in free text. Only messages that pass these checks chang
   - commitment: a lender's new offer can't be worse for the borrower than its live one (no bait-and-switch)
   - acceptance: the offer exists and is live, the accepted terms are exactly the offered terms, and they fit the mandate
 Every message and verdict is appended to the event log (the audit trail the UI shows).
+
+With `watchdog=True`, a flag-only watchdog (exchange/watchdog.py) reviews each event and adds `watchdog` events.
+One referee rule uses it: a lender that commits a hard violation (TERMS_WORSENED, BAD_SIGNATURE, or a RULE-BASED
+injection flag) is excluded for the rest of the session and its live offers are withdrawn. Claude flags never count.
 """
 import os, secrets, time
 from datetime import date
@@ -20,10 +24,13 @@ from .messages import (Message, Mandate, Terms, Verdict, TYPES, APR_CAP,
                        INTENT, OFFER, COUNTER, ACCEPT, DECLINE, WITHDRAW)
 from .lenders import RuleLender, POLICIES
 from .borrower import RuleBorrower
+from .watchdog import Watchdog
 
 BLOCKED_DECISIONS = {"STOP_FRAUD"}  # identity can't be trusted: nobody in the market sees anything
 ROLE_TYPES = {"borrower": {INTENT, COUNTER, ACCEPT, DECLINE}, "lender": {OFFER, DECLINE, WITHDRAW}}
 SIMULATED = "simulated (not available in the CRS sandbox)"
+HARD_VIOLATIONS = {"TERMS_WORSENED", "BAD_SIGNATURE"}
+EXCLUDING_DETECTORS = {"injection"}  # rule-based detectors whose flags get a lender excluded
 
 
 class CachedSource:
@@ -43,7 +50,8 @@ class CachedSource:
 
 
 class Exchange:
-    def __init__(self, persona, mandate=None, source=None, lenders=None, borrower=None, today=None):
+    def __init__(self, persona, mandate=None, source=None, lenders=None, borrower=None, today=None, watchdog=False,
+                 review=None):
         self.persona = persona
         self.mandate = mandate or Mandate()
         self.source = CachedSource(source or SampleSource())
@@ -57,6 +65,9 @@ class Exchange:
         self.events, self.offers, self.deal = [], {}, None
         self.round, self.closed, self.admitted = 0, False, False
         self.report = self.passport = None
+        self.watchdog = Watchdog() if watchdog else None
+        self.review = review   # optional ClaudeReview: advisory flags after the session closes
+        self.excluded = {}     # lender id -> reason
 
     # ---------------------------------------------------------------- bookkeeping
     def register(self, agent):
@@ -69,12 +80,21 @@ class Exchange:
         if verdict:
             e["verdict"] = {"ok": verdict.ok, "code": verdict.code, "reason": verdict.reason}
         self.events.append(e)
+        if self.watchdog and kind != "watchdog":
+            self.flag_all(self.watchdog.review(e, self))
         return e
+
+    def flag_all(self, flags):
+        for f in flags:
+            self.emit("watchdog", "watchdog", f)
+
+    def flags_on(self, e):
+        return [x["data"] for x in self.events[e["seq"] + 1:] if x["kind"] == "watchdog" and x["data"]["ref"] == e["seq"]]
 
     def send(self, agent, msg):
         """How agents talk: the harness signs with the agent's own key, then the referee checks it."""
         msg.round = self.round
-        return self.submit(msg.sign(self.keys[agent.id]))
+        return self.submit(msg.sign(self.keys[agent.id]), by=agent.id)
 
     # ---------------------------------------------------------------- stage 1: CRS gate + passport
     def gate(self):
@@ -100,17 +120,40 @@ class Exchange:
         return True
 
     # ---------------------------------------------------------------- validation
-    def submit(self, m: Message) -> Verdict:
-        v = self._check(m)
-        self.emit("message", m.sender, m.to_dict(), v)
+    def submit(self, m: Message, by=None) -> Verdict:
+        """`by` = the agent whose key signed this (the real sender, even if `m.sender` is forged)."""
+        by = by or m.sender
+        v = self._check(m, by)
+        e = self.emit("message", m.sender, m.to_dict(), v)
         if v.ok:
-            self._apply(m)
+            self._apply(m, e)
+        self._enforce(by, v, e)
         return v
+
+    def _enforce(self, by, v, e):
+        """With the watchdog on, hard violations get a lender excluded. Deterministic; only rule-based flags count."""
+        if not self.watchdog or self.roles.get(by) != "lender" or by in self.excluded:
+            return
+        hits = [f for f in self.flags_on(e) if f["source"] == "rules" and f["detector"] in EXCLUDING_DETECTORS
+                and f["agent"] == by]
+        if v.code in HARD_VIOLATIONS:
+            code, why = v.code, v.reason
+        elif hits:
+            code, why = "INJECTION", f"Rule-based watchdog: {hits[0]['why']} Saw: {hits[0]['saw']!r}"
+        else:
+            return
+        self.excluded[by] = code
+        withdrawn = [oid for oid, o in self.offers.items() if o["lender"] == by and o["status"] == "live"]
+        for oid in withdrawn:
+            self.offers[oid]["status"] = "withdrawn"
+        self.emit("excluded", "referee", {"agent": by, "code": code, "reason": why, "withdrawn": withdrawn,
+                                          "note": f"{POLICIES.get(by, (by,))[0]} is out of this session; "
+                                                  "its offers are withdrawn and further messages are rejected."})
 
     def _live_offer_of(self, lender):
         return next((oid for oid, o in self.offers.items() if o["lender"] == lender and o["status"] == "live"), None)
 
-    def _check(self, m):
+    def _check(self, m, by=None):
         V = Verdict
         if self.closed:
             return V(False, "SESSION_CLOSED", "The session is over.")
@@ -120,6 +163,9 @@ class Exchange:
             return V(False, "UNREGISTERED", f"{m.sender!r} is not a registered agent.")
         if not m.verify(self.keys[m.sender]):
             return V(False, "BAD_SIGNATURE", f"Signature doesn't match {m.sender!r}'s key: someone else sent this.")
+        if (by or m.sender) in self.excluded:
+            return V(False, "EXCLUDED", f"{by or m.sender} was excluded from this session "
+                                        f"({self.excluded[by or m.sender]}).")
         role = self.roles[m.sender]
         if m.type not in ROLE_TYPES[role]:
             return V(False, "WRONG_ROLE", f"A {role} can't send {m.type}.")
@@ -159,7 +205,7 @@ class Exchange:
                                                        "whatever the agent was told.")
         return V(True, "OK", "Valid.")
 
-    def _apply(self, m):
+    def _apply(self, m, e):
         if m.type == OFFER:
             prev = self._live_offer_of(m.sender)
             if prev:
@@ -167,7 +213,7 @@ class Exchange:
             m.offer_id = f"o{len(self.offers) + 1}"
             self.offers[m.offer_id] = {"lender": m.sender, "terms": m.terms, "text": m.text, "status": "live",
                                        "round": self.round}
-            self.events[-1]["data"]["offer_id"] = m.offer_id
+            e["data"]["offer_id"] = m.offer_id
         elif m.type == WITHDRAW:
             self.offers[m.offer_id]["status"] = "withdrawn"
         elif m.type == ACCEPT:
@@ -194,8 +240,9 @@ class Exchange:
                 v = self.send(self.borrower, m)
                 if m.type == DECLINE and v.ok:
                     ended = True
-                if m.type == COUNTER and v.ok and m.to in by_id:
-                    others = [o["terms"].apr for oid, o in live.items() if o["lender"] != m.to]
+                if m.type == COUNTER and v.ok and m.to in by_id and m.to not in self.excluded:
+                    others = [o["terms"].apr for o in self.offers.values()  # current, not the round-start snapshot:
+                              if o["status"] == "live" and o["lender"] != m.to]   # exclusion may withdraw offers mid-round
                     reply = by_id[m.to].respond_to_counter(m, self.passport,
                                                            {"best_competing_apr": min(others) if others else None})
                     for r in (reply if isinstance(reply, list) else [reply] if reply else []):
@@ -203,14 +250,31 @@ class Exchange:
             if self.deal or ended:
                 break
         self.closed = True
+        if self.watchdog:
+            self.flag_all(self.watchdog.finish(self))
+        if self.review:
+            self.flag_all(self.review.run(self))
         if self.deal:
             self.settle()
         else:
             self.emit("no_deal", "referee", {"reason": "No offer within the person's limits.",
                                              "lender_reasons": [e["data"]["text"] for e in self.events
                                                                 if e["kind"] == "message" and e["data"]["type"] == DECLINE
-                                                                and self.roles.get(e["actor"]) == "lender"]})
+                                                                and self.roles.get(e["actor"]) == "lender"],
+                                             "watchdog_notes": self.watchdog_notes()})
         return self.result()
+
+    def watchdog_notes(self):
+        """Plain-English watchdog flags for the person, most serious first. Flag-only: nothing here changed the deal."""
+        order = {"high": 0, "medium": 1, "low": 2}
+        seen, out = set(), []
+        for f in sorted((e["data"] for e in self.events if e["kind"] == "watchdog"), key=lambda f: order.get(f["severity"], 3)):
+            if f["severity"] not in order or f["note"] in seen:
+                continue
+            seen.add(f["note"])
+            out.append({"severity": f["severity"], "note": f["note"], "suggestion": f.get("suggestion"),
+                        "source": f["source"]})
+        return out
 
     # ---------------------------------------------------------------- settlement + disclosure
     def settle(self):
@@ -248,7 +312,7 @@ class Exchange:
         if gave:
             lines.append("To get this, your agent " + ", ".join(gave) + ".")
         return {"summary": lines, "monthly_payment": round(pay, 2), "baseline_monthly_payment": round(base_pay, 2),
-                "total_interest_and_fees": round(finance.interest_cost(t), 2)}
+                "total_interest_and_fees": round(finance.interest_cost(t), 2), "watchdog_notes": self.watchdog_notes()}
 
     def result(self):
         blocked = [e for e in self.events if e.get("verdict") and not e["verdict"]["ok"]]
@@ -262,5 +326,7 @@ class Exchange:
             "deal": ({"lender": self.deal["lender"], "lender_name": POLICIES.get(self.deal["lender"], (self.deal["lender"],))[0],
                       "terms": vars(self.deal["terms"])} if self.deal else None),
             "blocked": [{"seq": e["seq"], "actor": e["actor"], **e["verdict"]} for e in blocked],
+            "watchdog": [{"seq": e["seq"], **e["data"]} for e in self.events if e["kind"] == "watchdog"],
+            "excluded": [{"seq": e["seq"], **e["data"]} for e in self.events if e["kind"] == "excluded"],
             "events": self.events,
         }

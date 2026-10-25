@@ -107,6 +107,7 @@ def scorecard():
 from exchange.messages import Mandate  # noqa: E402
 from exchange.referee import Exchange  # noqa: E402
 from exchange.scenarios import build as build_scenario, SCENARIOS  # noqa: E402
+from exchange.watchdog import ClaudeReview  # noqa: E402
 
 
 @app.get("/api/exchange/scenarios")
@@ -117,9 +118,11 @@ def exchange_scenarios():
 @app.get("/api/exchange/{persona}")
 def exchange(persona: str, scenario: str = "normal", amount: float = 5000, min_amount: float = 3000,
              max_apr: float = 18.0, min_term: int = 12, max_term: int = 48, autopay: int = 1, max_fee: float = 0,
-             live: int = 0):
+             live: int = 0, watchdog: int = 1, review: int = 0):
     """Run one market session. Returns the full event log (gate, passport, every message with the referee's verdict,
-    settlement, disclosure). The UI can replay `events` in order to animate the negotiation."""
+    settlement, disclosure). The UI can replay `events` in order to animate the negotiation.
+    `watchdog=1` (default) adds flag-only watchdog events; `review=1` adds an advisory Claude pass if ANTHROPIC_API_KEY
+    is set (otherwise the rule-based flags stand)."""
     _row(persona)
     if scenario not in SCENARIOS:
         raise HTTPException(404, f"unknown scenario {scenario!r}; use one of {sorted(SCENARIOS)}")
@@ -135,7 +138,8 @@ def exchange(persona: str, scenario: str = "normal", amount: float = 5000, min_a
                 note = f"Live CRS login failed ({type(e).__name__}); showing saved samples instead."
         else:
             note = "Live mode needs CRS_USER and CRS_PASS in the environment; showing saved samples instead."
-    r = Exchange(persona, mandate, source, lenders, borrower, today=SC.AS_OF if source.name == "samples" else None).run()
+    r = Exchange(persona, mandate, source, lenders, borrower, today=SC.AS_OF if source.name == "samples" else None,
+                 watchdog=bool(watchdog), review=ClaudeReview() if review else None).run()
     return {"notice": NOTICE, "scenario": scenario, "live_note": note, **r}
 
 
