@@ -53,7 +53,8 @@ def test_prime_deal_shows_total_paid_and_simulated_next_steps():
 def test_negotiated_deal_shows_savings_and_what_was_traded():
     d = view("P03")["deal"]
     assert d["lender"] == "Campus Credit Union"
-    assert d["saved"] and d["saved"]["amount"] > 0 and "Campus Credit Union" in d["saved"]["sentence"]
+    # the "best first offer" is the cheapest per dollar, which is now Harbor's smaller, shorter loan
+    assert d["saved"] and d["saved"]["amount"] > 0 and "best first offer" in d["saved"]["sentence"]
     assert any("autopay" in t for t in d["traded"])
 
 

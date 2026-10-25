@@ -93,7 +93,7 @@ class DriftingBorrower(RuleBorrower):
 
 def build(name):
     """Return (lenders, borrower) for a scenario."""
-    base = ["prime_bank", "campus_cu", "newstart", "second_chance"]
+    base = ["prime_bank", "campus_cu", "newstart", "second_chance", "harbor", "ladder"]
     if name == "normal":
         return [RuleLender(i) for i in base], RuleBorrower()
     if name == "bait_switch":

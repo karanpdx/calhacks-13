@@ -74,6 +74,8 @@ def build(report, bureaus, today=None):
 
     disagreements = [f["text"] for f in report["findings"] if f["axis"] == "consistency"]
     ff = (report.get("signals") or {}).get("fraud_finder") or {}
+    bk = [r for c in hits.values() for r in c.get("bankruptcy_records", [])]
+    bk_dates = [d for r in bk for d in [r.get("resolved") or r.get("filed")] if d]
     lates = max((c.get("lates_30", 0) + c.get("lates_60", 0) + c.get("lates_90", 0) for c in hits.values()), default=0)
     p = {
         "score_band": _band(min(scores.values())) if scores else None,   # lowest bureau, banded
@@ -87,6 +89,11 @@ def build(report, bureaus, today=None):
         "collections": worst("collections"),
         "chargeoffs": worst("chargeoffs"),
         "bankruptcies": worst("bankruptcies"),
+        # Bankruptcies reported as public records (the summary's `bankruptcies` count can miss them, as for P06).
+        "bankruptcy_public_record": bool(bk),
+        "bankruptcy_discharged": bool(bk) and all((r.get("disposition") or "").lower() == "discharged" for r in bk),
+        "years_since_bankruptcy": min((y for y in (_years_since(d, today) for d in bk_dates) if y is not None),
+                                      default=None),
         "inquiries_6m": inq_6m,
         "thin_file": bool(hits) and max(c.get("tradelines", 0) for c in hits.values()) < 3,
         "no_score": bool(hits) and not scores,
