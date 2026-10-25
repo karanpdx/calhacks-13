@@ -5,6 +5,7 @@ Credit-file trust agent built on the CRS Credit API sandbox. Working notes live 
 - `exchange/` - **the agent-to-agent credit marketplace** (referee, passport, lender/borrower agents, attack scenarios). Try `python -m exchange.demo P01`. Start with `CLAUDE.md`.
 - `app/` - FastAPI demo + one static page (`app/static/index.html`). See "Run the demo" below.
 - `agent/` - screening agent: staged CRS checks, rule-based decision, Claude-written explanation. Try `python -m agent.screen --all`.
+- `docs/roadmap.md` - **project roadmap**: what's built, tonight's checklist, demo plan, and phases 2-6.
 - `docs/crs-brief.md` - what CRS wants, what they gave us, and directions we could take.
 - `crs/` - Python client for the CRS sandbox, OpenAPI spec, and saved sample responses (`crs/samples/`).
 - Mock data: the sample responses are fictional test personas (P03, P05, P12, P13, P17) from CRS's sandbox.
