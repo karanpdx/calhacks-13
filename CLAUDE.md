@@ -77,6 +77,14 @@ uvicorn app.main:app --reload                 # http://127.0.0.1:8000
   error so the demo never breaks.
 - Register new scenarios in `exchange/scenarios.py` (`build()` + `SCENARIOS`) so the API and UI pick them up.
 
+## Decision log (required when a feature is finished)
+- Important decisions and why we chose them live in `docs/decisions/LOG.md`. Process: `docs/decisions/PROCESS.md`.
+- When a feature is finished, Claude adds one entry to the log before calling it done. Entry format is in PROCESS.md.
+- Each entry is **2 lines max**: the choice, then why (and what we gave up).
+- Source material is all teammates' work, not only the current chat: git history and PRs, plus teammates' chat
+  excerpts dropped in `docs/decisions/inbox/` (`<name>-<feature>.md`). Process the inbox files for the feature, then delete them.
+- Never put secrets, credentials, or personal data in the log.
+
 ## Conventions
 - Python 3, small modules, plain functions; no new heavy dependencies without asking the team.
 - Work on branch `decision-agent` (or a feature branch off it) and open PRs to `main`. Pull before you push.
