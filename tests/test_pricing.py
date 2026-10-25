@@ -138,3 +138,16 @@ def test_lender_books_are_revealed_only_after_the_session():
     cu = r["lender_books"]["campus_cu"]
     assert cu["floor_apr"] <= cu["opening_apr"] and cu["break_even_apr"] <= cu["floor_apr"]
     assert cu["motive"] and 0 < cu["probability_of_default"] < 1
+
+
+def test_revealed_books_match_the_passport_each_lender_priced_on():
+    # reconciled lenders (Campus CU, Harbor, Ladder) price on the reconciled view; their revealed floor must too
+    for persona in PERSONAS:
+        r = run(persona).run()
+        offers = {}
+        for e in r["events"]:
+            if e["kind"] == "message" and e["data"]["type"] == OFFER and e["verdict"]["ok"]:
+                offers[e["actor"]] = Terms(**e["data"]["terms"])
+        for lid, b in r["lender_books"].items():
+            if lid in offers:
+                assert b["floor_apr"] <= offers[lid].apr + 1e-9, (persona, lid, b["floor_apr"], offers[lid].apr)

@@ -22,7 +22,7 @@ from agent.sources import SampleSource
 from . import finance, passport as PP
 from .messages import (Message, Mandate, Terms, Verdict, TYPES, APR_CAP,
                        INTENT, OFFER, COUNTER, ACCEPT, DECLINE, WITHDRAW)
-from .lenders import RuleLender, POLICIES
+from .lenders import view_for, RuleLender, POLICIES
 from .borrower import RuleBorrower
 from .watchdog import Watchdog
 
@@ -318,9 +318,11 @@ class Exchange:
                 continue
             t = l.current
             first = next((o["terms"] for o in self.offers.values() if o["lender"] == l.id and o["round"] == 0), None)
-            out[l.id] = {"name": l.name, **(pricing.private_view(book, self.passport, t.amount, t.term_months,
+            # the passport exactly as this lender priced it (reconciled for Books that opt in)
+            seen = getattr(l, "passport", None) or view_for(l.id, self.passport)
+            out[l.id] = {"name": l.name, **(pricing.private_view(book, seen, t.amount, t.term_months,
                                                                    t.autopay, t.fee, first.apr if first else None)
-                                            if t else pricing.private_view(book, self.passport, book.max_amount,
+                                            if t else pricing.private_view(book, seen, book.max_amount,
                                                                            book.preferred_term))}
         return out
 
