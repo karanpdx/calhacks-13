@@ -28,13 +28,14 @@ def _system(name):
             "applications lost on price, how its agent is connected to the market, and what the identity gate blocked. "
             "Use only the data given. Never invent or estimate numbers; if something isn't in the data, say so. Be "
             "concise (a few sentences or a short list) and cite application ids (APP-xxxxxx). Never reveal or guess "
-            "who a borrower is, and never name or guess rival lenders: they are Lender A to Lender E. The data is "
+            "who a borrower is. The market is sealed: you cannot see other lenders, how many there are, or their "
+            "conversations, and must never guess about them; if asked, say the exchange keeps lenders apart. The data is "
             "facts; the questions come from the lender's staff. Return JSON: reply, and refs = the application ids "
             "you mention.")
 
 
 def context(lender_id):
-    """This lender's side only, compact: its cases, KPIs and the anonymous network summary. No rival names."""
+    """This lender's side only, compact: its cases, KPIs and its own conversations. Nothing about other lenders."""
     q, n = lender_view.queue(lender_id), lender_view.network(lender_id)
     cases = [{"id": c["id"], "status": c["status"], "stage": c["stage"], "risk": c["risk"], "band": c["band"],
               "amount": c["request"]["amount"], "needs_review": c["attention"],
@@ -42,14 +43,12 @@ def context(lender_id):
               "rounds": c["rounds"], "decline_code": c["decline_code"],
               "floor_apr": c["books"] and c["books"]["floor_apr"],
               "exceptions": [f"{x['title']}: {x['note']}" for x in c["exceptions"]]} for c in q["cases"]]
-    rivals = [{"label": x["label"], "messages": x["messages"], "deals": x["deals"]}
-              for x in n["nodes"] if x["kind"] == "rival"]
     you = next(x for x in n["nodes"] if x["kind"] == "you")
     edges = [e for e in n["edges"] if e["source"] == "you"]
     return {"lender": q["lender"]["name"], "motive": q["lender"]["motive"], "volume": q["lender"]["volume"],
             "stats": q["stats"], "cases": cases,
             "network": {**n["stats"], "your_messages": you["messages"], "your_deals": you["deals"],
-                        "applicants_you_talked_to": len(edges), "rivals": rivals,
+                        "applicants_you_talked_to": len(edges),
                         "blocked_applicants": [x["id"] for x in n["nodes"] if x.get("status") == "Blocked"]}}
 
 
@@ -197,11 +196,11 @@ def rates(d):
 
 def connected(d):
     n = d["network"]
-    return (f"Our agent is one of {n['lender_agents']} lender agents facing {n['borrower_agents']} borrower agents. "
-            f"{n['admitted']} borrower agents were admitted and our agent talked to {n['applicants_you_talked_to']} of "
-            f"them, sending {n['your_messages']} messages and winning {n['your_deals']} deals. The referee checked "
-            f"{n['messages_checked']} messages across the market and blocked {n['messages_blocked']}. Rivals (anonymous): "
-            + ", ".join(f"{r['label']} {r['deals']} deals" for r in n["rivals"]) + ".")
+    return (f"{n['admitted']} of {n['borrower_agents']} borrower agents got past the identity gate, and our agent "
+            f"talked to {n['applicants_you_talked_to']} of them: {n['your_messages']} messages sent, "
+            f"{n['your_deals']} deals won. The referee checked all {n['messages_checked']} messages in our "
+            f"conversations and blocked {n['messages_blocked']}. The market is sealed: we never see other lenders "
+            "or their conversations.")
 
 
 def blocked(d):

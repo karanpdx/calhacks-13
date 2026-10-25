@@ -35,7 +35,7 @@ def test_fallback_answers_the_common_questions_with_real_numbers():
     lost_ids = [c["id"] for c in q["cases"] if c["status"] == "Lost"]
     assert lost_ids and f"lost {len(lost_ids)}" in lost["reply"] and set(lost_ids) <= set(lost["refs"])
     agents = ask("prime_bank", "how many agents are we connected to?")["reply"]
-    assert f"{n['lender_agents']} lender agents" in agents and f"{n['borrower_agents']} borrower agents" in agents
+    assert f"{n['borrower_agents']} borrower agents" in agents and "sealed" in agents and "Lender A" not in agents
 
 
 def test_fallback_never_names_rivals_or_personas():

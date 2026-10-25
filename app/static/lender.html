@@ -1,113 +1,143 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0E1B2E"><title>Lender console · Agent credit exchange</title><link rel="stylesheet" href="/static/lender.css"></head>
-<body class="lender-page">
-<a class="skip" href="#desk">Skip to Ask the desk</a>
-<div class="shell">
-  <aside class="rail" aria-label="Console navigation">
-    <a class="brand" href="/lender"><span class="brandmark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="4.5" cy="6" r="1.6"/><circle cx="19.5" cy="6" r="1.6"/><circle cx="4.5" cy="18" r="1.6"/><circle cx="19.5" cy="18" r="1.6"/><path d="M6 7l3.6 3M18 7l-3.6 3M6 17l3.6-3M18 17l-3.6-3"/></svg></span><span>Credit Exchange<small>Lender console</small></span></a>
-    <nav class="nav" aria-label="Sections">
-      <a href="#desk" data-sec="desk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg><span>Ask the desk</span></a>
-      <a href="#web" data-sec="web"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="2.5"/><circle cx="5" cy="5" r="1.5"/><circle cx="19" cy="6" r="1.5"/><circle cx="6" cy="19" r="1.5"/><circle cx="19" cy="18" r="1.5"/><path d="M6.2 6.2 10 10M17.8 7l-3.9 3.6M7.2 17.8l3-3.8M17.8 16.9l-4-3.2"/></svg><span>Agent web</span></a>
-      <a href="#activity" data-sec="activity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg><span>Referee activity</span></a>
-      <a href="#queue" data-sec="queue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg><span>Applications</span><span class="nav-badge" id="navReview" aria-label="applications needing review">0</span></a>
-    </nav>
-    <div class="rail-picker"><label for="lenderPick">Viewing as</label><select id="lenderPick"></select></div>
-    <div class="rail-spacer"></div>
-    <div class="rail-note"><span class="sim-pill"><span class="dot" aria-hidden="true"></span>Simulated data</span><p>Your agent bids and negotiates inside your books. You see a passport and a hashed id, never a name, SSN or which rival won.</p></div>
-  </aside>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#FFFFFF">
+<title>Lender console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/static/lender.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
 
-  <main class="main" id="main">
-    <header class="top reveal">
-      <div class="top-text">
-        <div class="eyebrow">Lender console · your side of 20 CRS sandbox sessions</div>
-        <h1 id="heroTitle">Lender console</h1>
-        <p id="heroMotive" class="motive">Loading your desk...</p>
+<header class="bar">
+  <a class="mark" href="/lender" aria-label="Lender console home">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5" fill="currentColor"/><circle cx="4" cy="6" r="2" fill="currentColor" opacity=".45"/><circle cx="20" cy="6" r="2" fill="currentColor" opacity=".45"/><circle cx="12" cy="21" r="2" fill="currentColor" opacity=".45"/></svg>
+    <span>Lender console</span>
+  </a>
+  <label class="sr-only" for="lenderPick">Viewing as lender</label>
+  <select id="lenderPick" class="pick" title="Switch lender"></select>
+  <span class="sim" title="Simulated lenders, offers and funding on CRS sandbox data. Fictional people.">Simulated</span>
+  <span class="bar-gap"></span>
+  <button class="btn ghost ask-toggle" id="askToggle" type="button" aria-controls="copilot" aria-expanded="false">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Ask
+  </button>
+</header>
+
+<div class="frame" id="frame">
+  <main id="main" class="main" tabindex="-1">
+    <div class="wrap">
+      <section class="head" aria-labelledby="lenderName">
+        <h1 id="lenderName">Loading…</h1>
+        <p class="muted" id="lenderLine" title="">One lender’s side of every session</p>
+      </section>
+
+      <section class="needs" aria-labelledby="needsTitle">
+        <h2 id="needsTitle" class="label">Needs you</h2>
+        <ul class="needs-list" id="needsList"><li class="muted">Loading…</li></ul>
+      </section>
+
+      <section class="metrics" aria-label="Key numbers" id="metrics"></section>
+
+      <div class="cards">
+        <section class="card net-card" aria-labelledby="netTitle">
+          <div class="card-head net-head">
+            <div class="net-title">
+              <h2 id="netTitle" title="CRS checks flow into each borrower agent, every message passes the referee, then reaches your agent. Other lenders are sealed off. Hover a node.">Agent network</h2>
+              <span class="live-state" id="liveState" data-state="connecting" title="Live updates from the exchange"><i aria-hidden="true"></i><span id="liveText">Connecting…</span></span>
+              <span class="mono muted small" id="lastAgo"></span>
+            </div>
+            <div class="net-tools">
+              <span class="mono muted small" id="netStats"></span>
+              <button class="btn sm" type="button" id="replayBtn" title="Replay the latest negotiation">Replay last</button>
+              <button class="btn sm" type="button" id="simBtn" title="Send a sample borrower (P03) through the market">Simulate</button>
+            </div>
+          </div>
+          <div class="net-cap" aria-live="polite"><span id="netCaption" class="cap-text muted">Waiting for a borrower…</span><span class="pill won" id="wonChip" hidden>You won this loan</span></div>
+          <div class="net-stage" id="netStage">
+            <div class="net-scroll" id="netScroll">
+              <svg id="netSvg" class="net" viewBox="0 0 900 440" role="group" aria-label="Agent network"></svg>
+            </div>
+            <div class="tip" id="netTip" role="status" hidden></div>
+          </div>
+          <ul class="legend" aria-label="Legend">
+            <li><i class="dot won"></i>Won</li>
+            <li><i class="dot offered"></i>Offered</li>
+            <li><i class="dot grey"></i>Declined / lost</li>
+            <li><i class="dot blocked"></i>Stopped at gate</li>
+            <li><i class="line flag"></i>Flagged check</li>
+          </ul>
+        </section>
+
+        <section class="card pipe-card" aria-labelledby="pipeTitle">
+          <div class="card-head">
+            <h2 id="pipeTitle" title="Borrower agents in the exchange, down to loans you won.">Pipeline</h2>
+          </div>
+          <div class="pipe-body">
+            <div class="funnel" id="funnel"></div>
+            <div>
+              <h3 class="label sub-label" title="Latest messages the referee checked">Live activity</h3>
+              <ol class="feed" id="feed"></ol>
+            </div>
+          </div>
+        </section>
       </div>
-      <div class="top-actions">
-        <span class="sim-pill"><span class="dot" aria-hidden="true"></span>Simulated data</span>
-        <button class="btn ghost" id="refresh" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9A7 7 0 0 1 18 6l2 2M4 16l2 2a7 7 0 0 0 12.4-3"/></svg>Refresh</button>
-      </div>
-    </header>
 
-    <p class="brief reveal" id="brief" aria-live="polite">Loading...</p>
-
-    <div class="room">
-      <section id="desk" class="panel desk reveal" aria-labelledby="deskTitle">
-        <div class="panel-head">
-          <div><h2 id="deskTitle">Ask the desk</h2><p class="sub">Your analyst agent reads exactly what this console shows. It explains; the referee's code decides.</p></div>
-          <button class="icon-btn" id="chatReset" type="button" aria-label="Start a new conversation" title="New conversation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5"/><path d="M4 4v4.5h4.5"/></svg></button>
+      <section class="card table-card" id="apps" aria-labelledby="appsTitle">
+        <div class="card-head">
+          <h2 id="appsTitle">Applications</h2>
         </div>
-        <div class="chat-log" id="chatLog" role="log" aria-live="polite" aria-label="Conversation with your desk agent"></div>
-        <div class="suggest" id="suggest" aria-label="Suggested questions"></div>
-        <form class="composer" id="composer" autocomplete="off">
-          <label for="chatInput" class="sr-only">Ask your desk agent</label>
-          <input id="chatInput" placeholder="Ask about deals, reviews, agents, pricing..." maxlength="600">
-          <button class="btn primary" type="submit" id="chatSend" aria-label="Send question"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="send-label">Ask</span></button>
-        </form>
+        <div class="toolbar">
+          <div class="tabs" role="tablist" aria-label="Filter applications" id="tabs"></div>
+          <label class="search"><span class="sr-only">Search applications</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 5 5"/></svg>
+            <input id="search" type="search" placeholder="Search ID" autocomplete="off">
+          </label>
+        </div>
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr>
+              <th scope="col">ID</th>
+              <th scope="col" class="num">Amount</th>
+              <th scope="col" class="c-risk">Risk</th>
+              <th scope="col">Outcome</th>
+              <th scope="col" class="num c-rate" title="Your opening rate → final rate">Rate</th>
+            </tr></thead>
+            <tbody id="rows"></tbody>
+          </table>
+        </div>
+        <p class="muted small foot" id="rowCount"></p>
       </section>
 
-      <section id="web" class="panel web reveal" aria-labelledby="webTitle">
-        <div class="panel-head">
-          <div><h2 id="webTitle">Agent web</h2><p class="sub" id="webSub">Every agent your agent met in the exchange.</p></div>
-          <span class="live-tag" id="webSource">Loading</span>
-        </div>
-        <div class="web-stats" id="webStats"></div>
-        <div class="web-stage" id="webStage">
-          <svg id="webSvg" role="group" aria-label="Network of agents"></svg>
-          <div class="web-tip" id="webTip" role="status" hidden></div>
-        </div>
-        <div class="web-select" id="webSelect" hidden></div>
-        <div class="legend" id="webLegend">
-          <span><i class="sw won"></i>Won</span><span><i class="sw offered"></i>Offered</span><span><i class="sw lost"></i>Lost</span><span><i class="sw declined"></i>You declined</span><span><i class="sw gate"></i>Stopped at gate</span><span class="legend-note">Line weight = messages</span>
-        </div>
-        <details class="web-list"><summary>List view of all agents</summary><div class="table-wrap"><table><thead><tr><th scope="col">Agent</th><th scope="col">Type</th><th scope="col">Messages</th><th scope="col">Outcome</th></tr></thead><tbody id="webListRows"></tbody></table></div></details>
-      </section>
+      <p class="fine muted small" title="The console never receives a name, SSN, contact details or persona id, and never sees other lenders.">Hashed IDs only · sealed market · simulated</p>
     </div>
-
-    <div id="activity" class="activity">
-      <section class="panel ticker reveal" aria-labelledby="tickerTitle">
-        <div class="panel-head">
-          <div><h2 id="tickerTitle">Referee ticker</h2><p class="sub">Every agent message passes the referee's code before anyone sees it.</p></div>
-          <button class="icon-btn" id="tickerToggle" type="button" aria-label="Pause ticker" aria-pressed="false"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button>
-        </div>
-        <ol class="tick-list" id="tickList" aria-label="Recent referee checks"></ol>
-        <p class="panel-foot" id="tickerFoot">Replay of the recorded sandbox sessions.</p>
-      </section>
-      <section class="panel flow reveal" aria-labelledby="flowTitle">
-        <div class="panel-head">
-          <div><h2 id="flowTitle">Where applications went</h2><p class="sub">From every borrower agent in the exchange to your outcomes. Click a stage to filter.</p></div>
-        </div>
-        <div class="flow-body" id="flowBody"></div>
-      </section>
-    </div>
-
-    <div id="queue" class="work">
-      <section class="panel queue reveal" aria-labelledby="queueTitle">
-        <div class="panel-head">
-          <div><h2 id="queueTitle">Application queue</h2><p class="sub">Every session your agent took part in. You see the passport, never the person.</p></div>
-        </div>
-        <div class="filters" role="toolbar" aria-label="Filter applications">
-          <button class="filter active" type="button" data-filter="All" aria-pressed="true">All <span id="fAll">0</span></button>
-          <button class="filter" type="button" data-filter="Review" aria-pressed="false">Needs review <span id="fReview">0</span></button>
-          <button class="filter" type="button" data-filter="Offered" aria-pressed="false">Offered <span id="fOffered">0</span></button>
-          <button class="filter" type="button" data-filter="Won" aria-pressed="false">Won <span id="fWon">0</span></button>
-          <button class="filter" type="button" data-filter="Lost" aria-pressed="false">Lost <span id="fLost">0</span></button>
-          <button class="filter" type="button" data-filter="Declined" aria-pressed="false">Declined / no deal <span id="fDeclined">0</span></button>
-          <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><input id="search" type="search" placeholder="Search id or band" aria-label="Search applications"></div>
-        </div>
-        <div class="table-wrap"><table class="queue-table"><thead><tr><th scope="col">Application</th><th scope="col">Request</th><th scope="col" class="c-risk">Risk</th><th scope="col" class="c-stage">Outcome</th><th scope="col">Your rate</th><th scope="col">Status</th></tr></thead><tbody id="caseRows"></tbody></table></div>
-        <div class="table-foot"><span id="rowCount">Loading...</span><span>Select a row for detail</span></div>
-      </section>
-      <aside id="caseDetail" class="panel detail reveal" aria-label="Application detail" tabindex="-1"></aside>
-    </div>
-
-    <p class="footnote">Built from the CRS sandbox sessions (saved responses, rule-based agents). Simulated lenders, offers and funding; fictional people. The console never receives a name, SSN, contact details or persona id, and rival lenders appear only as Lender A to E.</p>
   </main>
+
+  <aside class="copilot" id="copilot" aria-label="Desk agent" hidden>
+    <div class="cp-resize" id="cpResize" role="separator" aria-orientation="vertical" aria-controls="copilot" aria-label="Resize desk agent" aria-valuemin="300" aria-valuemax="720" aria-valuenow="380" tabindex="0" title="Drag to resize · double-click to reset"><span class="grip" aria-hidden="true"></span></div>
+    <div class="cp-head">
+      <div class="cp-id"><span class="cp-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="currentColor"/></svg></span><b>Desk agent</b><span class="badge" id="cpSource" title="Who wrote the last answer">Rule-based</span></div>
+      <div class="cp-actions">
+        <button class="icon-btn" id="cpReset" type="button" aria-label="New conversation" title="New conversation"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.4-5.7L4 8.5M4 4v4.5h4.5"/></svg></button>
+        <button class="icon-btn" id="cpClose" type="button" aria-label="Close desk agent" title="Close"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+      </div>
+    </div>
+    <div class="cp-log" id="cpLog" role="log" aria-live="polite" aria-label="Conversation"></div>
+    <div class="cp-chips" id="cpChips" aria-label="Suggested questions"></div>
+    <form class="cp-form" id="cpForm" autocomplete="off">
+      <label for="cpInput" class="sr-only">Ask the desk agent</label>
+      <input id="cpInput" placeholder="Ask about deals or an APP id" maxlength="600">
+      <button class="btn primary icon-only" type="submit" id="cpSend" aria-label="Send"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+    </form>
+  </aside>
 </div>
-<a class="ask-fab" href="#desk" id="askFab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Ask the desk</a>
+
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" role="dialog" aria-modal="false" aria-labelledby="drTitle" hidden tabindex="-1"></aside>
+
+<button class="fab" id="fab" type="button" aria-controls="copilot"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Ask</button>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 <script src="/static/lender-desk.js"></script>
-<script src="/static/lender-web.js"></script>
-<script src="/static/lender-activity.js"></script>
 <script src="/static/lender.js"></script>
 </body></html>

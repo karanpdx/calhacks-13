@@ -175,68 +175,105 @@ def _what(d):
     return t.capitalize()
 
 
+
+# CRS products the gate called for each applicant, and whether one of them raised a finding. Lenders only learn that a
+# check ran and whether it flagged; never the data behind it.
+CHECKS = {"tu": "TransUnion", "efx": "Equifax", "exp": "Experian", "idv": "Identity", "fraudfinder": "Fraud",
+          "reverse": "Contact"}
+
+
+def _checks(ex):
+    rep = ex.report or {}
+    src = " ".join(str(f.get("source") or "") for f in rep.get("findings", [])).lower()
+    src = src.replace("tri-bureau", "transunion equifax experian")
+    hit = {"idv": "identity verification" in src, "fraudfinder": "fraudfinder" in src,
+           "reverse": "accurateappend" in src or "reverse" in src,
+           "tu": "transunion" in src.replace("transunion identity verification", "") or "credit report" in src,
+           "efx": "equifax" in src or "credit report" in src, "exp": "experian" in src or "credit report" in src}
+    return [{"product": c, "label": CHECKS[c], "flag": bool(hit.get(c))}
+            for c in rep.get("products_called", []) if c in CHECKS]
+
+
 def network(lender_id):
-    """The whole market as a graph, seen from this lender: its agent, five anonymous rival agents ("Lender A".."E",
-    stable order) and the 20 borrower agents (hashed ids). Edges are lender<->borrower conversations; gate-blocked
-    applicants are nodes with no edges. Rivals appear as counts only, never by name."""
+    """This lender's agent and the borrower agents it talked to, nothing else. The market is sealed: a lender never
+    sees other lenders (not even anonymously), how many there are, or their messages; it sees only its own
+    conversations. Gate-blocked applicants are nodes with no edges (they never reached any lender)."""
     q = queue(lender_id)   # raises KeyError for an unknown lender
-    rivals = [i for i in MARKET if i != lender_id]
-    node_of = {lender_id: "you", **{r: f"rival-{chr(65 + k)}" for k, r in enumerate(rivals)}}
     cases = {c["id"]: c for c in q["cases"]}
-    lenders = {i: {"id": node_of[i], "kind": "you" if i == lender_id else "rival",
-                   "label": POLICIES[i][0] if i == lender_id else f"Lender {node_of[i][-1]}",
-                   "messages": 0, "deals": 0} for i in [lender_id, *rivals]}
+    you = {"id": "you", "kind": "you", "label": POLICIES[lender_id][0], "messages": 0, "deals": 0}
     applicants, edges, feed = [], [], []
-    stats = {"borrower_agents": len(PERSONAS), "lender_agents": len(MARKET), "admitted": 0, "blocked_at_gate": 0,
+    stats = {"borrower_agents": len(PERSONAS), "admitted": 0, "blocked_at_gate": 0,
              "messages_checked": 0, "messages_blocked": 0, "deals": 0}
     order = 0   # one running order across every session in replay order, for "talked to recently"
     for ex in sessions():
         app = _app_id(ex.persona, lender_id)
         bid = ex.borrower.id
+        won = bool(ex.deal and ex.deal["lender"] == lender_id)
         node = {"id": app, "kind": "applicant", "label": app, "risk": None, "band": None, "status": "Blocked",
-                "messages": 0, "deals": int(bool(ex.deal))}
+                "messages": 0, "deals": int(won), "checks": _checks(ex)}
         if ex.admitted:
             c = cases[app]
             node.update(risk=c["risk"], band=c["band"], status=c["status"])
             stats["admitted"] += 1
         else:
             stats["blocked_at_gate"] += 1
-        stats["deals"] += bool(ex.deal)
-        if ex.deal and ex.deal["lender"] in lenders:
-            lenders[ex.deal["lender"]]["deals"] += 1
-        per = {}
+        stats["deals"] += won
+        you["deals"] += won
+        edge = {"messages": 0, "blocked": 0, "last_seq": 0, "offered": False}
         for e in ex.events:
             if e["kind"] != "message":
                 continue
             order += 1
             d, ok = e["data"], e["verdict"]["ok"]
+            if not (e["actor"] == lender_id or (e["actor"] == bid and d.get("to") == lender_id)):
+                continue   # sealed market: other lenders' conversations are invisible here
             stats["messages_checked"] += 1
             stats["messages_blocked"] += not ok
-            if e["actor"] == bid:
-                node["messages"] += 1
-            elif e["actor"] in lenders:
-                lenders[e["actor"]]["messages"] += 1
-            lid = e["actor"] if e["actor"] in lenders else d.get("to") if e["actor"] == bid else None
-            if lid not in lenders:
-                continue   # broadcasts (the borrower's intent, a walk-away) aren't a conversation with one lender
-            edge = per.setdefault(lid, {"messages": 0, "blocked": 0, "last_seq": 0, "offered": False})
+            (you if e["actor"] == lender_id else node)["messages"] += 1
             edge["messages"] += 1
             edge["blocked"] += not ok
             edge["last_seq"] = order
-            edge["offered"] |= d["type"] == "OFFER" and ok and e["actor"] == lid
-            frm, to = (node_of[lid], app) if e["actor"] == lid else (app, node_of[lid])
-            if d["type"] == "ACCEPT" and lid != lender_id:
-                continue   # would show which (anonymous) rival closed the deal: lenders never learn who won
+            edge["offered"] |= d["type"] == "OFFER" and ok and e["actor"] == lender_id
+            frm, to = ("you", app) if e["actor"] == lender_id else (app, "you")
             feed.append({"from": frm, "to": to, "what": _what(d), "verdict": "allowed" if ok else "blocked"})
-        for lid, edge in per.items():
-            # who won is shown on this lender's own edges only; a rival's wins are a count on its node, never which
-            # applicant it took (so "you lost APP-x" never points at the rival that won it)
-            mine, won = lid == lender_id, bool(ex.deal and ex.deal["lender"] == lid)
-            kind = "won" if won and mine else "lost" if mine and edge["offered"] and ex.deal \
-                else "offered" if edge["offered"] \
-                else "declined"
-            edges.append({"source": node_of[lid], "target": app, "messages": edge["messages"], "kind": kind,
+        if edge["messages"]:
+            kind = "won" if won else "lost" if edge["offered"] and ex.deal else "offered" if edge["offered"]                 else "declined"
+            edges.append({"source": "you", "target": app, "messages": edge["messages"], "kind": kind,
                           "last_seq": edge["last_seq"], "blocked": edge["blocked"]})
         applicants.append(node)
-    return {"lender": {"id": lender_id, "name": POLICIES[lender_id][0]},
-            "nodes": list(lenders.values()) + applicants, "edges": edges, "stats": stats, "recent": feed[-RECENT:]}
+    return {"lender": {"id": lender_id, "name": POLICIES[lender_id][0]}, "sealed": True,
+            "sources": [{"product": k, "label": v} for k, v in CHECKS.items()],
+            "nodes": [you] + applicants, "edges": edges, "stats": stats, "recent": feed[-RECENT:]}
+
+
+# ---------------------------------------------------------------- live: the one session running right now
+def snapshot(ex):
+    """What the live feed keeps of a finished (or awaiting-approval) session: the persona, whether it got past the
+    gate, the winning lender, and its messages in order. Kept server-side; `live()` maps it per lender."""
+    msgs = [{"actor": e["actor"], "to": e["data"].get("to"), "type": e["data"]["type"], "ok": e["verdict"]["ok"],
+             "data": {k: e["data"].get(k) for k in ("type", "terms", "reason_code")}}
+            for e in ex.events if e["kind"] == "message"]
+    return {"persona": ex.persona, "admitted": ex.admitted, "borrower": ex.borrower.id, "checks": _checks(ex),
+            "deal_lender": ex.deal["lender"] if ex.deal else None, "messages": msgs}
+
+
+def live(lender_id, snap):
+    """One live session from this lender's side, as a timeline of edges to light up in order: only messages between
+    this lender's agent and the borrower's agent. Other lenders are invisible (sealed market); the borrower's opening
+    ask is shown as reaching this lender."""
+    if lender_id not in MARKET:
+        raise KeyError(lender_id)
+    app = _app_id(snap["persona"], lender_id)
+    steps = []
+    for m in snap["messages"]:
+        mine = m["actor"] == lender_id or (m["actor"] == snap["borrower"] and m["to"] == lender_id)
+        if m["actor"] == snap["borrower"] and m["type"] == "INTENT":
+            steps.append({"from": app, "to": "you", "type": "INTENT", "verdict": "allowed",
+                          "what": "Asked for a loan"})
+        elif mine:
+            frm, to = ("you", app) if m["actor"] == lender_id else (app, "you")
+            steps.append({"from": frm, "to": to, "type": m["type"], "verdict": "allowed" if m["ok"] else "blocked",
+                          "what": _what(m["data"])})
+    won = snap["deal_lender"] == lender_id
+    return {"applicant": app, "admitted": snap["admitted"], "checks": snap.get("checks", []), "steps": steps,
+            "outcome": "won" if won else ("closed" if snap["deal_lender"] else "open")}

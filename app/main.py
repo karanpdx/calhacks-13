@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import re
+import time
 import secrets
 import threading
 from collections import OrderedDict
@@ -218,6 +219,7 @@ def _presentation_note(ex, note, lang):
 
 
 def _respond(ex, scenario, note, sid=None, lang="en"):
+    _publish_live(ex)
     return {"notice": i18n.localized("notice", lang), "scenario": scenario,
             "live_note": _presentation_note(ex, note, lang), "data_source": ex.source.name,
             "session_id": sid, "lang": lang, **ex.result(), **_views(ex, lang)}
@@ -317,6 +319,7 @@ async def exchange_stream(persona: str, scenario: str = "normal", amount: float 
     async def run():
         try:
             r = await asyncio.to_thread(ex.run)
+            _publish_live(ex)
             views = await asyncio.to_thread(_views, ex, lang)
             q.put_nowait(("result", {**{k: v for k, v in r.items() if k != "events"}, **views,
                                      "live_note": _presentation_note(ex, note, lang), "data_source": ex.source.name,
@@ -494,6 +497,66 @@ def lender_ask(lender_id: str, req: AskRequest):
         return {"notice": NOTICE, **lender_assistant.ask(lender_id, [m.model_dump() for m in req.messages])}
     except KeyError:
         raise HTTPException(404, f"unknown lender {lender_id!r}")
+
+
+# The one session running right now, for the lender console's agent web: every session a borrower runs (phone,
+# demo, API) replaces it. In memory, last session only; each lender sees only its own conversation in it (hashed
+# applicant id; other lenders never appear). Demo convenience, like /api/pair.
+_LIVE = {"seq": 0, "snap": None, "t": 0.0}
+
+
+def _publish_live(ex):
+    try:
+        from exchange import lender_view
+        _LIVE.update(seq=_LIVE["seq"] + 1, snap=lender_view.snapshot(ex), t=time.time())
+    except Exception:
+        log.exception("publishing the live session failed")
+
+
+@app.get("/api/lender/{lender_id}/live")
+def lender_live(lender_id: str, after: int = 0):
+    """The latest borrower session from this lender's side, as edges to light up in order: {seq, at, session:
+    {applicant, admitted, checks, steps:[{from, to, type, verdict, what}], outcome}}. Only `seq` until a new session arrives
+    after `after`. Poll it (every second or two)."""
+    from exchange import lender_view
+    if lender_id not in lender_view.MARKET:
+        raise HTTPException(404, f"unknown lender {lender_id!r}")
+    if not _LIVE["snap"] or _LIVE["seq"] <= after:
+        return {"seq": _LIVE["seq"]}
+    return {"seq": _LIVE["seq"], "at": _LIVE["t"], "session": lender_view.live(lender_id, _LIVE["snap"])}
+
+
+@app.get("/api/lender/{lender_id}/live/stream")
+async def lender_live_stream(lender_id: str, request: Request, after: int = -1, once: int = 0):
+    """Server-sent events: `session` (same JSON as /live) the moment a borrower runs a new session, plus `ping`
+    every 15s to keep the connection open. `after` = the seq the page already has (-1: only new sessions).
+    `once=1` closes after the first session (tests)."""
+    from exchange import lender_view
+    if lender_id not in lender_view.MARKET:
+        raise HTTPException(404, f"unknown lender {lender_id!r}")
+    seen = _LIVE["seq"] if after < 0 else after
+
+    async def events():
+        nonlocal seen
+        yield _sse("hello", {"seq": seen})
+        idle = 0.0
+        while True:
+            if await request.is_disconnected():
+                return
+            if _LIVE["snap"] and _LIVE["seq"] > seen:
+                seen = _LIVE["seq"]
+                yield _sse("session", {"seq": seen, "at": _LIVE["t"],
+                                       "session": lender_view.live(lender_id, _LIVE["snap"])})
+                if once:
+                    return
+            await asyncio.sleep(0.2)
+            idle += 0.2
+            if idle >= 15:
+                idle = 0.0
+                yield _sse("ping", {"seq": seen})
+
+    return StreamingResponse(events(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
 
 @app.get("/lender")

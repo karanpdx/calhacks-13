@@ -62,7 +62,7 @@
     }
     if(/agent|connect|network|web|talk|rival|competit/.test(q)){
       const s=F.net.stats||{};
-      return {reply:`The exchange has ${s.borrower_agents??'?'} borrower agents and ${s.lender_agents??'?'} lender agents including yours. ${s.admitted??F.cases.length} borrower agents passed the CRS gate and reached you; ${s.blocked_at_gate??F.s.blocked_at_gate} were stopped first. Rival lenders appear only as Lender A to E.`,refs:[]};
+      return {reply:`${s.admitted??F.cases.length} borrower agents passed the CRS gate and reached you; ${s.blocked_at_gate??F.s.blocked_at_gate} were stopped first. The market is sealed: you never see other lenders or their conversations.`,refs:[]};
     }
     if(/volume|target|booked|goal|month/.test(q)){
       const v=F.L.volume||{};
