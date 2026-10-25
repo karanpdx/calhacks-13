@@ -77,3 +77,18 @@ uvicorn app.main:app --reload                 # http://127.0.0.1:8000
 - Python 3, small modules, plain functions; no new heavy dependencies without asking the team.
 - Work on branch `decision-agent` (or a feature branch off it) and open PRs to `main`. Pull before you push.
 - When you change behaviour, add or update a test in `tests/`.
+
+## gstack (recommended)
+
+This project uses [gstack](https://github.com/garrytan/gstack) for AI-assisted workflows.
+Install it for the best experience:
+
+```bash
+git clone --depth 1 https://github.com/garrytan/gstack.git ~/.claude/skills/gstack
+cd ~/.claude/skills/gstack && ./setup --team
+```
+
+`setup` needs [bun](https://bun.sh) on your PATH (`npm i -g bun` works). On Windows, re-run `./setup` after every gstack update.
+
+Skills like /qa, /ship, /review, /investigate, and /browse become available after install.
+Use /browse for all web browsing (Aside first, the bundled gstack browser as fallback). Use ~/.claude/skills/gstack/... for gstack file paths.
