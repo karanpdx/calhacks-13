@@ -161,7 +161,8 @@ def test_claude_review_falls_back_to_rules_on_failure():
 
 def test_fee_detector_ignores_no_fee_wording():
     from exchange.watchdog import FEE_WORD, NO_FEE
-    for text in ("No origination fee.", "Zero fees, 8.5%.", "We're processing your request: 8.5%."):
+    for text in ("No origination fee.", "Zero fees, 8.5%.", "We're processing your request: 8.5%.",
+                 "Origination fee is waived.", "Fees have been waived.", "fee waived"):
         assert not (FEE_WORD.search(text) and not NO_FEE.search(text)), text
     assert FEE_WORD.search("A $49 processing fee applies.") and not NO_FEE.search("A $49 processing fee applies.")
 

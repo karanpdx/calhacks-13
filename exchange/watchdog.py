@@ -30,7 +30,7 @@ PERSONAL = re.compile(r"\b(ssn|social security(?: number)?|date of birth|dob|bir
                       r"bank (?:login|password|credentials|username)|online banking (?:login|password))\b", re.I)
 SAME_DEAL = re.compile(r"\b(same (?:deal|terms|offer|rate)|unchanged|nothing(?: has)? changed|no changes?)\b", re.I)
 FEE_WORD = re.compile(r"\b(fees?|service charges?|closing costs?)\b", re.I)
-NO_FEE = re.compile(r"(fee waived|waived? (?:the |your )?fee|(?:no|zero) (?:\w+ )?fees?|without (?:a|any) (?:\w+ )?fee|"
+NO_FEE = re.compile(r"(fees? (?:is |are |has been |have been |will be )?waived|waived? (?:the |your )?fee|(?:no|zero) (?:\w+ )?fees?|without (?:a|any) (?:\w+ )?fee|"
                     r"fee-free|\$0 (?:\w+ )?fee)", re.I)
 PERCENT = re.compile(r"(\d+(?:\.\d+)?)\s*(?:%|percent)", re.I)
 LIMIT_WORD = re.compile(r"\b(limit|max(?:imum)?|cap|ceiling|budget|up to|no more than|at most|highest)\b", re.I)
