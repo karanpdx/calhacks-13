@@ -3,3 +3,7 @@ calhacks13-*.json
 .env
 __pycache__/
 *.pyc
+.venv/
+venv/
+.pytest_cache/
+.DS_Store
