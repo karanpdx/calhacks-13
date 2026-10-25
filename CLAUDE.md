@@ -60,6 +60,9 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
     decisions/prices must not move), `proxy_check()`, `consistency()` (twins), `disparity()` thin/no-file vs others
   - `reconcile.py`: bureau reconciliation: an item one bureau reports while another bureau with a file doesn't is
     "unconfirmed"; reconciled counts = what two bureaus agree on
+  - `adversary.py`: red team: `ScammerLender` (SwiftLend Express), a Claude agent told to scam the borrower's
+    agent, picking tactics from a fixed menu each move (fixed script without a key); `report(ex)` = each attempt
+    with the referee verdict and watchdog flags (the API's `red_team` field). Scenario `red_team`
   - `borrower.py`: `RuleBorrower` stand-in agent (+ `GullibleBorrower` for the injection scenario)
   - `scenarios.py`: `normal`, `bait_switch` (worse terms + forged acceptance), `injection` (hidden instructions),
     `data_grab` (lender asks for SSN/DOB, undeclared fee), `drift` (borrower takes a costlier offer, leaks max APR)
@@ -86,7 +89,7 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
 ## Commands
 ```
 pip install -r requirements.txt
-pytest                                        # 189 offline tests
+pytest                                        # 194 offline tests
 python -m exchange.demo P01                   # one market session in the terminal
 python -m exchange.demo P01 --scenario injection
 python -m exchange.demo P03 --max-apr 16 --json

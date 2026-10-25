@@ -25,6 +25,10 @@ INJECTION = [re.compile(p, re.I) for p in (
 PRESSURE = [re.compile(p, re.I) for p in (
     r"\bpre-?approved\b",
     r"\baccept\b[^.]{0,30}\b(immediately|right now|now)\b",
+    r"\b(only|just) (?:for )?(?:a few|\d+) (minutes|hours)\b",
+    r"\b(expires?|ends?|gone|disappears?)\b[^.]{0,20}\b(soon|today|tonight|minutes?|hours?)\b",
+    r"\b(act|respond|reply|decide) (now|fast|quickly|immediately|soon)\b",
+    r"\blimited[- ]time\b",
 )]
 PERSONAL = re.compile(r"\b(ssn|social security(?: number)?|date of birth|dob|birth ?date|"
                       r"bank (?:login|password|credentials|username)|online banking (?:login|password))\b", re.I)

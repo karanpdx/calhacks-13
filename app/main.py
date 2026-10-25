@@ -119,6 +119,7 @@ from exchange.referee import Exchange  # noqa: E402
 from exchange.scenarios import build as build_scenario, SCENARIOS  # noqa: E402
 from exchange.watchdog import ClaudeReview  # noqa: E402
 from exchange import hood, person as person_view  # noqa: E402
+from exchange.adversary import report as red_team_report  # noqa: E402
 
 
 @app.get("/api/exchange/scenarios")
@@ -130,7 +131,7 @@ def _views(ex):
     """The two readable views of a finished session: the person's screen and the judges' "under the hood" panel.
     A bug in either never breaks the session result itself."""
     out = {}
-    for key, build in (("person", person_view.build), ("under_the_hood", hood.build)):
+    for key, build in (("person", person_view.build), ("under_the_hood", hood.build), ("red_team", red_team_report)):
         try:
             out[key] = build(ex)
         except Exception:

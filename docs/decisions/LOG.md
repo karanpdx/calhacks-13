@@ -2,6 +2,10 @@
 
 Important decisions, newest first. Format and rules: [PROCESS.md](PROCESS.md).
 
+## 2026-10-25: Red team: a Claude scammer lender (`red_team` scenario)
+SwiftLend Express is played by Claude, told to scam the borrower's agent and choose its own tactics each move; it goes through the unchanged referee and watchdog, and `report(ex)` pairs each attempt with what caught it. Its first live runs found a gap ("held for only a few minutes" wasn't flagged), so the pressure detector gained urgency patterns.
+Why: an unscripted attacker is a stronger proof than scripted ones. Gave up: it's the one lender allowed to ignore its books (attacking is its job), and without a key it plays a fixed script.
+
 ## 2026-10-25: The person approves the loan, not their agent
 With `approval=1` (used by the /demo chat) the agent's ACCEPT is only a recommendation; the referee settles only when the person approves that exact offer (`POST /api/session/{id}/approve`, once, inside the mandate) or ends with no deal on decline.
 Why: an agent should never sign a loan for someone, and the roadmap listed the missing approval as the first gap. Gave up: held sessions live in server memory (a restart drops them), and the form path and exchange.html still auto-accept.
