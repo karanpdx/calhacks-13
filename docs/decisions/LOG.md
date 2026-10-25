@@ -2,6 +2,9 @@
 
 Important decisions, newest first. Format and rules: [PROCESS.md](PROCESS.md).
 
+## 2026-10-24: Live CRS mode with per-product fallback
+`?live=1` calls the CRS sandbox and, if one product call fails, uses that product's saved sample and says so on screen. Why: the live demo is CRS's one hard rule, and a flaky call at the table must not break it. Gave up: a run can be partly live; the label says which.
+
 ## 2026-10-24: Negotiation engine: lender books and a sealed market
 Lenders price from their own books (risk-based break-even, floor, private volume/risk motives) and never see rivals; the referee passes only a verified anonymous quote the borrower cites. Why: real negotiation with no fixed "2 points off" rule and no room to collude. Gave up: parameters are illustrative, not calibrated.
 

@@ -19,7 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from agent import scorecard as SC
 from agent.explain import explain
 from agent.screen import screen
-from agent.sources import LiveSource, SampleSource
+from agent.sources import FallbackSource, LiveSource, SampleSource
 
 STATIC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 NOTICE = "Data is from the CRS sandbox: fictional test personas, not real people."
@@ -148,14 +148,25 @@ def _exchange(persona, scenario, amount, min_amount, max_apr, min_term, max_term
     if live:
         if os.environ.get("CRS_USER") and os.environ.get("CRS_PASS"):
             try:
-                source = LiveSource()
+                source = FallbackSource(LiveSource())
             except Exception as e:
                 note = f"Live CRS login failed ({type(e).__name__}); showing saved samples instead."
         else:
             note = "Live mode needs CRS_USER and CRS_PASS in the environment; showing saved samples instead."
     ex = Exchange(persona, mandate, source, lenders, borrower, today=SC.AS_OF if source.name == "samples" else None,
                   watchdog=bool(watchdog), review=ClaudeReview() if review else None)
+    ex.crs_source = source
     return ex, note
+
+
+def _live_note(ex, note):
+    """After a session: say which CRS products fell back to saved samples during a live run."""
+    fb = getattr(getattr(ex, "crs_source", None), "fallbacks", None)
+    if not fb:
+        return note
+    names = sorted({f["product"] for f in fb})
+    extra = f"Live CRS sandbox used; {len(names)} product(s) fell back to saved samples: {', '.join(names)}."
+    return f"{note} {extra}" if note else extra
 
 
 @app.get("/api/exchange/{persona}")
@@ -171,7 +182,8 @@ def exchange(persona: str, scenario: str = "normal", amount: float = 5000, min_a
     ex, note = _exchange(persona, scenario, amount, min_amount, max_apr, min_term, max_term, autopay, max_fee, live,
                          watchdog, review, max_payment)
     r = ex.run()
-    return {"notice": NOTICE, "scenario": scenario, "live_note": note, **r, **_views(ex)}
+    return {"notice": NOTICE, "scenario": scenario, "live_note": _live_note(ex, note), "data_source": ex.source.name,
+            **r, **_views(ex)}
 
 
 def _sse(event, data):
@@ -213,7 +225,8 @@ async def exchange_stream(persona: str, scenario: str = "normal", amount: float 
         try:
             r = await asyncio.to_thread(ex.run)
             views = await asyncio.to_thread(_views, ex)
-            q.put_nowait(("result", {**{k: v for k, v in r.items() if k != "events"}, **views}))
+            q.put_nowait(("result", {**{k: v for k, v in r.items() if k != "events"}, **views,
+                                     "live_note": _live_note(ex, note), "data_source": ex.source.name}))
         except Exception as e:  # the type only: never leak credentials or vendor bodies into the stream
             q.put_nowait(("error", {"error": type(e).__name__, "note": "The session stopped; nothing was settled."}))
         q.put_nowait(None)
@@ -222,6 +235,7 @@ async def exchange_stream(persona: str, scenario: str = "normal", amount: float 
         task = asyncio.create_task(run())
         try:
             yield _sse("meta", {"notice": NOTICE, "persona": persona, "scenario": scenario, "live_note": note,
+                                "data_source": ex.source.name,
                                 "mandate": {**vars(ex.mandate), "allow": sorted(ex.mandate.allow)}})
             while (item := await q.get()) is not None:
                 yield _sse(*item)
