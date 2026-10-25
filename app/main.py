@@ -9,12 +9,16 @@ import json
 import logging
 import os
 import re
+import secrets
+import threading
+from collections import OrderedDict
 from functools import lru_cache
 from typing import Optional
 
 from fastapi import Body, FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
 
 from agent import scorecard as SC
 from agent.explain import explain
@@ -136,7 +140,7 @@ def _views(ex):
 
 
 def _exchange(persona, scenario, amount, min_amount, max_apr, min_term, max_term, autopay, max_fee, live, watchdog,
-              review, max_payment=None):
+              review, max_payment=None, approval=0):
     """Build one market session from query params. Returns (Exchange, live_note)."""
     _row(persona)
     if scenario not in SCENARIOS:
@@ -155,8 +159,8 @@ def _exchange(persona, scenario, amount, min_amount, max_apr, min_term, max_term
         else:
             note = "Live mode needs CRS_USER and CRS_PASS in the environment; showing saved samples instead."
     ex = Exchange(persona, mandate, source, lenders, borrower, today=SC.AS_OF if source.name == "samples" else None,
-                  watchdog=bool(watchdog), review=ClaudeReview() if review else None)
-    ex.crs_source = source
+                  watchdog=bool(watchdog), review=ClaudeReview() if review else None, require_approval=bool(approval))
+    ex.crs_source, ex.scenario = source, scenario
     return ex, note
 
 
@@ -173,18 +177,78 @@ def _live_note(ex, note):
 @app.get("/api/exchange/{persona}")
 def exchange(persona: str, scenario: str = "normal", amount: float = 5000, min_amount: float = 3000,
              max_apr: float = 18.0, min_term: int = 12, max_term: int = 48, autopay: int = 1, max_fee: float = 0,
-             live: int = 0, watchdog: int = 1, review: int = 0, max_payment: Optional[float] = None):
+             live: int = 0, watchdog: int = 1, review: int = 0, max_payment: Optional[float] = None, approval: int = 0):
     """Run one market session. Returns the full event log (gate, passport, every message with the referee's verdict,
     settlement, disclosure), plus `person` (the borrower's plain-English screen: deal, no deal or blocked) and
     `under_the_hood` (the judges' panel: plain-words feed, exclusions, which CRS product drove each decision).
     `max_payment` caps the monthly payment (the main limit for people who don't know APR; max_apr is advanced).
     `watchdog=1` (default) adds flag-only watchdog events; `review=1` adds an advisory Claude pass if ANTHROPIC_API_KEY
-    is set (otherwise the rule-based flags stand)."""
+    is set (otherwise the rule-based flags stand). `approval=1`: the agent's pick is only a recommendation; the result
+    has `awaiting_approval` and a `session_id`, and nothing settles until the person calls
+    POST /api/session/{session_id}/approve (or /decline)."""
     ex, note = _exchange(persona, scenario, amount, min_amount, max_apr, min_term, max_term, autopay, max_fee, live,
-                         watchdog, review, max_payment)
-    r = ex.run()
+                         watchdog, review, max_payment, approval)
+    ex.run()
+    return _respond(ex, scenario, note, _hold(ex, note))
+
+
+def _respond(ex, scenario, note, sid=None):
     return {"notice": NOTICE, "scenario": scenario, "live_note": _live_note(ex, note), "data_source": ex.source.name,
-            **r, **_views(ex)}
+            "session_id": sid, **ex.result(), **_views(ex)}
+
+
+class Approval(BaseModel):
+    offer_id: str = Field(max_length=32)
+
+
+@app.post("/api/session/{sid}/approve")
+def approve(sid: str, body: Approval):
+    """The person approves their agent's recommendation: the referee checks it's that exact offer, still waiting and
+    inside the mandate, then settles. Returns the finished session (same shape as /api/exchange/{persona})."""
+    with SESSION_LOCK:
+        ex, note = _session(sid)
+        v = ex.approve(body.offer_id)
+        if v.ok:
+            SESSIONS.pop(sid, None)
+    if not v.ok:
+        raise HTTPException(409, v.reason)
+    return _respond(ex, ex.scenario, note)
+
+
+@app.post("/api/session/{sid}/decline")
+def decline(sid: str):
+    """The person turns down the recommendation: nothing is signed. Returns the finished session."""
+    with SESSION_LOCK:
+        ex, note = _session(sid)
+        v = ex.decline()
+        if v.ok:
+            SESSIONS.pop(sid, None)
+    if not v.ok:
+        raise HTTPException(409, v.reason)
+    return _respond(ex, ex.scenario, note)
+
+
+def _session(sid):
+    if sid not in SESSIONS:
+        raise HTTPException(404, "That session isn't waiting for approval (it finished, expired or the server restarted).")
+    return SESSIONS[sid]
+
+
+# Sessions waiting for the person to approve their agent's recommendation. In memory, this process only: a server
+# restart drops them (the person just shops again). Capped so abandoned sessions can't pile up.
+SESSIONS, MAX_SESSIONS = OrderedDict(), 200
+SESSION_LOCK = threading.Lock()  # one decision per session, even on a double tap
+
+
+def _hold(ex, note):
+    """Keep a session that's waiting for approval; returns its id (unguessable), or None if nothing is waiting."""
+    if not ex.awaiting_approval():
+        return None
+    sid = secrets.token_urlsafe(16)
+    SESSIONS[sid] = (ex, note)
+    while len(SESSIONS) > MAX_SESSIONS:
+        SESSIONS.popitem(last=False)
+    return sid
 
 
 def _sse(event, data):
@@ -195,7 +259,7 @@ def _sse(event, data):
 async def exchange_stream(persona: str, scenario: str = "normal", amount: float = 5000, min_amount: float = 3000,
                           max_apr: float = 18.0, min_term: int = 12, max_term: int = 48, autopay: int = 1,
                           max_fee: float = 0, live: int = 0, watchdog: int = 1, review: int = 0, pace: float = 0.6,
-                          max_payment: Optional[float] = None):
+                          max_payment: Optional[float] = None, approval: int = 0):
     """The same session as /api/exchange/{persona}, streamed as server-sent events while it runs.
 
     Events, in order: `meta` (scenario, notice, live note), then one event per referee log entry named after its
@@ -207,7 +271,7 @@ async def exchange_stream(persona: str, scenario: str = "normal", amount: float 
     pace = min(max(pace, 0.0), 3.0)
     loop, q = asyncio.get_running_loop(), asyncio.Queue()
     ex, note = _exchange(persona, scenario, amount, min_amount, max_apr, min_term, max_term, autopay, max_fee, live,
-                         watchdog, review, max_payment)
+                         watchdog, review, max_payment, approval)
 
     def push(e):
         """Runs in the session's worker thread as each event is logged: copy it (the session keeps going), add its
@@ -227,7 +291,8 @@ async def exchange_stream(persona: str, scenario: str = "normal", amount: float 
             r = await asyncio.to_thread(ex.run)
             views = await asyncio.to_thread(_views, ex)
             q.put_nowait(("result", {**{k: v for k, v in r.items() if k != "events"}, **views,
-                                     "live_note": _live_note(ex, note), "data_source": ex.source.name}))
+                                     "live_note": _live_note(ex, note), "data_source": ex.source.name,
+                                     "session_id": _hold(ex, note)}))
         except Exception as e:  # the type only: never leak credentials or vendor bodies into the stream
             q.put_nowait(("error", {"error": type(e).__name__, "note": "The session stopped; nothing was settled."}))
         q.put_nowait(None)
@@ -251,7 +316,6 @@ async def exchange_stream(persona: str, scenario: str = "normal", amount: float 
 
 
 # ---------------------------------------------------------------- chat intake: conversation -> mandate
-from pydantic import BaseModel, Field  # noqa: E402
 from exchange.intake import MandateChat  # noqa: E402
 
 

@@ -2,6 +2,10 @@
 
 Important decisions, newest first. Format and rules: [PROCESS.md](PROCESS.md).
 
+## 2026-10-25: The person approves the loan, not their agent
+With `approval=1` (used by the /demo chat) the agent's ACCEPT is only a recommendation; the referee settles only when the person approves that exact offer (`POST /api/session/{id}/approve`, once, inside the mandate) or ends with no deal on decline.
+Why: an agent should never sign a loan for someone, and the roadmap listed the missing approval as the first gap. Gave up: held sessions live in server memory (a restart drops them), and the form path and exchange.html still auto-accept.
+
 ## 2026-10-25: Fairness check proves blindness by swapping protected data in the raw CRS responses
 We swap each applicant's name, address, ZIP, DOB, phone and email consistently across every CRS product and require identical decisions and prices, plus twins and a passport proxy scan; disparity compares thin/no-file vs others, labelled "internal check, not a legal fair-lending review".
 Why: it tests the whole pipeline, not just the lender functions. Gave up: no protected-class data in the sandbox, so no disparate-impact measure; file age is credit-relevant but age-correlated (flagged, kept); attack-scenario agents without books are left out of the matrix.

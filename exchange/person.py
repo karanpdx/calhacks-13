@@ -64,11 +64,13 @@ def _one_bureau(ex):
 # ---------------------------------------------------------------- build
 def build(ex):
     """Call after ex.run(). Returns the person's view (see module docstring); keys are a contract with the UI."""
-    outcome = "blocked" if not ex.admitted else "deal" if ex.deal else "no_deal"
+    pending = getattr(ex, "awaiting_approval", lambda: False)()
+    outcome = ("blocked" if not ex.admitted else "awaiting_approval" if pending else "deal" if ex.deal
+               else "no_deal")
     return {
         "outcome": outcome,
         "before": before(ex.mandate),
-        "deal": deal(ex) if outcome == "deal" else None,
+        "deal": deal(ex) if outcome in ("deal", "awaiting_approval") else None,
         "protection": protection(ex),
         "no_deal": no_deal(ex) if outcome == "no_deal" else None,
         "blocked": blocked(ex) if outcome == "blocked" else None,

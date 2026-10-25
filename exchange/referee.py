@@ -51,7 +51,7 @@ class CachedSource:
 
 class Exchange:
     def __init__(self, persona, mandate=None, source=None, lenders=None, borrower=None, today=None, watchdog=False,
-                 review=None, listener=None):
+                 review=None, listener=None, require_approval=False):
         self.persona = persona
         self.mandate = mandate or Mandate()
         self.source = CachedSource(source or SampleSource())
@@ -70,6 +70,9 @@ class Exchange:
         self.review = review   # optional ClaudeReview: advisory flags after the session closes
         self.excluded = {}     # lender id -> reason
         self.listener = listener  # optional callable(event), called as each event is logged (the live SSE stream)
+        # With require_approval, the borrower agent's ACCEPT is only a recommendation: nothing settles until the person
+        # approves that exact offer (approve) or turns it down (decline). approval: None = waiting, True, False.
+        self.require_approval, self.approval = require_approval, None
 
     # ---------------------------------------------------------------- bookkeeping
     def register(self, agent):
@@ -232,7 +235,7 @@ class Exchange:
         elif m.type == WITHDRAW:
             self.offers[m.offer_id]["status"] = "withdrawn"
         elif m.type == ACCEPT:
-            self.offers[m.offer_id]["status"] = "accepted"
+            self.offers[m.offer_id]["status"] = "recommended" if self.require_approval else "accepted"
             self.deal = {"offer_id": m.offer_id, **self.offers[m.offer_id]}
             self.closed = True
 
@@ -269,7 +272,12 @@ class Exchange:
             self.flag_all(self.watchdog.finish(self))
         if self.review:
             self.flag_all(self.review.run(self))
-        if self.deal:
+        if self.deal and self.require_approval:
+            self.emit("awaiting_approval", "referee", {
+                "offer_id": self.deal["offer_id"], "lender": self.deal["lender"], "terms": vars(self.deal["terms"]),
+                "note": "Your agent recommends this offer. Nothing is signed until you approve it.",
+                "preview": self.disclosure()})
+        elif self.deal:
             self.settle()
         else:
             self.emit("no_deal", "referee", {"reason": "No offer within the person's limits.",
@@ -328,6 +336,42 @@ class Exchange:
                         "source": f["source"]})
         return out
 
+    # ---------------------------------------------------------------- the person's approval
+    def awaiting_approval(self):
+        return bool(self.require_approval and self.deal and self.approval is None)
+
+    def approve(self, offer_id) -> Verdict:
+        """The person approves their agent's recommendation. Only that exact offer, only once, only inside the
+        mandate; then the deal settles. Nothing an agent sends can do this."""
+        if not self.awaiting_approval():
+            v = Verdict(False, "NOTHING_TO_APPROVE", "There's no recommendation waiting for your approval.")
+        elif offer_id != self.deal["offer_id"]:
+            v = Verdict(False, "OFFER_MISMATCH", f"Your agent recommended {self.deal['offer_id']}, not {offer_id!r}.")
+        else:
+            ok, why = self.mandate.allows(self.deal["terms"])
+            v = Verdict(True, "OK", "Approved by the person.") if ok else Verdict(False, "OUTSIDE_MANDATE", why)
+        self.emit("approval", "person", {"decision": "approve", "offer_id": offer_id}, v)
+        if v.ok:
+            self.approval = True
+            self.offers[offer_id]["status"] = "accepted"
+            self.settle()
+        return v
+
+    def decline(self) -> Verdict:
+        """The person turns down the recommendation: nothing is signed and the session ends with no deal."""
+        if not self.awaiting_approval():
+            v = Verdict(False, "NOTHING_TO_APPROVE", "There's no recommendation waiting for your approval.")
+            self.emit("approval", "person", {"decision": "decline"}, v)
+            return v
+        oid, self.approval = self.deal["offer_id"], False
+        v = Verdict(True, "OK", "Turned down by the person.")
+        self.emit("approval", "person", {"decision": "decline", "offer_id": oid}, v)
+        self.offers[oid]["status"] = "declined"
+        self.deal = None
+        self.emit("no_deal", "referee", {"reason": "You turned down your agent's recommendation. Nothing was signed.",
+                                         "lender_reasons": [], "watchdog_notes": self.watchdog_notes()})
+        return v
+
     # ---------------------------------------------------------------- settlement + disclosure
     def settle(self):
         t, lender = self.deal["terms"], self.deal["lender"]
@@ -368,6 +412,10 @@ class Exchange:
 
     def result(self):
         blocked = [e for e in self.events if e.get("verdict") and not e["verdict"]["ok"]]
+        pending = self.awaiting_approval()
+        pick = ({"offer_id": self.deal["offer_id"], "lender": self.deal["lender"],
+                 "lender_name": POLICIES.get(self.deal["lender"], (self.deal["lender"],))[0],
+                 "terms": vars(self.deal["terms"]), "preview": self.disclosure()} if pending else None)
         return {
             "persona": self.persona,
             "applicant": self.report["applicant"] if self.report else None,
@@ -376,7 +424,8 @@ class Exchange:
             "passport": self.passport,
             "mandate": {**vars(self.mandate), "allow": sorted(self.mandate.allow)},
             "deal": ({"lender": self.deal["lender"], "lender_name": POLICIES.get(self.deal["lender"], (self.deal["lender"],))[0],
-                      "terms": vars(self.deal["terms"])} if self.deal else None),
+                      "terms": vars(self.deal["terms"])} if self.deal and not pending else None),
+            "awaiting_approval": pick,
             "blocked": [{"seq": e["seq"], "actor": e["actor"], **e["verdict"]} for e in blocked],
             "watchdog": [{"seq": e["seq"], **e["data"]} for e in self.events if e["kind"] == "watchdog"],
             "excluded": [{"seq": e["seq"], **e["data"]} for e in self.events if e["kind"] == "excluded"],

@@ -457,6 +457,7 @@ const replies = round => D.msgs.filter(e => e.round === round && e.data.sender !
 const isInjected = d => /ignore/i.test(d.text || "");
 function focusLender() {  // the lender the story follows: the winner, else the best honest opening offer
   if (D.ex.deal) return D.ex.deal.lender;
+  if (D.ex.awaiting_approval) return D.ex.awaiting_approval.lender;
   const offers = replies(0).filter(e => e.data.type === "OFFER" && !isInjected(e.data)).sort((a, b) => a.data.terms.apr - b.data.terms.apr);
   return offers.length ? offers[0].data.sender : D.lenderIds[0];
 }
@@ -478,7 +479,14 @@ async function loadPerson(pid) {
   D = {P, F, pid};
   await loadExchange();
 }
-async function loadExchange() { useExchange(await get(`/api/exchange/${D.pid}?${mandateQuery()}`)); }
+// approval: the agent only recommends; the person accepts or turns it down (POST /api/session/{id}/approve|decline)
+async function loadExchange(approval) { useExchange(await get(`/api/exchange/${D.pid}?${mandateQuery()}${approval ? "&approval=1" : ""}`)); }
+async function decide(accept) {
+  const pick = D.ex.awaiting_approval, url = `/api/session/${D.ex.session_id}/${accept ? "approve" : "decline"}`;
+  const r = await fetch(url, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({offer_id: pick.offer_id})});
+  if (!r.ok) throw new Error(`${r.status} ${url}`);
+  useExchange(await r.json());
+}
 function useExchange(ex) {
   const msgs = ex.events.filter(e => e.kind === "message");
   Object.assign(D, {ex, msgs, lenderIds: [...new Set(msgs.filter(e => e.data.sender !== "borrower").map(e => e.data.sender))]});
@@ -850,7 +858,7 @@ function chatView() {
       M = {amount: m.amount, min_amount: m.min_amount, max_apr: m.max_apr, min_term: m.min_term, max_term: m.max_term,
            autopay: autopay ? 1 : 0, max_fee: m.max_fee || 0, max_payment: m.max_payment || null};
       go.disabled = true; go.textContent = "Starting...";
-      try { await loadExchange(); } catch (err) { go.textContent = "Couldn't reach the exchange"; return; }
+      try { await loadExchange(true); } catch (err) { go.textContent = "Couldn't reach the exchange"; return; }
       shareWithLaptop();
       go.remove(); edit.remove();
       const id = ++run; speed = 1;
@@ -873,7 +881,8 @@ function chatView() {
       put(c); appear(c).catch(() => {}); scroll(); return c; };
     const label = h("span", {}, "Checking your details..."), status = h("div", {class: "msg them status"}, h("span", {class: "spin"}), label);
     const gate = D.ex.events.find(e => e.kind === "gate").data, atk = attackMsg(), lid = focusLender(), name = LENDERS[lid] || lid;
-    const deal = D.ex.deal, dis = D.ex.events.find(x => x.kind === "disclosure");
+    let deal = D.ex.deal;
+    const pick = D.ex.awaiting_approval;
 
     // working: one line that updates in place (the laptop's activity log still gets every step)
     await say("On it. I'll let you know when I have an answer.");
@@ -912,19 +921,49 @@ function chatView() {
     status.remove();
 
     // the result first
-    if (!deal) {
+    if (!pick) {
       logAdd("Agent", "Walked away: nothing fit the limits.", "", "robot");
       await say("I couldn't find a loan that fits your limits, so I didn't accept anything. "
         + (M.max_payment ? "A higher monthly limit or a longer loan might get you an offer." : `Raising your highest rate above ${M.max_apr}% might get you an offer.`), "alertmsg");
     } else {
-      const t = deal.terms, pay = dis ? dis.data.monthly_payment : monthly(t.amount, t.apr, t.term_months);
-      const saved = dis && dis.data.summary.join(" ").match(/saves \$([\d,.]+)/);
-      logAdd(`Agent → ${deal.lender_name}`, `Accepted ${pct(t.apr)}: inside every limit.`, "good", "check");
-      await say(`Good news: you're approved with ${deal.lender_name}.` + (saved ? ` I negotiated it down, which saves you $${saved[1]} over the loan.` : ""));
-      const dc = h("div", {class: "ccard deal"}, h("div", {class: "hd"}, `${deal.lender_name} · simulated lender`),
-        h("div", {class: "body"}, h("div", {class: "pay"}, money(pay), h("span", {style: "font-size:15px;font-weight:600"}, " / month")),
-          h("div", {}, `${money(t.amount)} at ${pct(t.apr)} for ${t.term_months} months`)));
-      put(dc); appear(dc).catch(() => {}); pop(dc); scroll();
+      // the agent recommends; only the person can accept
+      const t = pick.terms, pay = pick.preview.monthly_payment, saved = pick.preview.summary.join(" ").match(/saves \$([\d,.]+)/);
+      logAdd(`Agent → you`, `Recommends ${pick.lender_name} at ${pct(t.apr)}: inside every limit. Waiting for your OK.`, "", "check");
+      await say(`I found your best offer: ${pick.lender_name}.` + (saved ? ` I negotiated it down, which saves you $${saved[1]} over the loan.` : "")
+        + " It fits every limit you set. I won't accept it unless you tell me to.");
+      const hd = h("div", {class: "hd"}, `${pick.lender_name} · simulated lender · waiting for your OK`);
+      const dc = h("div", {class: "ccard"}, hd,
+        h("div", {class: "body", style: "padding:2px 14px 10px;display:flex;flex-direction:column;gap:3px"},
+          h("div", {class: "pay", style: "font-size:34px;font-weight:800;letter-spacing:-.02em"}, money(pay), h("span", {style: "font-size:15px;font-weight:600"}, " / month")),
+          h("div", {}, `${money(t.amount)} at ${pct(t.apr)} for ${t.term_months} months${t.autopay ? ", with autopay" : ""}${t.fee ? `, ${money(t.fee)} fee` : ", no fee"}`)));
+      put(dc); appear(dc).catch(() => {}); scroll();
+      const yes = await new Promise(resolve => {
+        const again = async () => { await say("Tap \"Accept this loan\" to take it, or \"Not now\" to walk away. Nothing happens until you choose."); setChips(["Accept this loan", "Not now"]); };
+        followUp = text => {
+          const a = text.toLowerCase();
+          if (/^(accept|yes|yeah|yep|approve|ok|okay|sure|do it|sign|take it)\b/.test(a)) return async () => resolve(true);
+          if (/^(not now|no|nah|nope|decline|don'?t|cancel|pass)\b/.test(a)) return async () => resolve(false);
+          return again;
+        };
+        input.disabled = false; send.disabled = false; input.placeholder = "iMessage";
+        setChips(["Accept this loan", "Not now"]);
+      });
+      followUp = null; input.disabled = true; send.disabled = true;
+      try { await decide(yes); } catch (err) {
+        await say("I couldn't reach the exchange, so nothing was signed. You can start a new request.", "alertmsg");
+        setChips(["Start a new request"]); input.disabled = false; send.disabled = false; return;
+      }
+      shareWithLaptop();
+      deal = D.ex.deal;
+      if (deal) {
+        logAdd(`You → ${deal.lender_name}`, `Accepted ${pct(t.apr)}.`, "good", "check");
+        dc.classList.add("deal"); hd.textContent = `${deal.lender_name} · simulated lender · accepted`; pop(dc);
+        await say(`Done: you're approved with ${deal.lender_name}. You'll pay ${money(pay)} a month.`);
+      } else {
+        logAdd("You", `Turned down ${pick.lender_name}. Nothing was signed.`, "", "robot");
+        hd.textContent = `${pick.lender_name} · simulated lender · turned down`; dc.style.opacity = ".6";
+        await say("OK, I didn't accept it. Nothing was signed, and no lender ran a hard check.");
+      }
     }
     if (atk) await say("I also stopped a lender that tried to trick me into a bad loan. Nothing was signed with them.");
     return ask("Want a breakdown of what I did, or how I negotiated?", {"Show me the breakdown": showBreakdown, "How did you negotiate?": showNegotiation});

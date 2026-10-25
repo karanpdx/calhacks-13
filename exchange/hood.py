@@ -276,7 +276,8 @@ def _names(codes):
 def describe(e, ex=None):
     """Turn one event dict into a feed item, or None for events the panel skips. Works on a JSON copy with ex=None."""
     fn = {"gate": _gate, "blocked": _blocked, "passport": _passport, "message": _message, "watchdog": _watchdog,
-          "excluded": _excluded, "settlement": _settlement, "disclosure": _disclosure, "no_deal": _no_deal}.get(e.get("kind"))
+          "excluded": _excluded, "settlement": _settlement, "disclosure": _disclosure, "no_deal": _no_deal,
+          "awaiting_approval": _awaiting, "approval": _approval}.get(e.get("kind"))
     return fn(e, ex) if fn else None
 
 
@@ -460,7 +461,21 @@ def _disclosure(e, ex):
 
 
 def _no_deal(e, ex):
+    if "turned down" in ((e.get("data") or {}).get("reason") or ""):
+        return item(e, "Referee", "referee", "No deal: you turned down your agent's recommendation, so nothing was signed")
     return item(e, "Referee", "referee", "No deal: no offer fit your limits, so your agent walked away")
+
+
+def _awaiting(e, ex):
+    return item(e, "Referee", "referee", "Held your agent's pick for your approval: " + terms_text(e["data"].get("terms")),
+                verdict_text="Your agent can recommend a loan but can't sign one. Nothing settles until you approve.")
+
+
+def _approval(e, ex):
+    v = e.get("verdict") or {}
+    what = "You approved the loan" if e["data"].get("decision") == "approve" else "You turned down the loan"
+    return item(e, "You", "person", what if v.get("ok") else "Approval rejected", verdict="allowed" if v.get("ok") else "blocked",
+                verdict_text=v.get("reason"))
 
 
 # ---------------------------------------------------------------- whole panel
