@@ -1,0 +1,68 @@
+{
+  "_status": 200,
+  "_latency_s": 0.11,
+  "_headers": {
+    "RequestID": "fefa533a-1e01-456a-80ef-c5b18a27e94f",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "104",
+    "x-ratelimit-reset": "12"
+  },
+  "body": {
+    "requestData": {
+      "firstName": "TOMAS",
+      "lastName": "LINDQVIST",
+      "ssn": "666701004",
+      "addresses": [
+        {
+          "borrowerResidencyType": "Current",
+          "addressLine1": "415 PINE ST UNIT 12",
+          "city": "SEATTLE",
+          "state": "WA",
+          "postalCode": "98101"
+        }
+      ]
+    },
+    "repositoryIncluded": {
+      "transunion": true,
+      "experian": false,
+      "equifax": false
+    },
+    "responseDetail": {
+      "dateRequested": "2026-10-24T22:22:02.295830Z",
+      "requestingParty": {
+        "name": "CALHACKS13"
+      },
+      "creditBureauContact": {
+        "name": "CREDIT REPORTING SERVICES, INC",
+        "address": {
+          "addressLine1": "1024 IRON POINT ROAD",
+          "city": "FOLSOM",
+          "state": "CA",
+          "postalCode": "95630"
+        }
+      }
+    },
+    "responseAlertMessages": [
+      {
+        "borrowerSourceType": "Borrower",
+        "sourceType": "TransUnion",
+        "responseAlertMessageCategoryType": "SSNVerification",
+        "responseAlertMessageText": "SSN Alert: NO SSN ON FILE"
+      }
+    ],
+    "creditFiles": [
+      {
+        "creditFileDetail": {
+          "borrowerSourceType": "Borrower",
+          "creditFileInfileDate": "2024-11-19",
+          "creditFileResultStatusType": "NoFileReturnedNoHit",
+          "sourceType": "TransUnion"
+        }
+      }
+    ],
+    "summaries": {
+      "tradeSummary": {},
+      "derogatorySummary": {}
+    }
+  }
+}

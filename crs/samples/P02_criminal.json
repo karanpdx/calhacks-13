@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.12,
+  "_headers": {
+    "RequestID": "4ce64108-8872-463a-a4d8-ee3682a1dc8c",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "107",
+    "x-ratelimit-reset": "10"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "WHITFIELD,DANIEL"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

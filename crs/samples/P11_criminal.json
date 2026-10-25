@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.12,
+  "_headers": {
+    "RequestID": "58044b29-086b-4a6d-b9e6-e9c0b3e5d38a",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "55",
+    "x-ratelimit-reset": "49"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "SZABO,BRANDON"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

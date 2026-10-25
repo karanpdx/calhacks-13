@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.18,
+  "_headers": {
+    "RequestID": "0b16628f-fc8c-4fde-9dd5-ee429e3e344a",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "114",
+    "x-ratelimit-reset": "5"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "OKAFOR,MARGARET"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

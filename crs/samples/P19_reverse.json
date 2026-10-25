@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.1,
+  "_headers": {
+    "RequestID": "cebef550-4eaf-4837-b390-fb086a190db9",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "16",
+    "x-ratelimit-reset": "78"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": [
+        {
+          "firstName": "GRACE",
+          "lastName": "NAKAMURA",
+          "houseNo": "1850",
+          "streetName": "SOLANO AVE",
+          "address": "1850 SOLANO AVE",
+          "city": "BERKELEY",
+          "state": "CA",
+          "postalCode": "94707"
+        }
+      ]
+    }
+  }
+}

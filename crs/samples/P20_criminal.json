@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.12,
+  "_headers": {
+    "RequestID": "1d2495e5-e92b-4bd1-a8d0-e74a30b2e252",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "10",
+    "x-ratelimit-reset": "83"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "WHITCOMB,DOLORES"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

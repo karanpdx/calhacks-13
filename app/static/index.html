@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Credit-file trust agent</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --ink:#1b2430; --mute:#667085; --line:#e4e7ec;
+          --red:#c0262d; --amber:#b86e00; --green:#1a7f45; --grey:#556070; --blue:#2457c5; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; color:var(--ink); background:var(--bg); }
+  header { background:#10243e; color:#fff; padding:12px 20px; display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+  header h1 { font-size:18px; margin:0; }
+  header .grow { flex:1; }
+  .banner { background:#fff4d6; color:#5c4300; padding:6px 20px; font-size:13px; border-bottom:1px solid #ecd9a0; }
+  button { font:inherit; border:1px solid var(--line); background:#fff; border-radius:6px; padding:6px 12px; cursor:pointer; }
+  button.primary { background:var(--blue); color:#fff; border-color:var(--blue); }
+  label.live { font-size:13px; display:flex; gap:6px; align-items:center; }
+  main { display:grid; grid-template-columns:300px 1fr; gap:16px; padding:16px 20px; max-width:1200px; margin:0 auto; }
+  @media (max-width:800px) { main { grid-template-columns:1fr; } }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:10px; }
+  #list { max-height:78vh; overflow:auto; }
+  .item { display:flex; gap:8px; align-items:center; padding:8px 12px; border-bottom:1px solid var(--line); cursor:pointer; }
+  .item:hover { background:#f2f5fb; } .item.sel { background:#e8efff; }
+  .item .id { font-weight:600; width:34px; } .item .nm { flex:1; } .item .ex { font-size:11px; color:var(--mute); }
+  .item.star { border-left:4px solid var(--red); }
+  #card { padding:20px; min-height:300px; }
+  .badge { display:inline-block; font-size:26px; font-weight:700; color:#fff; padding:8px 18px; border-radius:8px; }
+  .b-red { background:var(--red); } .b-amber { background:var(--amber); } .b-green { background:var(--green); } .b-grey { background:var(--grey); }
+  .tag { display:inline-block; font-size:12px; padding:2px 8px; border-radius:99px; border:1px solid var(--line); margin-left:6px; }
+  .tag.ok { color:var(--green); border-color:var(--green); } .tag.no { color:var(--amber); border-color:var(--amber); }
+  .explain { font-size:17px; margin:16px 0 8px; }
+  .wrong { background:#fff8e6; border-left:4px solid var(--amber); padding:8px 12px; font-size:14px; border-radius:4px; }
+  h3 { margin:20px 0 8px; font-size:13px; text-transform:uppercase; letter-spacing:.05em; color:var(--mute); }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  .sig { border:1px solid var(--line); border-radius:8px; padding:8px 10px; }
+  .sig .k { font-size:12px; color:var(--mute); } .sig .v { font-size:20px; font-weight:600; }
+  .sig.hot { border-color:var(--red); background:#fff1f1; } .sig.hot .v { color:var(--red); }
+  ul.f { list-style:none; margin:0; padding:0; }
+  ul.f li { padding:6px 0; border-bottom:1px solid var(--line); display:flex; gap:8px; }
+  .sev { font-size:11px; font-weight:700; border-radius:4px; padding:1px 6px; height:20px; color:#fff; white-space:nowrap; }
+  .s3 { background:var(--red); } .s2 { background:var(--amber); } .s1 { background:#98a2b3; }
+  .src { color:var(--mute); font-size:12px; }
+  .codes span { display:inline-block; font-family:monospace; font-size:12px; background:#fff1f1; border:1px solid var(--red); color:var(--red); border-radius:4px; padding:1px 6px; margin:0 6px 4px 0; }
+  table { border-collapse:collapse; width:100%; } th,td { text-align:left; padding:8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th { font-size:12px; color:var(--mute); text-transform:uppercase; }
+  td.score { background:#f3f4f6; } td.agent { background:#eef4ff; }
+  .note { color:var(--mute); font-size:12px; margin-top:6px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Credit-file trust agent</h1>
+  <span class="grow"></span>
+  <button class="primary" id="sbs">Side by side: score vs agent</button>
+  <label class="live"><input type="checkbox" id="live"> Live CRS sandbox</label>
+  <span id="srcTag" class="tag" style="color:#fff;border-color:#fff"></span>
+</header>
+<div class="banner"><b>Demo data:</b> every applicant here is a CRS sandbox test persona (fictional, not a real person). Decisions come from deterministic rules; the text only explains them.</div>
+<main>
+  <section class="panel"><div id="list"></div><div class="note" style="padding:8px 12px" id="sc"></div></section>
+  <section class="panel" id="card"><p style="color:var(--mute)">Pick a persona on the left. P13 is the one to see.</p></section>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const BADGE = {STOP_FRAUD:"b-red", VERIFY:"b-amber", DECLINE_CREDIT:"b-red", DECLINE_RECORDS:"b-red", NO_FILE:"b-grey", REVIEW:"b-amber", APPROVE:"b-green"};
+const SHORT = {STOP_FRAUD:"HOLD: FRAUD", VERIFY:"VERIFY IDENTITY", DECLINE_CREDIT:"DECLINE: CREDIT", DECLINE_RECORDS:"DECLINE: RECORD", NO_FILE:"NO FILE", REVIEW:"MANUAL REVIEW", APPROVE:"APPROVE"};
+const HIGHLIGHT = "P13";
+let sel = null;
+const q = () => $("#live").checked ? "?live=1" : "";
+const get = async u => { const r = await fetch(u); if (!r.ok) throw new Error(r.status); return r.json(); };
+
+async function init() {
+  const d = await get("/api/personas");
+  $("#list").innerHTML = d.personas.map(p =>
+    `<div class="item ${p.id===HIGHLIGHT?"star":""}" data-id="${p.id}"><span class="id">${p.id}</span><span class="nm">${esc(p.name)}${p.id===HIGHLIGHT?" ★":""}</span><span class="ex">CRS: ${p.crs_expected}</span></div>`).join("");
+  document.querySelectorAll(".item").forEach(e => e.onclick = () => show(e.dataset.id));
+  const s = await get("/api/scorecard");
+  $("#sc").textContent = `Agent matches CRS expected on ${s.match}/${s.total} personas (offline samples).`;
+  show(HIGHLIGHT);
+}
+
+async function show(id) {
+  sel = id;
+  document.querySelectorAll(".item").forEach(e => e.classList.toggle("sel", e.dataset.id === id));
+  $("#card").innerHTML = "Loading...";
+  let d;
+  try { d = await get(`/api/decide/${id}${q()}`); } catch (e) { $("#card").textContent = "Error loading " + id; return; }
+  setSrc(d);
+  const ff = d.fraud_finder, ffScore = ff ? ff.risk_score : null;
+  const hot = (c) => c ? " hot" : "";
+  const sigs = [
+    ["Credit score (lowest)", d.score_only.score ?? "none", false],
+    ["FraudFinder risk", ffScore ?? "n/a", ffScore >= 75],
+    ["Identity risk points", d.identity_risk_points, d.identity_risk_points >= 3],
+    ["Email age (days)", ff ? (ff.email_age_days ?? "?") : "n/a", ff && ff.email_age_days != null && ff.email_age_days < 30],
+    ["Phone", ff ? `${ff.phone_prepaid ? "prepaid " : ""}${ff.phone_type ?? "?"}${ff.phone_owner_matches ? "" : " (not theirs)"}` : "n/a", ff && !ff.phone_owner_matches],
+    ["Tumbling", ff ? (ff.tumbling ? "yes" : "no") : "n/a", ff && ff.tumbling],
+  ];
+  const bureaus = Object.entries(d.scores).map(([b, s]) => `${b} ${s ?? "no file"}`).join(" · ");
+  $("#card").innerHTML = `
+    <div><span class="badge ${BADGE[d.decision]}">${SHORT[d.decision]}</span>
+      <span class="tag ${d.match ? "ok" : "no"}">${d.match ? "✓ matches CRS expected" : "≠ differs from CRS expected"}: ${d.crs_expected}</span></div>
+    <h2 style="margin:12px 0 0">${d.persona} ${esc(d.name)} <span class="src">(fictional CRS test persona)</span></h2>
+    <div class="src">${esc(d.headline)}</div>
+    <p class="explain">${esc(d.explanation.text.replace(d.explanation.where_wrong, "").trim())}</p>
+    <div class="wrong"><b>Where this could be wrong.</b> ${esc(d.explanation.where_wrong)}</div>
+    <h3>Key signals</h3>
+    <div class="grid">${sigs.map(([k,v,h]) => `<div class="sig${hot(h)}"><div class="k">${k}</div><div class="v">${esc(v)}</div></div>`).join("")}</div>
+    <div class="note">Bureau scores: ${esc(bureaus || "none")}. A score-only check would say: <b>${esc(d.score_only.verdict)}</b>.</div>
+    ${d.id_codes.length ? `<h3>Identity codes (TransUnion)</h3><div class="codes">${d.id_codes.map(c => `<span title="${esc(c.text)}">${esc(c.code)}</span>`).join("")}</div>
+      <div class="note">${d.id_codes.map(c => esc(c.code + " " + c.text)).join(" · ")}</div>` : ""}
+    <h3>What triggered it</h3>
+    <ul class="f">${d.findings.map(f => `<li><span class="sev s${f.severity}">${["","NOTE","CONCERN","BLOCKER"][f.severity]}</span><span>${esc(f.text)} <span class="src">${esc(f.source)}</span></span></li>`).join("") || "<li>No findings.</li>"}</ul>
+    <h3>Next steps</h3><ul>${d.next_steps.map(s => `<li>${esc(s)}</li>`).join("")}</ul>`;
+}
+
+function setSrc(d) {
+  $("#srcTag").textContent = "source: " + d.source;
+  if (d.live_note) $("#srcTag").title = d.live_note;
+  if (d.live_note && !$("#card").querySelector(".live-note")) {
+    setTimeout(() => $("#card").insertAdjacentHTML("afterbegin", `<div class="wrong live-note" style="margin-bottom:10px">${esc(d.live_note)}</div>`), 0);
+  }
+}
+
+$("#live").onchange = () => sel && show(sel);
+
+$("#sbs").onclick = async () => {
+  $("#card").innerHTML = "Loading...";
+  const ids = ["P13", "P03", "P12"];
+  const ds = await Promise.all(ids.map(i => get(`/api/decide/${i}${q()}`)));
+  $("#card").innerHTML = `<h2 style="margin-top:0">What a credit score says vs what this agent says</h2>
+    <p class="src">Fictional CRS sandbox personas. "Score only" uses the lowest bureau score with simple cut-offs (620 / 580), for illustration.</p>
+    <table><tr><th>Persona</th><th>Plain credit score says</th><th>This agent says</th><th>Why</th></tr>
+    ${ds.map(d => `<tr ${d.persona==="P13"?'style="outline:2px solid #c0262d"':""}>
+      <td><b>${d.persona}</b> ${esc(d.name)}<div class="src">CRS expected: ${d.crs_expected}</div></td>
+      <td class="score"><b>${esc(d.score_only.verdict)}</b><div class="src">${esc(d.score_only.score ?? "no score")}</div></td>
+      <td class="agent"><span class="badge ${BADGE[d.decision]}" style="font-size:14px;padding:3px 10px">${SHORT[d.decision]}</span>
+        <div class="src">${d.match ? "✓ matches CRS" : "≠ differs from CRS"}</div></td>
+      <td>${esc(d.explanation.text.replace(d.explanation.where_wrong, "").trim())}</td></tr>`).join("")}</table>
+    <div class="note"><b>P13:</b> a clean 640 on all three bureaus, but FraudFinder says 88/100 and TransUnion codes 2201/2202 say the SSN and birth date don't belong to this name. A score-only check approves it. P03 is the honest miss: a thin file the agent approves and CRS would review.</div>`;
+  setSrc(ds[0]);
+};
+
+init();
+</script>
+</body>
+</html>

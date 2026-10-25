@@ -1,0 +1,85 @@
+{
+  "_status": 200,
+  "_latency_s": 0.16,
+  "_headers": {
+    "RequestID": "0bcd9a28-577e-490e-9ed9-75aaaf4ded3a",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "54",
+    "x-ratelimit-reset": "50"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Processed Successfully",
+      "reference": "CALHACKS",
+      "responseID": "9211",
+      "name": "SZABO,BRANDON"
+    },
+    "response": {
+      "count": 2,
+      "countWest4": 2,
+      "countNational1": 0,
+      "candidate": [
+        {
+          "zone": "West-4",
+          "lastName": "SZABO",
+          "firstName": "BRANDON",
+          "middle": "",
+          "address": "2640 HIGHLAND AVE APT 7",
+          "city": "NATIONAL CITY",
+          "state": "CA",
+          "zipCode": "91950",
+          "activity": {
+            "court": "SAN DIEGO COUNTY SUPERIOR COURT",
+            "agencyState": "CA",
+            "agencyCounty": "SAN DIEGO",
+            "filingDate": "02-11-2022",
+            "caseNo": "37-2022-00004512-CL-UD-CTL",
+            "plaintiff": "PACIFIC VIEW APARTMENTS LLC",
+            "plaintiffPhone": "",
+            "noticeType": "PAY OR QUIT",
+            "judgementDate": "",
+            "judgementAmount": "",
+            "judgement": "",
+            "judgementFor": "",
+            "judgementSatAmount": "",
+            "judgementRelDate": "",
+            "dismissalDate": "03-28-2022",
+            "_default": "0",
+            "plaintiffAtty": "",
+            "plaintiffAttyPhone": ""
+          }
+        },
+        {
+          "zone": "West-4",
+          "lastName": "SZABO",
+          "firstName": "BRANDON",
+          "middle": "",
+          "address": "2640 HIGHLAND AVE APT 7",
+          "city": "NATIONAL CITY",
+          "state": "CA",
+          "zipCode": "91950",
+          "activity": {
+            "court": "SAN DIEGO COUNTY SUPERIOR COURT",
+            "agencyState": "CA",
+            "agencyCounty": "SAN DIEGO",
+            "filingDate": "09-16-2024",
+            "caseNo": "37-2024-00031877-CL-UD-CTL",
+            "plaintiff": "HARBORSIDE RESIDENTIAL LP",
+            "plaintiffPhone": "",
+            "noticeType": "PAY OR QUIT",
+            "judgementDate": "11-08-2024",
+            "judgementAmount": "4850",
+            "judgement": "PLAINTIFF",
+            "judgementFor": "PLAINTIFF",
+            "judgementSatAmount": "",
+            "judgementRelDate": "",
+            "dismissalDate": "",
+            "_default": "0",
+            "plaintiffAtty": "HARBORSIDE LEGAL GROUP",
+            "plaintiffAttyPhone": ""
+          }
+        }
+      ]
+    }
+  }
+}

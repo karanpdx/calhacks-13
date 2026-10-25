@@ -1,0 +1,70 @@
+{
+  "_status": 200,
+  "_latency_s": 0.09,
+  "_headers": {
+    "RequestID": "ad0ee250-b3d4-4819-9ef9-8d0b776627ba",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "42",
+    "x-ratelimit-reset": "58"
+  },
+  "body": {
+    "eam": {
+      "date_first_seen": "2015-03-30",
+      "longevity": 9,
+      "velocity": 1,
+      "popularity": 6
+    },
+    "dam": {
+      "date_first_seen": "1995-08-13",
+      "longevity": 10,
+      "velocity": 1,
+      "popularity": 10
+    },
+    "risk": {
+      "score": 10,
+      "tumbling_risk": 0,
+      "query_id": "calhacks-P15-0001",
+      "domain": {
+        "domain_risk_score": 0
+      },
+      "ip": {
+        "routing_type": "fixed",
+        "organization": "comcast cable communications llc",
+        "proxy_type": "",
+        "hosting_facility": false,
+        "latitude": "45.52",
+        "longitude": "-122.68"
+      },
+      "postal": {
+        "first_name_match": "match",
+        "last_name_match": "match",
+        "street_match": "match",
+        "city_match": "match",
+        "zip_match": "match",
+        "address_type": "Street",
+        "deliverability": "deliverable",
+        "ip_postal_distance": "5 miles"
+      },
+      "phone": {
+        "line_type": "mobile",
+        "carrier": "VERIZON WIRELESS",
+        "status": "valid",
+        "prepaid": false,
+        "owner": {
+          "first_name_match": "match",
+          "last_name_match": "match",
+          "street_match": "match",
+          "city_match": "match",
+          "zip_match": "match",
+          "type": "person"
+        }
+      }
+    },
+    "email_validation": {
+      "address": "nicole.farragut@example.com",
+      "status": "valid",
+      "status_code": 50,
+      "domain_type": "freeisp"
+    }
+  }
+}

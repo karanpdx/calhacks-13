@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.09,
+  "_headers": {
+    "RequestID": "b0dc6f7a-0e3a-42dc-a2a7-8f0d1754377f",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "60",
+    "x-ratelimit-reset": "45"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": [
+        {
+          "firstName": "LAUREN",
+          "lastName": "KOWALCZYK",
+          "houseNo": "1181",
+          "streetName": "WOODWARD AVE",
+          "address": "1181 WOODWARD AVE",
+          "city": "DETROIT",
+          "state": "MI",
+          "postalCode": "48226"
+        }
+      ]
+    }
+  }
+}

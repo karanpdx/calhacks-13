@@ -1,0 +1,549 @@
+{
+  "_status": 200,
+  "_latency_s": 0.14,
+  "_headers": {
+    "RequestID": "230b2f6d-6218-489a-ba82-687d5452ea3e",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "89",
+    "x-ratelimit-reset": "23"
+  },
+  "body": {
+    "requestData": {
+      "firstName": "MARCUS",
+      "lastName": "BELLAMY",
+      "ssn": "666701007",
+      "addresses": [
+        {
+          "borrowerResidencyType": "Current",
+          "addressLine1": "1507 PEACHTREE INDUSTRIAL BLVD",
+          "city": "ATLANTA",
+          "state": "GA",
+          "postalCode": "30341"
+        }
+      ]
+    },
+    "repositoryIncluded": {
+      "transunion": true,
+      "experian": false,
+      "equifax": false
+    },
+    "responseDetail": {
+      "dateRequested": "2026-10-24T22:22:04.636813Z",
+      "requestingParty": {
+        "name": "CALHACKS13"
+      },
+      "creditBureauContact": {
+        "name": "CREDIT REPORTING SERVICES, INC",
+        "address": {
+          "addressLine1": "1024 IRON POINT ROAD",
+          "city": "FOLSOM",
+          "state": "CA",
+          "postalCode": "95630"
+        }
+      }
+    },
+    "responseAlertMessages": [
+      {
+        "borrowerSourceType": "Borrower",
+        "sourceType": "TransUnion",
+        "responseAlertMessageCategoryType": "FACTARiskScoreValue",
+        "responseAlertMessageText": "FACTA: Risk Score Value - The borrower's Risk Score Value was negatively affected by the presence of credit inquiry records on their credit file"
+      }
+    ],
+    "creditFiles": [
+      {
+        "creditFileDetail": {
+          "borrowerSourceType": "Borrower",
+          "creditFileInfileDate": "2016-04-07",
+          "creditFileResultStatusType": "FileReturned",
+          "sourceType": "TransUnion"
+        },
+        "aliases": [
+          {
+            "firstName": "MARCUS",
+            "lastName": "BELLAMY",
+            "middleName": "J"
+          }
+        ],
+        "employments": [
+          {
+            "employerName": "SHORTLINE COACH",
+            "employmentPositionDescription": "LABORER",
+            "employmentReportedDate": "2024-10-10"
+          },
+          {
+            "employerName": "VARSITY",
+            "employmentPositionDescription": "JANITOR",
+            "employmentReportedDate": "2024-10-10"
+          }
+        ]
+      }
+    ],
+    "inquiries": [],
+    "tradelines": [
+      {
+        "accountClosedDate": "2026-02-19",
+        "accountIdentifier": "CALHACKS-CO-1",
+        "accountOpenedDate": "2017-04-12",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2026-02-19",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": true,
+        "highBalanceAmount": "2200",
+        "lastActivityDate": "2026-02-19",
+        "monthsReviewedCount": "99",
+        "creditorName": "METRO BANK CARD 1",
+        "subscriberCode": "F 01PPH001",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "9",
+        "currentRatingType": "ChargeOff",
+        "paymentPatternData": "9CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "TransUnion",
+        "comments": [
+          {
+            "commentSourceType": "TransUnion",
+            "commentType": "BureauRemarks",
+            "commentText": ""
+          }
+        ],
+        "adverseRatings": {
+          "highestAdverseRatingDate": "2026-09-19",
+          "highestAdverseRatingCode": "9",
+          "highestAdverseRatingType": "ChargeOff",
+          "mostRecentAdverseRatingDate": "2026-09-19",
+          "mostRecentAdverseRatingCode": "9",
+          "mostRecentAdverseRatingType": "ChargeOff",
+          "priorAdverseRatings": [
+            {
+              "priorAdverseRatingDate": "2026-09-19",
+              "priorAdverseRatingCode": "9",
+              "priorAdverseRatingType": "ChargeOff"
+            }
+          ]
+        }
+      },
+      {
+        "accountClosedDate": "2026-02-19",
+        "accountIdentifier": "CALHACKS-CO-2",
+        "accountOpenedDate": "2017-04-12",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2026-02-19",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": true,
+        "highBalanceAmount": "2500",
+        "lastActivityDate": "2026-02-19",
+        "monthsReviewedCount": "99",
+        "creditorName": "METRO BANK CARD 2",
+        "subscriberCode": "F 01PPH001",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "9",
+        "currentRatingType": "ChargeOff",
+        "paymentPatternData": "9CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "TransUnion",
+        "comments": [
+          {
+            "commentSourceType": "TransUnion",
+            "commentType": "BureauRemarks",
+            "commentText": ""
+          }
+        ],
+        "adverseRatings": {
+          "highestAdverseRatingDate": "2026-09-19",
+          "highestAdverseRatingCode": "9",
+          "highestAdverseRatingType": "ChargeOff",
+          "mostRecentAdverseRatingDate": "2026-09-19",
+          "mostRecentAdverseRatingCode": "9",
+          "mostRecentAdverseRatingType": "ChargeOff",
+          "priorAdverseRatings": [
+            {
+              "priorAdverseRatingDate": "2026-09-19",
+              "priorAdverseRatingCode": "9",
+              "priorAdverseRatingType": "ChargeOff"
+            }
+          ]
+        }
+      },
+      {
+        "accountIdentifier": "CALHACKS-REV-1",
+        "accountOpenedDate": "2007-10-20",
+        "accountOwnershipType": "Individual",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Open",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "creditLimitAmount": "5000",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "2750",
+        "lastActivityDate": "2026-09-19",
+        "monthsReviewedCount": "99",
+        "creditorName": "NORTHSTAR BANK VISA",
+        "subscriberCode": "F 01PPH001",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "2750",
+        "businessType": "Finance",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "TransUnion"
+      },
+      {
+        "accountIdentifier": "CALHACKS-REV-2",
+        "accountOpenedDate": "2023-04-20",
+        "accountOwnershipType": "Individual",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Open",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "creditLimitAmount": "5000",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "2750",
+        "lastActivityDate": "2026-09-19",
+        "monthsReviewedCount": "42",
+        "creditorName": "CAPITAL REWARDS MC",
+        "subscriberCode": "F 01PPH001",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "2750",
+        "businessType": "Finance",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "TransUnion"
+      },
+      {
+        "accountIdentifier": "CALHACKS-INST-1",
+        "accountOpenedDate": "2025-04-20",
+        "accountOwnershipType": "Individual",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Open",
+        "accountType": "Installment",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "57800",
+        "lastActivityDate": "2026-09-19",
+        "monthlyPaymentAmount": "740",
+        "monthsReviewedCount": "18",
+        "creditorName": "LAKESIDE AUTO FINANCE",
+        "subscriberCode": "F 01PPH001",
+        "pastDueAmount": "0",
+        "termsDescription": "60 months at $740 per month",
+        "termsMonthsCount": "60",
+        "currentBalanceAmount": "35500",
+        "businessType": "Finance",
+        "loanType": "Automobile",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "TransUnion"
+      },
+      {
+        "accountClosedDate": "2025-10-19",
+        "accountIdentifier": "CALHACKS-CLOSED-1",
+        "accountOpenedDate": "2020-10-19",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2025-10-19",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "4000",
+        "lastActivityDate": "2025-10-19",
+        "monthsReviewedCount": "72",
+        "creditorName": "FORMER LENDER 1",
+        "subscriberCode": "F 01PPH001",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "TransUnion"
+      },
+      {
+        "accountClosedDate": "2025-04-20",
+        "accountIdentifier": "CALHACKS-CLOSED-2",
+        "accountOpenedDate": "2019-10-20",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2025-04-20",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Installment",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "4900",
+        "lastActivityDate": "2025-04-20",
+        "monthsReviewedCount": "84",
+        "creditorName": "FORMER LENDER 2",
+        "subscriberCode": "F 01PPH001",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "Automobile",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "TransUnion"
+      },
+      {
+        "accountClosedDate": "2024-10-19",
+        "accountIdentifier": "CALHACKS-CLOSED-3",
+        "accountOpenedDate": "2018-10-19",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2024-10-19",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "5800",
+        "lastActivityDate": "2024-10-19",
+        "monthsReviewedCount": "96",
+        "creditorName": "FORMER LENDER 3",
+        "subscriberCode": "F 01PPH001",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "TransUnion"
+      },
+      {
+        "accountClosedDate": "2024-04-19",
+        "accountIdentifier": "CALHACKS-CLOSED-4",
+        "accountOpenedDate": "2017-10-19",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2024-04-19",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Installment",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "6700",
+        "lastActivityDate": "2024-04-19",
+        "monthsReviewedCount": "99",
+        "creditorName": "FORMER LENDER 4",
+        "subscriberCode": "F 01PPH001",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "Automobile",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "TransUnion"
+      },
+      {
+        "accountClosedDate": "2023-10-20",
+        "accountIdentifier": "CALHACKS-CLOSED-5",
+        "accountOpenedDate": "2016-10-19",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2023-10-20",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "7600",
+        "lastActivityDate": "2023-10-20",
+        "monthsReviewedCount": "99",
+        "creditorName": "FORMER LENDER 5",
+        "subscriberCode": "F 01PPH001",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "TransUnion"
+      }
+    ],
+    "publicRecords": [
+      {
+        "accountOwnershipType": "Individual",
+        "borrowerSourceType": "Borrower",
+        "subscriberCode": "",
+        "bankruptcyType": "Personal",
+        "dispositionType": "Filed",
+        "filedDate": "2025-02-14",
+        "reportedDate": "2025-04-02",
+        "sourceType": "TransUnion",
+        "publicRecordType": "BankruptcyChapter13"
+      }
+    ],
+    "scores": [
+      {
+        "borrowerSourceType": "Borrower",
+        "modelName": "TransUnionVantageScore4.0",
+        "modelNameType": "001NN",
+        "sourceType": "TransUnion",
+        "factaInquiriesIndicator": true,
+        "scoreValue": "560",
+        "scoreRankPercentileValue": "9",
+        "scoreMaximumValue": "850",
+        "scoreMinimumValue": "300",
+        "scoreFactors": [
+          {
+            "scoreFactorCode": "38",
+            "scoreFactorText": "Lack of bankcard account information"
+          },
+          {
+            "scoreFactorCode": "5",
+            "scoreFactorText": ""
+          },
+          {
+            "scoreFactorCode": "27",
+            "scoreFactorText": "Delinquent or derogatory status on revolving accounts is too recent"
+          },
+          {
+            "scoreFactorCode": "16",
+            "scoreFactorText": "Total of credit limits and loan amounts is too low"
+          }
+        ]
+      }
+    ],
+    "summaries": {
+      "tradeSummary": {
+        "mortgageTradesCount": "0",
+        "mortgageBalanceTotal": "0",
+        "mortgageHighCreditTotal": "0",
+        "mortgagePaymentsTotal": "0",
+        "mortgagePastDueTotal": "0",
+        "autoTradesCount": "3",
+        "autoBalanceTotal": "35500",
+        "autoHighCreditTotal": "69400",
+        "autoPaymentsTotal": "740",
+        "autoPastDueTotal": "0",
+        "educationTradesCount": "0",
+        "educationBalanceTotal": "0",
+        "educationHighCreditTotal": "0",
+        "educationPaymentsTotal": "0",
+        "educationPastDueTotal": "0",
+        "openTradesCount": "0",
+        "openBalanceTotal": "0",
+        "openHighCreditTotal": "0",
+        "openPaymentsTotal": "0",
+        "openPastDueTotal": "0",
+        "revolvingTradesCount": "7",
+        "revolvingBalanceTotal": "5500",
+        "revolvingHighCreditTotal": "32100",
+        "revolvingPaymentsTotal": "0",
+        "revolvingPastDueTotal": "0",
+        "unknownTradesCount": "0",
+        "unknownBalanceTotal": "0",
+        "unknownHighCreditTotal": "0",
+        "unknownPaymentsTotal": "0",
+        "unknownPastDueTotal": "0",
+        "installmentOtherTradesCount": "0",
+        "installmentOtherBalanceTotal": "0",
+        "installmentOtherHighCreditTotal": "0",
+        "installmentOtherPaymentsTotal": "0",
+        "installmentOtherPastDueTotal": "0",
+        "applicableMortgagePaymentsTotal": "0",
+        "applicableAutoPaymentsTotal": "740",
+        "applicableEducationPaymentsTotal": "0",
+        "applicableOpenPaymentsTotal": "0",
+        "applicableRevolvingPaymentsTotal": "0",
+        "applicableUnknownPaymentsTotal": "0",
+        "applicableInstallmentPaymentsTotal": "740",
+        "applicableInstallmentOtherPaymentsTotal": "0",
+        "applicableMortgageHighCreditTotal": "0",
+        "applicableAutoHighCreditTotal": "57800",
+        "applicableEducationHighCreditTotal": "0",
+        "applicableOpenHighCreditTotal": "0",
+        "applicableRevolvingHighCreditTotal": "10000",
+        "applicableUnknownHighCreditTotal": "0",
+        "applicableInstallmentHighCreditTotal": "57800",
+        "applicableInstallmentOtherHighCreditTotal": "0",
+        "tradesCount": "10",
+        "balanceTotal": "41000",
+        "applicablePaymentsTotal": "740",
+        "applicableHighCreditTotal": "67800",
+        "highCreditTotal": "101500",
+        "paymentsTotal": "740",
+        "pastDueTotal": "0",
+        "securedDebtBalanceTotal": "35500",
+        "unsecuredDebtBalanceTotal": "5500",
+        "oldestTradelineDate": "2007-10-20",
+        "oldestTradelineCreditorName": "NORTHSTAR BANK VISA",
+        "revolvingCreditUtilization": "55",
+        "totalDebtHighCreditRatio": "60"
+      },
+      "derogatorySummary": {
+        "chargeOffsCount": "2",
+        "collectionsCount": "0",
+        "bankruptciesCount": "0",
+        "publicRecordsCount": "1",
+        "satisfactoryTradelineCount": "8",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "inquiriesCount": "0",
+        "mostRecentLateDate": "2026-09-19",
+        "disputesCount": "0",
+        "currentAdverseTradelineCount": "0",
+        "priorAdverseTradelineCount": "0",
+        "otherCount": "0",
+        "securedDebtBalanceTotal": "35500",
+        "unsecuredDebtBalanceTotal": "5500"
+      }
+    }
+  }
+}

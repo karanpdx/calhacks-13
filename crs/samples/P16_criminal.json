@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.13,
+  "_headers": {
+    "RequestID": "bc76d375-c873-450d-b0a2-1f1563581a92",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "32",
+    "x-ratelimit-reset": "66"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "OYELARAN,SAMUEL"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

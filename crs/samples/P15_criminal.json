@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.12,
+  "_headers": {
+    "RequestID": "8a18691f-b342-4d40-bc5a-cb2ceaae6851",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "40",
+    "x-ratelimit-reset": "60"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "FARRAGUT,NICOLE"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

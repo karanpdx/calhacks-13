@@ -1,0 +1,65 @@
+{
+  "_status": 200,
+  "_latency_s": 0.18,
+  "_headers": {
+    "RequestID": "cec8f3a3-6cff-44e0-96ce-2332fd7bb7ee",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "93",
+    "x-ratelimit-reset": "21"
+  },
+  "body": {
+    "DetailedBLJReport": {
+      "JudgmentsFound": 0,
+      "Filters": {
+        "ExcludeBankruptcies": false,
+        "FilterVerbiage": "Judgment satisfied = 7 years; Judgment unsatisfied = 7 years; Lien released = 7 years; Lien unreleased = 10 years; Bankruptcy chapter 7 or 11 dismissed or discharged = 10 years; Bankruptcy chapter 7 or 11 not dismissed or discharged = 10 years; Bankruptcy chapter 13 dismissed or discharged = 7 years; Bankruptcy chapter 13 not dismissed or discharged = 10 years",
+        "SkipNameValidation": false
+      },
+      "Messages": {
+        "Message": {
+          "Text": "No Errors",
+          "Code": 0
+        }
+      },
+      "Results": {
+        "Bankruptcies": {
+          "BankruptcyRecord": {
+            "Status": "Discharged",
+            "Debtor": {
+              "Name": {
+                "FirstName": "ANGELA",
+                "UnparsedName": "ANGELA MORRISSEY",
+                "LastName": "MORRISSEY"
+              }
+            },
+            "CourtCaseNumber": "23-51234",
+            "FilingDate": {
+              "month": "05",
+              "year": 2023,
+              "day": "09"
+            },
+            "DischargeDate": {
+              "month": "01",
+              "year": 2024,
+              "day": 18
+            },
+            "Chapter": 7,
+            "DamarDocumentType": "Bankruptcy",
+            "FilingLocation": "Columbus, OH",
+            "FilingType": "Bankruptcy",
+            "Court": {
+              "Address": {
+                "State": "OH",
+                "City": "COLUMBUS"
+              },
+              "Id": "OHSB",
+              "Name": "US BANKRUPTCY COURT S.D. OHIO"
+            }
+          }
+        }
+      },
+      "BankruptciesFound": 1,
+      "LiensFound": 0
+    }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "_status": 200,
+  "_latency_s": 0.11,
+  "_headers": {
+    "RequestID": "70301f89-a74d-457e-8b6e-993ed4954518",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "70",
+    "x-ratelimit-reset": "38"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9109",
+      "name": "HOLLOWAY,DEREK"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "candidate": [
+          {
+            "offenses": {
+              "count": "1",
+              "offense": [
+                {
+                  "caseType": "FELONY",
+                  "description": "BURGLARY 2ND DEGREE - CLASS 4 FELONY",
+                  "arrestDate": "11/16/2020",
+                  "sentenceLength": "3 YEARS PROBATION",
+                  "statute": "18-4-203",
+                  "filingDate": "12/02/2020",
+                  "disposition": "CONVICTED",
+                  "dispositionDate": "06/15/2021",
+                  "offenseDate": "11/14/2020",
+                  "offenseCode": "18-4-203",
+                  "convictionDate": "06/15/2021",
+                  "convictionLocation": "DENVER COUNTY, CO",
+                  "probationSentenceLength": "3 YEARS",
+                  "court": "DENVER COUNTY DISTRICT COURT",
+                  "plea": "GUILTY"
+                }
+              ]
+            },
+            "subject": {
+              "category": "CRIMINAL",
+              "address": "4875 W COLFAX AVE",
+              "comments": "CLASS 4 FELONY",
+              "sex": "MALE",
+              "source": "CO DENVER COUNTY DISTRICT COURT",
+              "jurisdiction": "DENVER COUNTY",
+              "dob": "02/11/1986",
+              "state": "CO",
+              "fullName": "DEREK S HOLLOWAY",
+              "caseNumber": "20CR04417"
+            }
+          }
+        ],
+        "count": "1"
+      }
+    }
+  }
+}

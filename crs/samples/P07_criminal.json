@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.13,
+  "_headers": {
+    "RequestID": "4448a51c-815a-4461-af08-ce5cb07e1141",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "84",
+    "x-ratelimit-reset": "27"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "BELLAMY,MARCUS"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

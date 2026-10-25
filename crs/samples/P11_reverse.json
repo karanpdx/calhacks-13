@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.11,
+  "_headers": {
+    "RequestID": "907e3503-8c6d-4ccd-b356-3090c05e50e8",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "53",
+    "x-ratelimit-reset": "50"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": [
+        {
+          "firstName": "BRANDON",
+          "lastName": "SZABO",
+          "houseNo": "2640",
+          "streetName": "HIGHLAND AVE APT 7",
+          "address": "2640 HIGHLAND AVE APT 7",
+          "city": "NATIONAL CITY",
+          "state": "CA",
+          "postalCode": "91950"
+        }
+      ]
+    }
+  }
+}

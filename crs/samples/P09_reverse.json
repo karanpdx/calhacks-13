@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.13,
+  "_headers": {
+    "RequestID": "7146affa-79c0-45b0-9dd2-9fd205400473",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "68",
+    "x-ratelimit-reset": "39"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": [
+        {
+          "firstName": "DEREK",
+          "lastName": "HOLLOWAY",
+          "houseNo": "4875",
+          "streetName": "W COLFAX AVE",
+          "address": "4875 W COLFAX AVE",
+          "city": "DENVER",
+          "state": "CO",
+          "postalCode": "80204"
+        }
+      ]
+    }
+  }
+}

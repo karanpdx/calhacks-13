@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.09,
+  "_headers": {
+    "RequestID": "ec3e3d03-5b74-4b54-b3c6-cba2b0cdfddd",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "8",
+    "x-ratelimit-reset": "84"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": [
+        {
+          "firstName": "DOLORES",
+          "lastName": "WHITCOMB",
+          "houseNo": "612",
+          "streetName": "OCEAN VIEW DR",
+          "address": "612 OCEAN VIEW DR",
+          "city": "SANTA BARBARA",
+          "state": "CA",
+          "postalCode": "93109"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.1,
+  "_headers": {
+    "RequestID": "dd53e512-e639-4e4c-9fcc-1a96cd66ec35",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "83",
+    "x-ratelimit-reset": "28"
+  },
+  "body": {
+    "success": true,
+    "message": "Unified reverse completed successfully",
+    "data": {
+      "transactionId": "TC-REVERSE-0001",
+      "records": [
+        {
+          "firstName": "MARCUS",
+          "lastName": "BELLAMY",
+          "houseNo": "1507",
+          "streetName": "PEACHTREE INDUSTRIAL BLVD",
+          "address": "1507 PEACHTREE INDUSTRIAL BLVD",
+          "city": "ATLANTA",
+          "state": "GA",
+          "postalCode": "30341"
+        }
+      ]
+    }
+  }
+}

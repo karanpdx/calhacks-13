@@ -1,0 +1,630 @@
+{
+  "_status": 200,
+  "_latency_s": 0.13,
+  "_headers": {
+    "RequestID": "a0f8a40c-4238-478b-90d3-98f5bc4dac71",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "96",
+    "x-ratelimit-reset": "18"
+  },
+  "body": {
+    "requestData": {
+      "firstName": "ANGELA",
+      "lastName": "MORRISSEY",
+      "ssn": "666701006",
+      "addresses": [
+        {
+          "borrowerResidencyType": "Current",
+          "addressLine1": "960 MAPLEWOOD AVE",
+          "city": "COLUMBUS",
+          "state": "OH",
+          "postalCode": "43209"
+        }
+      ]
+    },
+    "repositoryIncluded": {
+      "transunion": false,
+      "experian": false,
+      "equifax": true
+    },
+    "responseDetail": {
+      "dateRequested": "2026-10-24T22:22:03.540401Z",
+      "requestingParty": {
+        "name": "CALHACKS13"
+      },
+      "creditBureauContact": {
+        "name": "CREDIT REPORTING SERVICES, INC",
+        "address": {
+          "addressLine1": "1024 IRON POINT ROAD",
+          "city": "FOLSOM",
+          "state": "CA",
+          "postalCode": "95630"
+        }
+      }
+    },
+    "responseAlertMessages": [
+      {
+        "borrowerSourceType": "Borrower",
+        "sourceType": "Equifax",
+        "responseAlertMessageCategoryType": "FACTARiskScoreValue",
+        "responseAlertMessageText": "FACTA: Risk Score Value - The borrower's Risk Score Value was negatively affected by the presence of credit inquiry records on their credit file"
+      }
+    ],
+    "creditFiles": [
+      {
+        "creditFileDetail": {
+          "borrowerSourceType": "Borrower",
+          "creditFileInfileDate": "2009-09-01",
+          "creditFileResultStatusType": "FileReturned",
+          "sourceType": "Equifax"
+        },
+        "aliases": [
+          {
+            "firstName": "ANGELA",
+            "lastName": "MORRISSEY",
+            "middleName": "M"
+          }
+        ],
+        "ssns": [],
+        "employments": [
+          {
+            "employerName": "TMNCBBZWFJMPPRAGHKX",
+            "employmentStatusType": "Current",
+            "employmentPositionDescription": "CSUGS"
+          },
+          {
+            "employerName": "CZMZPYEJOAPPGCPMUZQV",
+            "employmentStatusType": "Previous",
+            "employmentPositionDescription": "PNQ"
+          }
+        ]
+      }
+    ],
+    "inquiries": [
+      {
+        "creditorName": "CAPITAL AUTO FINANCE",
+        "borrowerSourceType": "Borrower",
+        "inquiryDate": "2026-08-19",
+        "businessType": "Finance",
+        "subscriberCode": "999FA05015",
+        "sourceType": "Equifax"
+      }
+    ],
+    "tradelines": [
+      {
+        "accountClosedDate": "2026-02-19",
+        "accountIdentifier": "CALHACKS-CO-1",
+        "accountOpenedDate": "2017-04-12",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2026-02-19",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": true,
+        "highBalanceAmount": "2200",
+        "lastActivityDate": "2026-02-19",
+        "monthsReviewedCount": "99",
+        "creditorName": "METRO BANK CARD 1",
+        "subscriberCode": "999FF07198",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "9",
+        "currentRatingType": "ChargeOff",
+        "paymentPatternData": "9CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Equifax",
+        "adverseRatings": {
+          "highestAdverseRatingDate": "2026-09-19",
+          "highestAdverseRatingCode": "9",
+          "highestAdverseRatingType": "ChargeOff",
+          "mostRecentAdverseRatingDate": "2026-09-19",
+          "mostRecentAdverseRatingCode": "9",
+          "mostRecentAdverseRatingType": "ChargeOff",
+          "priorAdverseRatings": [
+            {
+              "priorAdverseRatingDate": "2026-09-19",
+              "priorAdverseRatingCode": "9",
+              "priorAdverseRatingType": "ChargeOff"
+            }
+          ]
+        }
+      },
+      {
+        "accountClosedDate": "2026-02-19",
+        "accountIdentifier": "CALHACKS-CO-2",
+        "accountOpenedDate": "2017-04-12",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2026-02-19",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": true,
+        "highBalanceAmount": "2500",
+        "lastActivityDate": "2026-02-19",
+        "monthsReviewedCount": "99",
+        "creditorName": "METRO BANK CARD 2",
+        "subscriberCode": "999FF07198",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "9",
+        "currentRatingType": "ChargeOff",
+        "paymentPatternData": "9CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Equifax",
+        "adverseRatings": {
+          "highestAdverseRatingDate": "2026-09-19",
+          "highestAdverseRatingCode": "9",
+          "highestAdverseRatingType": "ChargeOff",
+          "mostRecentAdverseRatingDate": "2026-09-19",
+          "mostRecentAdverseRatingCode": "9",
+          "mostRecentAdverseRatingType": "ChargeOff",
+          "priorAdverseRatings": [
+            {
+              "priorAdverseRatingDate": "2026-09-19",
+              "priorAdverseRatingCode": "9",
+              "priorAdverseRatingType": "ChargeOff"
+            }
+          ]
+        }
+      },
+      {
+        "accountClosedDate": "2026-02-19",
+        "accountIdentifier": "CALHACKS-CO-3",
+        "accountOpenedDate": "2017-04-12",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2026-02-19",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": true,
+        "highBalanceAmount": "2800",
+        "lastActivityDate": "2026-02-19",
+        "monthsReviewedCount": "99",
+        "creditorName": "METRO BANK CARD 3",
+        "subscriberCode": "999FF07198",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "9",
+        "currentRatingType": "ChargeOff",
+        "paymentPatternData": "9CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Equifax",
+        "adverseRatings": {
+          "highestAdverseRatingDate": "2026-09-19",
+          "highestAdverseRatingCode": "9",
+          "highestAdverseRatingType": "ChargeOff",
+          "mostRecentAdverseRatingDate": "2026-09-19",
+          "mostRecentAdverseRatingCode": "9",
+          "mostRecentAdverseRatingType": "ChargeOff",
+          "priorAdverseRatings": [
+            {
+              "priorAdverseRatingDate": "2026-09-19",
+              "priorAdverseRatingCode": "9",
+              "priorAdverseRatingType": "ChargeOff"
+            }
+          ]
+        }
+      },
+      {
+        "accountClosedDate": "2026-02-19",
+        "accountIdentifier": "CALHACKS-CO-4",
+        "accountOpenedDate": "2017-04-12",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2026-02-19",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": true,
+        "highBalanceAmount": "3100",
+        "lastActivityDate": "2026-02-19",
+        "monthsReviewedCount": "99",
+        "creditorName": "METRO BANK CARD 4",
+        "subscriberCode": "999FF07198",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "9",
+        "currentRatingType": "ChargeOff",
+        "paymentPatternData": "9CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Equifax",
+        "adverseRatings": {
+          "highestAdverseRatingDate": "2026-09-19",
+          "highestAdverseRatingCode": "9",
+          "highestAdverseRatingType": "ChargeOff",
+          "mostRecentAdverseRatingDate": "2026-09-19",
+          "mostRecentAdverseRatingCode": "9",
+          "mostRecentAdverseRatingType": "ChargeOff",
+          "priorAdverseRatings": [
+            {
+              "priorAdverseRatingDate": "2026-09-19",
+              "priorAdverseRatingCode": "9",
+              "priorAdverseRatingType": "ChargeOff"
+            }
+          ]
+        }
+      },
+      {
+        "accountIdentifier": "CALHACKS-REV-1",
+        "accountOpenedDate": "2012-10-19",
+        "accountOwnershipType": "Individual",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Open",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "creditLimitAmount": "1500",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "600",
+        "lastActivityDate": "2026-09-19",
+        "monthsReviewedCount": "99",
+        "creditorName": "NORTHSTAR BANK VISA",
+        "subscriberCode": "999FF07198",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "300",
+        "businessType": "Finance",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Equifax"
+      },
+      {
+        "accountClosedDate": "2025-10-19",
+        "accountIdentifier": "CALHACKS-CLOSED-1",
+        "accountOpenedDate": "2020-10-19",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2025-10-19",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "4000",
+        "lastActivityDate": "2025-10-19",
+        "monthsReviewedCount": "72",
+        "creditorName": "FORMER LENDER 1",
+        "subscriberCode": "999FF07198",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Equifax"
+      },
+      {
+        "accountClosedDate": "2025-04-20",
+        "accountIdentifier": "CALHACKS-CLOSED-2",
+        "accountOpenedDate": "2019-10-20",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2025-04-20",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Installment",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "4900",
+        "lastActivityDate": "2025-04-20",
+        "monthsReviewedCount": "84",
+        "creditorName": "FORMER LENDER 2",
+        "subscriberCode": "999FF07198",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Automotive",
+        "loanType": "Automobile",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Equifax"
+      },
+      {
+        "accountClosedDate": "2024-10-19",
+        "accountIdentifier": "CALHACKS-CLOSED-3",
+        "accountOpenedDate": "2018-10-19",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2024-10-19",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "5800",
+        "lastActivityDate": "2024-10-19",
+        "monthsReviewedCount": "96",
+        "creditorName": "FORMER LENDER 3",
+        "subscriberCode": "999FF07198",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Equifax"
+      },
+      {
+        "accountClosedDate": "2024-04-19",
+        "accountIdentifier": "CALHACKS-CLOSED-4",
+        "accountOpenedDate": "2017-10-19",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2024-04-19",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Installment",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "6700",
+        "lastActivityDate": "2024-04-19",
+        "monthsReviewedCount": "99",
+        "creditorName": "FORMER LENDER 4",
+        "subscriberCode": "999FF07198",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Automotive",
+        "loanType": "Automobile",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Equifax"
+      },
+      {
+        "accountClosedDate": "2023-10-20",
+        "accountIdentifier": "CALHACKS-CLOSED-5",
+        "accountOpenedDate": "2016-10-19",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2023-10-20",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Revolving",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "7600",
+        "lastActivityDate": "2023-10-20",
+        "monthsReviewedCount": "99",
+        "creditorName": "FORMER LENDER 5",
+        "subscriberCode": "999FF07198",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Finance",
+        "loanType": "CreditCard",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Equifax"
+      },
+      {
+        "accountClosedDate": "2023-04-20",
+        "accountIdentifier": "CALHACKS-CLOSED-6",
+        "accountOpenedDate": "2015-10-20",
+        "accountOwnershipType": "Individual",
+        "accountPaidDate": "2023-04-20",
+        "accountReportedDate": "2026-09-19",
+        "accountStatusType": "Paid",
+        "accountType": "Installment",
+        "borrowerSourceType": "Borrower",
+        "derogatoryDataIndicator": false,
+        "highBalanceAmount": "8500",
+        "lastActivityDate": "2023-04-20",
+        "monthsReviewedCount": "99",
+        "creditorName": "FORMER LENDER 6",
+        "subscriberCode": "999FF07198",
+        "pastDueAmount": "0",
+        "currentBalanceAmount": "0",
+        "businessType": "Automotive",
+        "loanType": "Automobile",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "currentRatingCode": "C",
+        "currentRatingType": "AsAgreed",
+        "paymentPatternData": "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC",
+        "paymentPatternStartDate": "2026-09-19",
+        "sourceType": "Equifax"
+      }
+    ],
+    "publicRecords": [
+      {
+        "accountOwnershipType": "Individual",
+        "borrowerSourceType": "Borrower",
+        "bankruptcyType": "Personal",
+        "dispositionDate": "2024-01-18",
+        "dispositionType": "Discharged",
+        "filedDate": "2023-05-09",
+        "reportedDate": "2024-01-18",
+        "sourceType": "Equifax",
+        "publicRecordType": "BankruptcyChapter7"
+      }
+    ],
+    "scores": [
+      {
+        "borrowerSourceType": "Borrower",
+        "modelName": "Vantage 4.0",
+        "modelNameType": "05402",
+        "sourceType": "Equifax",
+        "factaInquiriesIndicator": true,
+        "scoreValue": "580",
+        "scoreRankPercentileValue": "12",
+        "scoreMaximumValue": "850",
+        "scoreMinimumValue": "300",
+        "scoreFactors": [
+          {
+            "scoreFactorCode": "68",
+            "scoreFactorText": "LACK OF REAL ESTATE SECURED LOAN INFORMATION"
+          },
+          {
+            "scoreFactorCode": "4",
+            "scoreFactorText": "BALANCES ON ACCTS TOO HIGH COMPARED TO CREDIT LIMITS AND LOAN AMOUNTS"
+          },
+          {
+            "scoreFactorCode": "24",
+            "scoreFactorText": "TOO MANY BANKCARDS WITH HIGH BALANCE COMPARED TO CREDIT LIMIT"
+          },
+          {
+            "scoreFactorCode": "7",
+            "scoreFactorText": "TOO MANY DELINQUENT OR DEROGATORY ACCOUNTS"
+          }
+        ]
+      },
+      {
+        "borrowerSourceType": "Borrower",
+        "modelName": "02958",
+        "modelNameType": "FICO SCORE 5",
+        "sourceType": "Equifax",
+        "factaInquiriesIndicator": true,
+        "scoreValue": "580",
+        "scoreFactors": [
+          {
+            "scoreFactorCode": "38",
+            "scoreFactorText": "SERIOUS DELINQUENCY AND PUBLIC RECORD OR COLLECTION FILED"
+          },
+          {
+            "scoreFactorCode": "13",
+            "scoreFactorText": "TIME SINCE DELINQUENCY IS TOO RECENT OR UNKNOWN"
+          },
+          {
+            "scoreFactorCode": "18",
+            "scoreFactorText": "NUMBER OF ACCOUNTS WITH DELINQUENCY"
+          },
+          {
+            "scoreFactorCode": "10",
+            "scoreFactorText": "RATIO OF BALANCE TO LIMIT ON BANK REVOLVING OR OTHER REV ACCTS TOO HIGH"
+          }
+        ]
+      }
+    ],
+    "summaries": {
+      "tradeSummary": {
+        "mortgageTradesCount": "0",
+        "mortgageBalanceTotal": "0",
+        "mortgageHighCreditTotal": "0",
+        "mortgagePaymentsTotal": "0",
+        "mortgagePastDueTotal": "0",
+        "autoTradesCount": "3",
+        "autoBalanceTotal": "0",
+        "autoHighCreditTotal": "20100",
+        "autoPaymentsTotal": "0",
+        "autoPastDueTotal": "0",
+        "educationTradesCount": "0",
+        "educationBalanceTotal": "0",
+        "educationHighCreditTotal": "0",
+        "educationPaymentsTotal": "0",
+        "educationPastDueTotal": "0",
+        "openTradesCount": "0",
+        "openBalanceTotal": "0",
+        "openHighCreditTotal": "0",
+        "openPaymentsTotal": "0",
+        "openPastDueTotal": "0",
+        "revolvingTradesCount": "8",
+        "revolvingBalanceTotal": "300",
+        "revolvingHighCreditTotal": "29500",
+        "revolvingPaymentsTotal": "0",
+        "revolvingPastDueTotal": "0",
+        "unknownTradesCount": "0",
+        "unknownBalanceTotal": "0",
+        "unknownHighCreditTotal": "0",
+        "unknownPaymentsTotal": "0",
+        "unknownPastDueTotal": "0",
+        "installmentOtherTradesCount": "0",
+        "installmentOtherBalanceTotal": "0",
+        "installmentOtherHighCreditTotal": "0",
+        "installmentOtherPaymentsTotal": "0",
+        "installmentOtherPastDueTotal": "0",
+        "applicableMortgagePaymentsTotal": "0",
+        "applicableAutoPaymentsTotal": "0",
+        "applicableEducationPaymentsTotal": "0",
+        "applicableOpenPaymentsTotal": "0",
+        "applicableRevolvingPaymentsTotal": "0",
+        "applicableUnknownPaymentsTotal": "0",
+        "applicableInstallmentPaymentsTotal": "0",
+        "applicableInstallmentOtherPaymentsTotal": "0",
+        "applicableMortgageHighCreditTotal": "0",
+        "applicableAutoHighCreditTotal": "0",
+        "applicableEducationHighCreditTotal": "0",
+        "applicableOpenHighCreditTotal": "0",
+        "applicableRevolvingHighCreditTotal": "1500",
+        "applicableUnknownHighCreditTotal": "0",
+        "applicableInstallmentHighCreditTotal": "0",
+        "applicableInstallmentOtherHighCreditTotal": "0",
+        "tradesCount": "11",
+        "balanceTotal": "300",
+        "applicablePaymentsTotal": "0",
+        "applicableHighCreditTotal": "1500",
+        "highCreditTotal": "49600",
+        "paymentsTotal": "0",
+        "pastDueTotal": "0",
+        "securedDebtBalanceTotal": "0",
+        "unsecuredDebtBalanceTotal": "300",
+        "oldestTradelineDate": "2012-10-19",
+        "oldestTradelineCreditorName": "NORTHSTAR BANK VISA",
+        "revolvingCreditUtilization": "20",
+        "totalDebtHighCreditRatio": "20"
+      },
+      "derogatorySummary": {
+        "chargeOffsCount": "4",
+        "collectionsCount": "0",
+        "bankruptciesCount": "0",
+        "publicRecordsCount": "1",
+        "satisfactoryTradelineCount": "7",
+        "_30DayLates": "0",
+        "_60DayLates": "0",
+        "_90DayLates": "0",
+        "inquiriesCount": "1",
+        "mostRecentLateDate": "2026-09-19",
+        "disputesCount": "0",
+        "currentAdverseTradelineCount": "0",
+        "priorAdverseTradelineCount": "0",
+        "otherCount": "0",
+        "securedDebtBalanceTotal": "0",
+        "unsecuredDebtBalanceTotal": "300"
+      }
+    }
+  }
+}

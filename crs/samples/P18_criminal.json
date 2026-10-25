@@ -1,0 +1,23 @@
+{
+  "_status": 200,
+  "_latency_s": 0.1,
+  "_headers": {
+    "RequestID": "345097b3-fe2b-46d4-ad84-b195a9b18986",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "25",
+    "x-ratelimit-reset": "72"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9100",
+      "name": "ABERNATHY,TERRENCE"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "count": "0",
+        "message": "No Criminal Records Found"
+      }
+    }
+  }
+}

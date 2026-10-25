@@ -1,0 +1,60 @@
+{
+  "_status": 200,
+  "_latency_s": 0.12,
+  "_headers": {
+    "RequestID": "1881bdba-fd9d-4743-9f3f-cc0ab1d94fd3",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "62",
+    "x-ratelimit-reset": "43"
+  },
+  "body": {
+    "orderResponse": {
+      "message": "Request Results",
+      "responseID": "9110",
+      "name": "KOWALCZYK,LAUREN"
+    },
+    "cicCriminal": {
+      "candidates": {
+        "candidate": [
+          {
+            "offenses": {
+              "count": "1",
+              "offense": [
+                {
+                  "caseType": "MISDEMEANOR",
+                  "description": "DISORDERLY CONDUCT",
+                  "arrestDate": "03/08/2014",
+                  "sentenceLength": "",
+                  "statute": "750.167",
+                  "filingDate": "03/20/2014",
+                  "disposition": "DISMISSED",
+                  "dispositionDate": "07/11/2014",
+                  "offenseDate": "03/08/2014",
+                  "offenseCode": "750.167",
+                  "convictionDate": "",
+                  "convictionLocation": "",
+                  "probationSentenceLength": "",
+                  "court": "36TH DISTRICT COURT - DETROIT",
+                  "plea": "NOT GUILTY"
+                }
+              ]
+            },
+            "subject": {
+              "category": "CRIMINAL",
+              "address": "1181 WOODWARD AVE",
+              "comments": "DISMISSED BY PROSECUTION",
+              "sex": "FEMALE",
+              "source": "MI WAYNE COUNTY 36TH DISTRICT COURT",
+              "jurisdiction": "WAYNE COUNTY",
+              "dob": "10/03/1992",
+              "state": "MI",
+              "fullName": "LAUREN B KOWALCZYK",
+              "caseNumber": "14-M-02211"
+            }
+          }
+        ],
+        "count": "1"
+      }
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "_status": 200,
+  "_latency_s": 0.12,
+  "_headers": {
+    "RequestID": "bdc83c0c-4130-4e9f-bb2e-1fb1f2f328a5",
+    "x-ratelimit-limit": "80",
+    "x-ratelimit-remaining": "100",
+    "x-ratelimit-reset": "15"
+  },
+  "body": {
+    "DetailedBLJReport": {
+      "JudgmentsFound": 0,
+      "Filters": {
+        "ExcludeBankruptcies": false,
+        "FilterVerbiage": "Judgment satisfied = 7 years; Judgment unsatisfied = 7 years; Lien released = 7 years; Lien unreleased = 10 years; Bankruptcy chapter 7 or 11 dismissed or discharged = 10 years; Bankruptcy chapter 7 or 11 not dismissed or discharged = 10 years; Bankruptcy chapter 13 dismissed or discharged = 7 years; Bankruptcy chapter 13 not dismissed or discharged = 10 years",
+        "SkipNameValidation": false
+      },
+      "Messages": {
+        "Message": {
+          "Text": "No Errors",
+          "Code": 0
+        }
+      },
+      "Results": "",
+      "BankruptciesFound": 0,
+      "LiensFound": 0
+    }
+  }
+}
