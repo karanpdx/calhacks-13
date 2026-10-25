@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from . import finance, pricing as P
-from .messages import Message, Terms, OFFER, DECLINE, APR_CAP
+from .messages import Message, Terms, OFFER, DECLINE, APR_CAP, REASON_CODES
 
 
 @dataclass
@@ -25,6 +25,24 @@ class Quote:
     term: int = 36
     fee: float = 0.0
     pd: float = 0.0              # its estimate of the borrower's annual probability of default
+    code: Optional[str] = None   # when not eligible: one of messages.REASON_CODES
+
+
+def no(code, reason):
+    """An ineligible Quote: a fixed reason code plus the plain sentence (sentences are matched by hood.py: keep them)."""
+    assert code in REASON_CODES, code
+    return Quote(False, reason, code=code)
+
+
+def _derog(p):
+    """The code for the most serious negative item, for declines that name several in one sentence."""
+    if p.get("bankruptcies") or p.get("bankruptcy_public_record"):
+        return "BANKRUPTCY_ON_FILE"
+    if p.get("chargeoffs"):
+        return "CHARGEOFF_ON_FILE"
+    if p.get("collections"):
+        return "COLLECTION_ON_FILE"
+    return "RECENT_LATES"
 
 
 # ---------------------------------------------------------------- each lender's private books (illustrative)
@@ -77,7 +95,7 @@ def priced(lender_id, p, reason):
     amt, term = b.max_amount, b.preferred_term
     flo = P.floor(b, p, amt, term)
     if flo > APR_CAP:
-        return Quote(False, f"at this score the risk can't be priced under the {APR_CAP:g}% rate cap")
+        return no("OVER_RATE_CAP", f"at this score the risk can't be priced under the {APR_CAP:g}% rate cap")
     return Quote(True, reason, min(P.opening(b, p, amt, term), APR_CAP), flo,
                  round(flo - P.floor(b, p, amt, term, autopay=True), 2), amt, term, b.fee,
                  round(P.pd_annual(p, b.pd_model)[0], 4))
@@ -85,47 +103,47 @@ def priced(lender_id, p, reason):
 
 def prime_bank(p):
     if p["no_file"] or p["no_score"]:
-        return Quote(False, "needs a scored credit file")
+        return no("NO_SCORE", "needs a scored credit file")
     if p["score_low"] < 700:
-        return Quote(False, f"lowest score {p['score_low']} is below our 700 minimum")
+        return no("SCORE_BELOW_MIN", f"lowest score {p['score_low']} is below our 700 minimum")
     if p["late_payments"] or p["collections"] or p["chargeoffs"]:
-        return Quote(False, "needs a file with no late payments, collections or charge-offs")
+        return no(_derog(p), "needs a file with no late payments, collections or charge-offs")
     if p["thin_file"]:
-        return Quote(False, "needs at least 3 accounts of history")
+        return no("FEW_ACCOUNTS", "needs at least 3 accounts of history")
     if p["bureau_disagreements"]:
-        return Quote(False, "the bureaus disagree about this file; we only lend on consistent files")
+        return no("BUREAUS_DISAGREE", "the bureaus disagree about this file; we only lend on consistent files")
     return priced("prime_bank", p, "prime file")
 
 
 def campus_cu(p):
     if p["no_file"]:
-        return Quote(False, "needs at least one account on file")
+        return no("FEW_ACCOUNTS", "needs at least one account on file")
     if p["collections"] or p["chargeoffs"] or p["bankruptcies"]:
-        return Quote(False, "no collections, charge-offs or bankruptcies")
+        return no(_derog(p), "no collections, charge-offs or bankruptcies")
     if p["score_low"] is not None and p["score_low"] < 620:
-        return Quote(False, f"lowest score {p['score_low']} is below our 620 minimum")
+        return no("SCORE_BELOW_MIN", f"lowest score {p['score_low']} is below our 620 minimum")
     if not (p["thin_file"] or p["no_score"] or (p["file_age_years"] or 0) <= 12):
-        return Quote(False, "membership is for students and people with short credit histories")
+        return no("OUTSIDE_PRODUCT", "membership is for students and people with short credit histories")
     return priced("campus_cu", p, "short histories welcome")
 
 
 def newstart_fintech(p):
     if p["identity"] != "strong":
-        return Quote(False, "we lend on identity strength, and this identity isn't strong enough")
+        return no("IDENTITY_UNCONFIRMED", "we lend on identity strength, and this identity isn't strong enough")
     if p["bankruptcies"]:
-        return Quote(False, "no bankruptcies")
+        return no("BANKRUPTCY_ON_FILE", "no bankruptcies")
     if not (p["no_file"] or p["no_score"] or p["thin_file"] or (p["score_low"] or 0) >= 600):
-        return Quote(False, "we focus on new-to-credit and thin files")
+        return no("OUTSIDE_PRODUCT", "we focus on new-to-credit and thin files")
     return priced("newstart", p, "new to credit, strong identity")
 
 
 def second_chance(p):
     if p["identity"] == "weak":
-        return Quote(False, "identity checks didn't pass")
+        return no("IDENTITY_UNCONFIRMED", "identity checks didn't pass")
     if p["no_file"] or p["score_low"] is None:
-        return Quote(False, "needs a scored file")
+        return no("NO_SCORE", "needs a scored file")
     if p["score_low"] < 500:
-        return Quote(False, f"lowest score {p['score_low']} is below our 500 minimum")
+        return no("SCORE_BELOW_MIN", f"lowest score {p['score_low']} is below our 500 minimum")
     return priced("second_chance", p, "rebuilding credit")
 
 
@@ -136,32 +154,32 @@ LADDER_MIN_SCORE = 500
 def harbor_newcomer(p):
     """Uses: no_file, thin_file, identity_score, collections, chargeoffs, bankruptcies (+ positive evidence in price)."""
     if not (p["no_file"] or p["thin_file"]):
-        return Quote(False, "we serve people new to credit: no file, or fewer than 3 accounts")
+        return no("OUTSIDE_PRODUCT", "we serve people new to credit: no file, or fewer than 3 accounts")
     if p["identity_score"] < HARBOR_MIN_IDENTITY:
-        return Quote(False, f"we lend on identity strength, and an identity score of {p['identity_score']} is below "
+        return no("IDENTITY_UNCONFIRMED", f"we lend on identity strength, and an identity score of {p['identity_score']} is below "
                             f"our {HARBOR_MIN_IDENTITY} minimum")
     if p["collections"] or p["chargeoffs"] or p["bankruptcies"] or p["bankruptcy_public_record"]:
-        return Quote(False, "no collections, charge-offs or bankruptcies")
+        return no(_derog(p), "no collections, charge-offs or bankruptcies")
     return priced("harbor", p, "new to credit, priced on identity strength")
 
 
 def ladder_builder(p):
     """Uses: identity, no_file, chargeoffs, bankruptcy_public_record/discharged, collections, late_payments, score_low."""
     if p["identity"] == "weak":
-        return Quote(False, "identity checks didn't pass")
+        return no("IDENTITY_UNCONFIRMED", "identity checks didn't pass")
     if p["no_file"]:
-        return Quote(False, "our builder loans are for people rebuilding a file they already have")
+        return no("OUTSIDE_PRODUCT", "our builder loans are for people rebuilding a file they already have")
     rebuilding = p["chargeoffs"] or p["bankruptcy_discharged"]
     if not rebuilding:
-        return Quote(False, "we serve people rebuilding after charge-offs or a discharged bankruptcy")
+        return no("OUTSIDE_PRODUCT", "we serve people rebuilding after charge-offs or a discharged bankruptcy")
     if p["bankruptcy_public_record"] and not p["bankruptcy_discharged"]:
-        return Quote(False, "a bankruptcy still in progress; we can help once it's discharged")
+        return no("BANKRUPTCY_ON_FILE", "a bankruptcy still in progress; we can help once it's discharged")
     if p["collections"]:
-        return Quote(False, "no open collections")
+        return no("COLLECTION_ON_FILE", "no open collections")
     if p["late_payments"]:
-        return Quote(False, "needs no late payments since the past problems")
+        return no("RECENT_LATES", "needs no late payments since the past problems")
     if p["score_low"] is not None and p["score_low"] < LADDER_MIN_SCORE:
-        return Quote(False, f"lowest score {p['score_low']} is below our {LADDER_MIN_SCORE} minimum")
+        return no("SCORE_BELOW_MIN", f"lowest score {p['score_low']} is below our {LADDER_MIN_SCORE} minimum")
     return priced("ladder", p, "rebuilding credit with a small builder loan")
 
 
@@ -234,19 +252,19 @@ class RuleLender:
         self.passport, self.intent_ask = passport, intent.ask or {}
         self.quote = q = self.policy(passport)
         if not q.eligible:
-            return Message(DECLINE, self.id, to=intent.sender, text=f"{self.name}: {q.reason}.")
+            return Message(DECLINE, self.id, to=intent.sender, reason_code=q.code, text=f"{self.name}: {q.reason}.")
         term = self._term(self.intent_ask)
         if term is None:
-            return Message(DECLINE, self.id, to=intent.sender,
+            return Message(DECLINE, self.id, to=intent.sender, reason_code="OUTSIDE_PRODUCT",
                            text=f"{self.name}: we only lend for {', '.join(map(str, self.book.terms))} months.")
         amt = min(self.intent_ask.get("amount", q.max_amount), q.max_amount)
         if self.book and amt < self.book.min_amount:
-            return Message(DECLINE, self.id, to=intent.sender,
+            return Message(DECLINE, self.id, to=intent.sender, reason_code="OUTSIDE_PRODUCT",
                            text=f"{self.name}: our loans start at ${self.book.min_amount:,.0f}.")
         base = Terms(amt, 0.0, term, False, q.fee)
         apr = min(self.opening_for(base), APR_CAP)
         if self.floor_for(base) > APR_CAP:
-            return Message(DECLINE, self.id, to=intent.sender,
+            return Message(DECLINE, self.id, to=intent.sender, reason_code="OVER_RATE_CAP",
                            text=f"{self.name}: at this score the risk can't be priced under the {APR_CAP:g}% rate cap.")
         self.current = Terms(amt, apr, term, False, q.fee)
         return Message(OFFER, self.id, to=intent.sender, terms=self.current,
@@ -276,7 +294,7 @@ class RuleLender:
                 why = f"; we can't profitably match {vq['apr']}%"
         apr, fee = self.within_books(round(max(want.apr, target, flo), 2), term, autopay, fee)
         if apr > APR_CAP:
-            return Message(DECLINE, self.id, to=counter.sender, offer_id=counter.offer_id,
+            return Message(DECLINE, self.id, to=counter.sender, offer_id=counter.offer_id, reason_code="OVER_RATE_CAP",
                            text=f"{self.name}: at {term} months we can't price it under the {APR_CAP:g}% cap.")
         new = Terms(cur.amount, apr, term, autopay, fee)
         if new.key() == cur.key():

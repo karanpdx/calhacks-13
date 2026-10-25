@@ -18,6 +18,22 @@ DECLINE = "DECLINE"    # either side: no deal
 WITHDRAW = "WITHDRAW"  # lender: pull its offer (allowed only before acceptance)
 TYPES = {INTENT, OFFER, COUNTER, ACCEPT, DECLINE, WITHDRAW}
 
+# Fixed reason codes a lender's DECLINE carries (`Message.reason_code`), next to its plain sentence in `text`.
+# A "this is our best" reply to a counter carries none: the lender's offer stays live, so nothing was declined.
+REASON_CODES = {
+    "NO_SCORE": "no credit score on file",
+    "FEW_ACCOUNTS": "too few accounts on file",
+    "FILE_TOO_NEW": "credit file too new",
+    "SCORE_BELOW_MIN": "score below the lender's minimum",
+    "RECENT_LATES": "late payments on file",
+    "COLLECTION_ON_FILE": "a collection on file",
+    "CHARGEOFF_ON_FILE": "a charged-off account on file",
+    "BANKRUPTCY_ON_FILE": "a bankruptcy on file",
+    "BUREAUS_DISAGREE": "the credit bureaus disagree about the file",
+    "IDENTITY_UNCONFIRMED": "identity evidence not strong enough",
+    "OVER_RATE_CAP": "the risk can't be priced under the rate cap",
+    "OUTSIDE_PRODUCT": "outside what this lender offers",
+}
 CONCESSIONS = {"autopay"}  # things a borrower may agree to in exchange for a lower rate
 APR_CAP = 36.0             # common state-law ceiling for consumer installment loans; hard limit in the exchange
 
@@ -80,6 +96,7 @@ class Message:
     ask: Optional[dict] = None        # INTENT only: {"amount", "term_range", "purpose"}; never the person's max APR
     cite: Optional[str] = None        # COUNTER only: a rival's live offer id the borrower shows as proof of a better
                                       # deal. The referee verifies it and passes the lender only its terms, never its source
+    reason_code: Optional[str] = None  # DECLINE by a lender: one of REASON_CODES (structured, unlike `text`)
     text: str = ""                    # free text: UNTRUSTED, never acted on by the referee
     round: int = 0
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])
