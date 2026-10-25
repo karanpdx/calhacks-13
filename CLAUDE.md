@@ -62,7 +62,8 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
 - `app/main.py`: FastAPI: `/api/personas`, `/api/decide/{P}`, `/api/scorecard`,
   `/api/exchange/{P}?scenario=...&watchdog=1&review=0` (watchdog on by default; `review=1` = Claude pass),
   `/api/exchange/{P}/stream?...&pace=0.6` (same session as server-sent events, one per referee event, then
-  `result` and `done`), `POST /api/chat/mandate {"messages": [{"role": "user"|"agent", "content"}]}`
+  `result` and `done`; `live=1` uses `FallbackSource`: live sandbox per product, saved sample if a call fails, every
+  fallback listed in `live_note`), `POST /api/chat/mandate {"messages": [{"role": "user"|"agent", "content"}]}`
 - `app/static/index.html`: screening view
 - `app/static/exchange.html`: borrower app: chat -> limits (monthly payment first) -> live market -> deal / no deal /
   blocked, plus the "How your deal was made" judge panel. http://127.0.0.1:8000/static/exchange.html
@@ -71,13 +72,14 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
 ## Commands
 ```
 pip install -r requirements.txt
-pytest                                        # 135 offline tests
+pytest                                        # 139 offline tests
 python -m exchange.demo P01                   # one market session in the terminal
 python -m exchange.demo P01 --scenario injection
 python -m exchange.demo P03 --max-apr 16 --json
 python -m exchange.demo P17 --watchdog             # bureau disagreement flags + what to do
 python -m exchange.demo P01 --scenario drift --watchdog --review   # + Claude review (needs ANTHROPIC_API_KEY)
 uvicorn app.main:app --reload                 # http://127.0.0.1:8000
+# live CRS: export CRS_USER/CRS_PASS, put the Postman collection in crs/, open /static/exchange.html?live=1
 ```
 
 ## Agent interfaces (how to plug in Claude-powered agents)

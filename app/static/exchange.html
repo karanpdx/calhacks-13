@@ -268,6 +268,8 @@ th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; colo
   .feed { max-height: none; }
 }
 .pill .short { display: none; }
+.pill.data { background: var(--surface); color: var(--muted); border-color: var(--line); }
+.pill.data.live { background: var(--good-soft); color: var(--good); border-color: transparent; font-weight: 700; }
 @media (max-width: 600px) {
   .top { position: static; gap: 8px; }
   .pill .long { display: none; }
@@ -293,6 +295,7 @@ th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; colo
     <span id="app-name">Credit Agent Exchange</span>
   </div>
   <span class="pill"><span class="long">Demo: fictional people, simulated lenders</span><span class="short">Sandbox demo</span></span>
+  <span class="pill data" id="data-pill" title="Where the credit and identity data comes from">Saved CRS data</span>
   <button class="btn" id="hood-toggle" type="button" aria-controls="hood" aria-expanded="false">How your deal was made</button>
 </header>
 
@@ -440,7 +443,7 @@ th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; colo
   // ------------------------------------------------------------------ state
   var S = {
     persona: null, personas: [], chat: [], chatBusy: false, mandate: null, chatSource: null,
-    scenario: "normal", scenarios: {}, pace: 0.6, es: null, run: null
+    scenario: "normal", scenarios: {}, pace: 0.6, es: null, run: null, live: false
   };
 
   // ------------------------------------------------------------------ helpers
@@ -725,6 +728,7 @@ th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; colo
     });
     var auto = Array.isArray(m.allow) ? m.allow.indexOf("autopay") >= 0 : (m.autopay == null ? true : !!m.autopay);
     p.set("autopay", auto ? "1" : "0");
+    if (S.live) p.set("live", "1");
     return "/api/exchange/" + encodeURIComponent(S.persona || "P01") + "/stream?" + p.toString();
   }
   function stopStream() { if (S.es) { try { S.es.close(); } catch (e) {} S.es = null; } }
@@ -767,7 +771,7 @@ th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; colo
 
   function onEvent(kind, d) {
     var run = S.run;
-    if (kind === "meta") { run.meta = d; if (d && str(d.live_note)) sourceLine(d.live_note); return; }
+    if (kind === "meta") { run.meta = d; if (d) setDataPill(d.data_source, d.live_note); if (d && str(d.live_note)) sourceLine(d.live_note); return; }
     if (kind === "done") { run.finished = true; stopStream(); if (!run.result) runError(); return; }
     if (kind === "result") { run.result = d || {}; run.finished = true; renderResult(); return; }
     if (!d) return;
@@ -1250,14 +1254,27 @@ th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; colo
     if (Array.isArray(u.crs_products) && u.crs_products.length) renderCrs(u.crs_products);
     else if (run.gate) renderCrs(null, run.gate.crs_products);
     renderSimulated(u.simulated);
-    var src = run.gate && run.gate.source;
+    var src = (run.result && run.result.data_source) || (run.gate && run.gate.source);
+    var note = (run.result && str(run.result.live_note)) || (run.meta && str(run.meta.live_note));
+    setDataPill(src, note);
     sourceLine([src ? (src === "samples" ? "Data: saved CRS sandbox responses" : "Data: live CRS sandbox") : null,
-                run.meta && str(run.meta.live_note)].filter(Boolean).join(" · "));
+                note].filter(Boolean).join(" · "));
+  }
+
+  // ------------------------------------------------------------------ data source (?live=1)
+  function setDataPill(src, note) {
+    var pill = $("data-pill"), live = src ? src === "live" : S.live;
+    var partial = live && /fell back/.test(note || "");
+    pill.classList.toggle("live", live);
+    pill.textContent = live ? (partial ? "Live CRS sandbox (some saved)" : "Live CRS sandbox") : (S.live ? "Saved CRS data (live unavailable)" : "Saved CRS data");
+    if (note) pill.title = note;
   }
 
   // ------------------------------------------------------------------ boot
   function boot() {
     var params = new URLSearchParams(location.search);
+    S.live = params.get("live") === "1";
+    setDataPill(null, null);
     document.body.classList.toggle("hood-collapsed", params.get("hood") === "0");
     syncHood();
     renderStats(); renderSimulated(null);

@@ -65,3 +65,34 @@ class LiveSource:
 
     def personas(self):
         return sorted(self.c.personas)
+
+
+class FallbackSource:
+    """Live CRS sandbox first; if a product call fails (error, timeout, non-200), use the saved sample for that product
+    so a demo never breaks. Every fallback is recorded in `fallbacks` and shown to the person, never hidden."""
+    name = "live"
+
+    def __init__(self, live, samples=None):
+        self.live, self.samples = live, samples or SampleSource()
+        self.log, self.fallbacks = live.log, []
+
+    def get(self, persona, product):
+        try:
+            body = self.live.get(persona, product)
+        except Exception as e:  # type only: never surface credentials or vendor bodies
+            body, why = None, type(e).__name__
+        else:
+            why = "no usable response"
+        if body is not None:
+            return body
+        self.fallbacks.append({"product": product, "why": why})
+        return self.samples.get(persona, product)
+
+    def applicant(self, persona):
+        try:
+            return self.live.applicant(persona)
+        except Exception:
+            return self.samples.applicant(persona)
+
+    def personas(self):
+        return self.samples.personas()
