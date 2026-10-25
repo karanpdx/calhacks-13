@@ -74,7 +74,9 @@ def test_bureau_disagreement_suggests_dispute():
     f = flags(r, "bureau_disagreement")
     coll = next(x for x in f if "only at Experian" in x["note"])
     assert "dispute" in coll["suggestion"] and "Experian" in coll["suggestion"]
-    assert any("Prime Bank and Campus Credit Union" in x["note"] for x in f)   # what it cost, at session end
+    # what it cost, at session end: Prime Bank prices on the worst bureau; Campus CU reconciles and lends anyway
+    assert any("offers from Prime Bank." in x["note"] for x in f)
+    assert not any("Campus Credit Union" in x["note"] for x in f)
     assert "only at Experian" in notes(r)
 
 

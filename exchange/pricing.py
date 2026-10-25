@@ -55,6 +55,7 @@ class Book:
     pd_model: str = "scorecard"  # "scorecard" (score first) or "identity" (identity strength + positive evidence)
     autopay_margin_cut: float = 0.0  # % a year of margin it gives up for autopay, on top of the computed saving
     reports_payments: bool = False   # reports on-time payments to the bureaus (simulated in the sandbox)
+    reconciled: bool = False    # prices on the reconciled view: items only one bureau reports count as unconfirmed
 
     @property
     def volume_pressure(self):

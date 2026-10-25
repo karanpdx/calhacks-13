@@ -8,7 +8,7 @@ Two layers on purpose:
 from dataclasses import dataclass
 from typing import Optional
 
-from . import finance, pricing as P
+from . import finance, pricing as P, reconcile
 from .messages import Message, Terms, OFFER, DECLINE, APR_CAP, REASON_CODES
 
 
@@ -58,7 +58,8 @@ BOOKS = {
                         month_progress=0.6, risk_bucket_fill=0.4, terms=(12, 24, 36, 48), preferred_term=36,
                         max_amount=5000,
                         motive="Member-owned with cheap funding and well behind its loan goal this month, so it "
-                               "concedes early."),
+                               "concedes early. Reconciles the three bureaus: an item only one of them reports doesn't "
+                               "count against a member.", reconciled=True),
     "newstart": P.Book(cost_of_funds=7.0, servicing=1.5, origination_cost=80, lgd=0.85, capital_ratio=0.15,
                        roe_hurdle=0.15, target_margin=3.0, min_margin=1.0, volume_target=2000, booked=1100,
                        month_progress=0.6, risk_bucket_fill=0.6, terms=(12, 24), preferred_term=24, max_amount=3000,
@@ -73,14 +74,14 @@ BOOKS = {
     "harbor": P.Book(cost_of_funds=4.5, servicing=1.2, origination_cost=60, lgd=0.80, capital_ratio=0.10,
                      roe_hurdle=0.10, target_margin=2.0, min_margin=0.5, volume_target=200, booked=80,
                      month_progress=0.6, risk_bucket_fill=0.4, terms=(12, 24), preferred_term=24, max_amount=3000,
-                     pd_model="identity",
+                     pd_model="identity", reconciled=True,
                      motive="Mission lender with community-development funding, building a book of newcomers. "
                             "With no score to lean on it prices on identity strength and on-time history, and it "
                             "is behind its monthly goal."),
     "ladder": P.Book(cost_of_funds=4.0, servicing=2.0, origination_cost=40, lgd=0.60, capital_ratio=0.12,
                      roe_hurdle=0.10, target_margin=2.5, min_margin=1.0, volume_target=150, booked=70,
                      month_progress=0.6, risk_bucket_fill=0.5, terms=(12, 18, 24), preferred_term=24,
-                     max_amount=2000, min_amount=500, autopay_margin_cut=1.0, reports_payments=True,
+                     max_amount=2000, min_amount=500, autopay_margin_cut=1.0, reports_payments=True, reconciled=True,
                      motive="Credit-builder lender: small loans for people rebuilding after charge-offs or a "
                             "bankruptcy. Autopay keeps its borrowers on track, so it cuts its margin for it, and it "
                             "reports on-time payments to the bureaus (simulated)."),
@@ -183,14 +184,28 @@ def ladder_builder(p):
     return priced("ladder", p, "rebuilding credit with a small builder loan")
 
 
-POLICIES = {
+def view_for(lender_id, p):
+    """The passport as this lender prices it: the reconciled view if its Book opts in, else the worst-bureau one."""
+    b = BOOKS.get(lender_id)
+    return reconcile.view(p) if b and b.reconciled else p
+
+
+def _on_view(lender_id, policy):
+    """Every caller of a policy (the agent, the person's "what would change" screen) sees the same view."""
+    def run(p):
+        return policy(view_for(lender_id, p))
+    run.__name__, run.__doc__ = policy.__name__, policy.__doc__
+    return run
+
+
+POLICIES = {lid: (name, _on_view(lid, fn)) for lid, (name, fn) in {
     "prime_bank": ("Prime Bank", prime_bank),
     "campus_cu": ("Campus Credit Union", campus_cu),
     "newstart": ("NewStart Fintech", newstart_fintech),
     "second_chance": ("Second Chance Lending", second_chance),
     "harbor": ("Harbor Newcomer Lending", harbor_newcomer),
     "ladder": ("Ladder Credit Builder", ladder_builder),
-}
+}.items()}
 
 
 class RuleLender:
@@ -249,7 +264,7 @@ class RuleLender:
 
     # ---------------------------------------------------------------- messages
     def respond_to_intent(self, intent: Message, passport) -> Message:
-        self.passport, self.intent_ask = passport, intent.ask or {}
+        self.passport, self.intent_ask = view_for(self.id, passport), intent.ask or {}
         self.quote = q = self.policy(passport)
         if not q.eligible:
             return Message(DECLINE, self.id, to=intent.sender, reason_code=q.code, text=f"{self.name}: {q.reason}.")

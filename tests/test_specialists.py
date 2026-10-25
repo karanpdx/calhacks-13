@@ -35,7 +35,8 @@ def test_harbor_serves_newcomers_with_strong_identity_only():
     assert harbor(passport("P04")).eligible and harbor(passport("P03")).eligible
     assert not harbor(passport("P01")).eligible                        # full file: not its product
     assert not harbor({**passport("P04"), "identity_score": 75}).eligible
-    assert not harbor({**passport("P03"), "collections": 1}).eligible
+    q = passport("P03")
+    assert not harbor({**q, "collections": 1, "reconciled": {**q["reconciled"], "collections": 1}}).eligible
     o = first_offers(run("P04"))["harbor"]["terms"]
     assert o["amount"] <= 3000 and o["term_months"] in (12, 24)
 

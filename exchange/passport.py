@@ -6,6 +6,8 @@ Lenders get the full file only after the borrower accepts (simulated in the sand
 import re
 from datetime import date
 
+from .reconcile import reconcile
+
 BUREAUS = ("TransUnion", "Equifax", "Experian")
 WITHHELD = ["name", "SSN", "date of birth", "address", "phone", "email", "employers", "account-level details"]
 
@@ -105,6 +107,8 @@ def build(report, bureaus, today=None):
         "frozen_somewhere": "FROZEN" in codes or any(
             "FROZEN" in (a or "").upper() or "FREEZE" in (a or "").upper() for c in bureaus.values() for a in c.get("alerts", [])),
         "bureau_disagreements": disagreements,
+        # Items only one bureau reports are marked unconfirmed here; lenders that opt in price on this view.
+        "reconciled": reconcile(hits) if hits else None,
         # Positive evidence: what a thin file has going for it, not just the absence of negatives.
         "months_on_time": max((c.get("on_time_months", 0) for c in hits.values()), default=0),
         "oldest_account_years": _years_since(oldest, today),
