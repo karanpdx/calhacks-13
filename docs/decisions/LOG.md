@@ -56,3 +56,7 @@ Lenders get derived attributes only (no name, SSN, DOB or contact). Why: data mi
 
 ## 2026-10-24: Backfilled: Claude-powered lenders may only negotiate inside their policy range
 Claude overrides `respond_to_counter` and never the policy. Why: pricing must come from the CRS-derived policy, so an LLM cannot offer terms outside it. Source: CLAUDE.md hard rule 3.
+
+## 2026-10-25: Lender web of agents and analyst read one shared replay, rivals anonymous
+`network()` and `queue()` share the 20 sessions run once per process; rivals are "Lender A".."E" and their wins show as counts only, never per applicant. Why: the lender must never learn who beat it. Gave up: a full who-won-what graph.
+The lender analyst (Claude, rules fallback) only reads this lender's queue and network; code drops unknown app ids and falls back if the reply names a rival or persona. Why: the model explains, never decides, and can't leak. Gave up: free-form market-wide answers.

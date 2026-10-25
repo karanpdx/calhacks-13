@@ -434,6 +434,37 @@ def lender_queue(lender_id: str):
         raise HTTPException(404, f"unknown lender {lender_id!r}")
 
 
+@app.get("/api/lender/{lender_id}/network")
+def lender_network(lender_id: str):
+    """The web of agents from one lender's side: its agent, anonymous rivals (Lender A..E), the 20 borrower agents
+    (hashed ids), who talked to whom, what the referee checked and blocked, and a recent-message ticker."""
+    from exchange import lender_view
+    try:
+        return {"notice": NOTICE, **lender_view.network(lender_id)}
+    except KeyError:
+        raise HTTPException(404, f"unknown lender {lender_id!r}")
+
+
+class AskTurn(BaseModel):
+    role: str = Field(pattern="^(user|assistant)$")
+    content: str = Field(max_length=2000)
+
+
+class AskRequest(BaseModel):
+    messages: list[AskTurn] = Field(default_factory=list, max_length=40)
+
+
+@app.post("/api/lender/{lender_id}/ask")
+def lender_ask(lender_id: str, req: AskRequest):
+    """The lender's analyst: answers pipeline and KPI questions from this lender's queue and network only. Claude
+    when ANTHROPIC_API_KEY is set, otherwise rule-based answers from the same data (`source` says which)."""
+    from exchange import lender_assistant
+    try:
+        return {"notice": NOTICE, **lender_assistant.ask(lender_id, [m.model_dump() for m in req.messages])}
+    except KeyError:
+        raise HTTPException(404, f"unknown lender {lender_id!r}")
+
+
 @app.get("/lender")
 def lender_page():
     """Lender operations dashboard prototype for monitoring and exception triage."""
