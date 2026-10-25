@@ -4,12 +4,16 @@ Data source: saved CRS sandbox samples by default (offline, no credentials). `?l
 CRS_USER and CRS_PASS are set, and falls back to samples on any error. Credentials are read from the environment
 only, and are never logged or returned.
 """
+import asyncio
+import json
+import logging
 import os
 import re
 from functools import lru_cache
+from typing import Optional
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from agent import scorecard as SC
@@ -19,6 +23,7 @@ from agent.sources import LiveSource, SampleSource
 
 STATIC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 NOTICE = "Data is from the CRS sandbox: fictional test personas, not real people."
+log = logging.getLogger(__name__)
 
 app = FastAPI(title="Credit-file trust agent", description=NOTICE)
 
@@ -108,6 +113,8 @@ from exchange.lenders import POLICIES  # noqa: E402
 from exchange.messages import Mandate  # noqa: E402
 from exchange.referee import Exchange  # noqa: E402
 from exchange.scenarios import build as build_scenario, SCENARIOS  # noqa: E402
+from exchange.watchdog import ClaudeReview  # noqa: E402
+from exchange import hood, person as person_view  # noqa: E402
 
 
 @app.get("/api/exchange/scenarios")
@@ -115,18 +122,29 @@ def exchange_scenarios():
     return {"scenarios": SCENARIOS, "lenders": {i: name for i, (name, _) in POLICIES.items()}}
 
 
-@app.get("/api/exchange/{persona}")
-def exchange(persona: str, scenario: str = "normal", amount: float = 5000, min_amount: float = 3000,
-             max_apr: float = 18.0, min_term: int = 12, max_term: int = 48, autopay: int = 1, max_fee: float = 0,
-             live: int = 0):
-    """Run one market session. Returns the full event log (gate, passport, every message with the referee's verdict,
-    settlement, disclosure). The UI can replay `events` in order to animate the negotiation."""
+def _views(ex):
+    """The two readable views of a finished session: the person's screen and the judges' "under the hood" panel.
+    A bug in either never breaks the session result itself."""
+    out = {}
+    for key, build in (("person", person_view.build), ("under_the_hood", hood.build)):
+        try:
+            out[key] = build(ex)
+        except Exception:
+            log.exception("building %s view failed", key)
+            out[key] = None
+    return out
+
+
+def _exchange(persona, scenario, amount, min_amount, max_apr, min_term, max_term, autopay, max_fee, live, watchdog,
+              review, max_payment=None):
+    """Build one market session from query params. Returns (Exchange, live_note)."""
     _row(persona)
     if scenario not in SCENARIOS:
         raise HTTPException(404, f"unknown scenario {scenario!r}; use one of {sorted(SCENARIOS)}")
     lenders, borrower = build_scenario(scenario)
     mandate = Mandate(amount, min(min_amount, amount), max_apr, min_term, max_term,
                       {"autopay"} if autopay else set(), max_fee)
+    mandate.max_payment = max_payment if max_payment and max_payment > 0 else None
     note, source = None, SampleSource()
     if live:
         if os.environ.get("CRS_USER") and os.environ.get("CRS_PASS"):
@@ -136,8 +154,109 @@ def exchange(persona: str, scenario: str = "normal", amount: float = 5000, min_a
                 note = f"Live CRS login failed ({type(e).__name__}); showing saved samples instead."
         else:
             note = "Live mode needs CRS_USER and CRS_PASS in the environment; showing saved samples instead."
-    r = Exchange(persona, mandate, source, lenders, borrower, today=SC.AS_OF if source.name == "samples" else None).run()
-    return {"notice": NOTICE, "scenario": scenario, "live_note": note, **r}
+    ex = Exchange(persona, mandate, source, lenders, borrower, today=SC.AS_OF if source.name == "samples" else None,
+                  watchdog=bool(watchdog), review=ClaudeReview() if review else None)
+    return ex, note
+
+
+@app.get("/api/exchange/{persona}")
+def exchange(persona: str, scenario: str = "normal", amount: float = 5000, min_amount: float = 3000,
+             max_apr: float = 18.0, min_term: int = 12, max_term: int = 48, autopay: int = 1, max_fee: float = 0,
+             live: int = 0, watchdog: int = 1, review: int = 0, max_payment: Optional[float] = None):
+    """Run one market session. Returns the full event log (gate, passport, every message with the referee's verdict,
+    settlement, disclosure), plus `person` (the borrower's plain-English screen: deal, no deal or blocked) and
+    `under_the_hood` (the judges' panel: plain-words feed, exclusions, which CRS product drove each decision).
+    `max_payment` caps the monthly payment (the main limit for people who don't know APR; max_apr is advanced).
+    `watchdog=1` (default) adds flag-only watchdog events; `review=1` adds an advisory Claude pass if ANTHROPIC_API_KEY
+    is set (otherwise the rule-based flags stand)."""
+    ex, note = _exchange(persona, scenario, amount, min_amount, max_apr, min_term, max_term, autopay, max_fee, live,
+                         watchdog, review, max_payment)
+    r = ex.run()
+    return {"notice": NOTICE, "scenario": scenario, "live_note": note, **r, **_views(ex)}
+
+
+def _sse(event, data):
+    return f"event: {event}\ndata: {json.dumps(data, default=str)}\n\n"
+
+
+@app.get("/api/exchange/{persona}/stream")
+async def exchange_stream(persona: str, scenario: str = "normal", amount: float = 5000, min_amount: float = 3000,
+                          max_apr: float = 18.0, min_term: int = 12, max_term: int = 48, autopay: int = 1,
+                          max_fee: float = 0, live: int = 0, watchdog: int = 1, review: int = 0, pace: float = 0.6,
+                          max_payment: Optional[float] = None):
+    """The same session as /api/exchange/{persona}, streamed as server-sent events while it runs.
+
+    Events, in order: `meta` (scenario, notice, live note), then one event per referee log entry named after its
+    kind (`gate`, `blocked`, `passport`, `message`, `watchdog`, `excluded`, `settlement`, `disclosure`, `no_deal`),
+    each carrying the same JSON as an entry in `events` plus `view` (that entry as a plain-words "under the hood" feed
+    item, or null for entries the panel skips), then `result` (the full result minus the event log, with `person` and
+    `under_the_hood`) and `done`. On a failure mid-session: `error`, then `done`. `pace` (seconds, 0-3) spaces events
+    out so a fast rule-based session can be watched; Claude agents stream as fast as they think."""
+    pace = min(max(pace, 0.0), 3.0)
+    loop, q = asyncio.get_running_loop(), asyncio.Queue()
+    ex, note = _exchange(persona, scenario, amount, min_amount, max_apr, min_term, max_term, autopay, max_fee, live,
+                         watchdog, review, max_payment)
+
+    def push(e):
+        """Runs in the session's worker thread as each event is logged: copy it (the session keeps going), add its
+        plain-words feed item, and hand it to the event loop."""
+        copy = json.loads(json.dumps(e, default=str))
+        try:
+            copy["view"] = hood.describe(copy, ex)
+        except Exception:
+            log.exception("describing event %s failed", e.get("seq"))
+            copy["view"] = None
+        loop.call_soon_threadsafe(q.put_nowait, (e["kind"], copy))
+
+    ex.listener = push
+
+    async def run():
+        try:
+            r = await asyncio.to_thread(ex.run)
+            views = await asyncio.to_thread(_views, ex)
+            q.put_nowait(("result", {**{k: v for k, v in r.items() if k != "events"}, **views}))
+        except Exception as e:  # the type only: never leak credentials or vendor bodies into the stream
+            q.put_nowait(("error", {"error": type(e).__name__, "note": "The session stopped; nothing was settled."}))
+        q.put_nowait(None)
+
+    async def events():
+        task = asyncio.create_task(run())
+        try:
+            yield _sse("meta", {"notice": NOTICE, "persona": persona, "scenario": scenario, "live_note": note,
+                                "mandate": {**vars(ex.mandate), "allow": sorted(ex.mandate.allow)}})
+            while (item := await q.get()) is not None:
+                yield _sse(*item)
+                if pace and item[0] not in ("result", "error"):
+                    await asyncio.sleep(pace)
+            yield _sse("done", {})
+        finally:
+            await task
+
+    return StreamingResponse(events(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+
+
+# ---------------------------------------------------------------- chat intake: conversation -> mandate
+from pydantic import BaseModel, Field  # noqa: E402
+from exchange.intake import MandateChat  # noqa: E402
+
+
+class ChatTurn(BaseModel):
+    role: str = Field(pattern="^(user|agent)$")
+    content: str = Field(max_length=2000)
+
+
+class ChatRequest(BaseModel):
+    messages: list[ChatTurn] = Field(default_factory=list, max_length=40)
+
+
+@app.post("/api/chat/mandate")
+def chat_mandate(req: ChatRequest):
+    """One turn of the person's chat with their agent. Send the whole conversation (oldest first); get back the
+    agent's reply, the limits understood so far, what's still missing, and a `mandate` once it's `ready`. Pass the
+    mandate's fields to /api/exchange/{persona}/stream to send the agent to the market. Uses Claude when
+    ANTHROPIC_API_KEY is set, otherwise a rule-based parser (`source` says which)."""
+    return {"notice": NOTICE, **MandateChat().turn([m.model_dump() for m in req.messages])}
 
 
 @app.get("/")

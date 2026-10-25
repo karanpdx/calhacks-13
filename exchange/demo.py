@@ -2,8 +2,11 @@
 
   python -m exchange.demo P01
   python -m exchange.demo P03 --amount 3000 --max-apr 16
+  python -m exchange.demo P03 --max-payment 150   # limit by monthly payment instead of APR
   python -m exchange.demo P01 --scenario injection
   python -m exchange.demo P13                     # fraud: blocked at the gate
+  python -m exchange.demo P17 --watchdog          # flag-only watchdog: bureau disagreement + what to do
+  python -m exchange.demo P01 --scenario drift --watchdog --review   # + advisory Claude pass (needs ANTHROPIC_API_KEY)
   python -m exchange.demo P01 --json > out.json   # full event log for the UI
 """
 import argparse, json, sys
@@ -12,12 +15,14 @@ from agent.sources import SampleSource, LiveSource
 from .messages import Mandate
 from .referee import Exchange
 from .scenarios import build, SCENARIOS
+from .watchdog import ClaudeReview
 
 
-def run(persona, scenario="normal", live=False, **mandate):
+def run(persona, scenario="normal", live=False, watchdog=False, review=False, **mandate):
     lenders, borrower = build(scenario)
     ex = Exchange(persona, Mandate(**{k: v for k, v in mandate.items() if v is not None}),
-                  LiveSource() if live else SampleSource(), lenders, borrower)
+                  LiveSource() if live else SampleSource(), lenders, borrower, watchdog=watchdog or review,
+                  review=ClaudeReview() if review else None)
     return ex.run()
 
 
@@ -42,6 +47,12 @@ def show(r):
             print(f"  r{e['round']} {G[v['ok']]} {e['actor']:>13} {d['type']:<8}{terms}  | {d['text'][:90]}")
             if not v["ok"]:
                 print(f"      BLOCKED {v['code']}: {v['reason']}")
+        elif k == "watchdog":
+            print(f"      WATCHDOG [{d['severity']}, {d['source']}] {d['agent']}: {d['why']}")
+            if d.get("suggestion"):
+                print(f"        -> {d['suggestion']}")
+        elif k == "excluded":
+            print(f"      EXCLUDED {d['agent']} ({d['code']}): {d['note']} Withdrawn: {', '.join(d['withdrawn']) or 'none'}")
         elif k in ("blocked", "no_deal"):
             print(f"[{k}] {d['reason']}")
         elif k == "settlement":
@@ -50,6 +61,14 @@ def show(r):
         elif k == "disclosure":
             for s in d["summary"]:
                 print(f"[deal] {s}")
+        for n in d.get("watchdog_notes", []) if k in ("disclosure", "no_deal") else []:
+            print(f"[watchdog] {n['note']}" + (f" Next step: {n['suggestion']}" if n.get("suggestion") else ""))
+    for b in r.get("lender_books", {}).values():   # private to each lender during the session; shown after it
+        ln = b["loan"]
+        print(f"[books] {b['name']}: default risk {b['probability_of_default']:.1%}; for its final terms "
+              f"({ln['term_months']} mo{', autopay' if ln['autopay'] else ''}{', no fee' if not ln['fee'] else ''}) "
+              f"break-even {b['break_even_apr']}%, floor {b['floor_apr']}%; opened at {b['opening_apr']}% "
+              f"({b['concession_style']}). {b['motive']}")
 
 
 def main(argv=None):
@@ -59,10 +78,14 @@ def main(argv=None):
     ap.add_argument("--amount", type=float)
     ap.add_argument("--min-amount", type=float)
     ap.add_argument("--max-apr", type=float)
+    ap.add_argument("--max-payment", type=float, help="most the person can pay each month, in dollars")
     ap.add_argument("--live", action="store_true")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--watchdog", action="store_true", help="flag-only watchdog + referee exclusion rule")
+    ap.add_argument("--review", action="store_true", help="add the advisory Claude review pass (implies --watchdog)")
     a = ap.parse_args(argv)
-    r = run(a.persona, a.scenario, a.live, amount=a.amount, min_amount=a.min_amount, max_apr=a.max_apr)
+    r = run(a.persona, a.scenario, a.live, a.watchdog, a.review, amount=a.amount, min_amount=a.min_amount, max_apr=a.max_apr,
+            max_payment=a.max_payment)
     if a.json:
         json.dump(r, sys.stdout, indent=2, default=str)
         print()

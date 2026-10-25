@@ -98,7 +98,7 @@ def test_scenarios_include_lender_names():
 def test_demo_page_served_and_its_data_loads():
     r = client.get("/demo")
     assert r.status_code == 200 and "scenario=demo" in r.text
-    d = client.get("/api/exchange/P03?scenario=demo").json()
+    d = client.get("/api/exchange/P03?scenario=demo&watchdog=0").json()
     assert [b["code"] for b in d["blocked"]] == ["OUTSIDE_MANDATE"] and d["deal"]["lender"] == "campus_cu"
 
 

@@ -7,6 +7,8 @@ from dataclasses import dataclass, field, asdict
 from typing import Optional
 import hashlib, hmac, json, time, uuid
 
+from .finance import monthly_payment  # finance.py imports nothing, so no cycle
+
 # message types
 INTENT = "INTENT"      # borrower -> market: what they want (no personal data)
 OFFER = "OFFER"        # lender -> borrower: binding terms until expiry or withdrawal
@@ -34,7 +36,10 @@ class Terms:
 
 @dataclass
 class Mandate:
-    """What the person authorises their agent to do. The agent can never accept outside this."""
+    """What the person authorises their agent to do. The agent can never accept outside this.
+
+    `max_payment` (dollars per month) is the plain-words limit for people who don't think in APR; when set, terms
+    whose monthly payment is above it are outside the mandate. `max_apr` always applies too (an "advanced" limit)."""
     amount: float = 5000
     min_amount: float = 3000
     max_apr: float = 18.0
@@ -43,6 +48,7 @@ class Mandate:
     allow: set = field(default_factory=lambda: {"autopay"})
     max_fee: float = 0.0
     max_rounds: int = 4
+    max_payment: Optional[float] = None
 
     def allows(self, t: Terms):
         """Return (ok, reason)."""
@@ -52,6 +58,11 @@ class Mandate:
             return False, f"APR {t.apr}% above the person's limit of {self.max_apr}%"
         if not (self.min_term <= t.term_months <= self.max_term):
             return False, f"{t.term_months}-month term outside {self.min_term}-{self.max_term} months"
+        if self.max_payment is not None:
+            pay = monthly_payment(t.amount, t.apr, t.term_months)
+            if pay > self.max_payment + 0.005:  # cents: a $150.00 payment fits a $150 limit
+                fmt = ",.0f" if round(pay) != round(self.max_payment) else ",.2f"  # never "$150 above $150"
+                return False, f"monthly payment ${pay:{fmt}} above the person's limit of ${self.max_payment:{fmt}}"
         if t.autopay and "autopay" not in self.allow:
             return False, "requires autopay, which the person did not allow"
         if t.fee > self.max_fee:
@@ -67,6 +78,8 @@ class Message:
     terms: Optional[Terms] = None
     offer_id: Optional[str] = None    # for OFFER: assigned by referee; for COUNTER/ACCEPT/WITHDRAW: the offer referred to
     ask: Optional[dict] = None        # INTENT only: {"amount", "term_range", "purpose"}; never the person's max APR
+    cite: Optional[str] = None        # COUNTER only: a rival's live offer id the borrower shows as proof of a better
+                                      # deal. The referee verifies it and passes the lender only its terms, never its source
     text: str = ""                    # free text: UNTRUSTED, never acted on by the referee
     round: int = 0
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])

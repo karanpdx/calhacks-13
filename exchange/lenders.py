@@ -8,19 +8,63 @@ Two layers on purpose:
 from dataclasses import dataclass
 from typing import Optional
 
-from .messages import Message, Terms, OFFER, DECLINE
+from . import finance, pricing as P
+from .messages import Message, Terms, OFFER, DECLINE, APR_CAP
 
 
 @dataclass
 class Quote:
+    """A lender's view of one borrower, computed from its books (exchange/pricing.py) at its default loan terms.
+    floor_apr / autopay_discount are for `term` and `max_amount`; other terms are priced with `RuleLender.floor_for`."""
     eligible: bool
     reason: str
     open_apr: float = 0.0
-    floor_apr: float = 0.0       # lowest APR the policy allows (without autopay)
+    floor_apr: float = 0.0       # lowest APR it accepts at `term`, without autopay
     autopay_discount: float = 0.0
     max_amount: float = 0.0
     term: int = 36
     fee: float = 0.0
+    pd: float = 0.0              # its estimate of the borrower's annual probability of default
+
+
+# ---------------------------------------------------------------- each lender's private books (illustrative)
+BOOKS = {
+    "prime_bank": P.Book(cost_of_funds=4.0, servicing=1.0, origination_cost=150, lgd=0.85, capital_ratio=0.10,
+                         roe_hurdle=0.12, target_margin=2.5, min_margin=0.75, volume_target=400, booked=260,
+                         month_progress=0.6, risk_bucket_fill=0.5, terms=(24, 36, 48, 60), preferred_term=36,
+                         max_amount=25000,
+                         motive="Ahead of its monthly target with cheap deposit funding, so it protects its margin "
+                                "and concedes slowly."),
+    "campus_cu": P.Book(cost_of_funds=2.5, servicing=0.8, origination_cost=100, lgd=0.80, capital_ratio=0.07,
+                        roe_hurdle=0.08, target_margin=1.5, min_margin=0.25, volume_target=120, booked=40,
+                        month_progress=0.6, risk_bucket_fill=0.4, terms=(12, 24, 36, 48), preferred_term=36,
+                        max_amount=5000,
+                        motive="Member-owned with cheap funding and well behind its loan goal this month, so it "
+                               "concedes early."),
+    "newstart": P.Book(cost_of_funds=7.0, servicing=1.5, origination_cost=80, lgd=0.85, capital_ratio=0.15,
+                       roe_hurdle=0.15, target_margin=3.0, min_margin=1.0, volume_target=2000, booked=1100,
+                       month_progress=0.6, risk_bucket_fill=0.6, terms=(12, 24), preferred_term=24, max_amount=3000,
+                       motive="Funded by an expensive credit line, so even its best rates sit high; growing in "
+                              "new-to-credit customers."),
+    "second_chance": P.Book(cost_of_funds=7.5, servicing=2.5, origination_cost=200, lgd=0.65, capital_ratio=0.15,
+                            roe_hurdle=0.15, target_margin=4.0, min_margin=2.0, volume_target=300, booked=150,
+                            month_progress=0.6, risk_bucket_fill=0.85, terms=(12, 24, 36), preferred_term=36,
+                            max_amount=5000, fee=150,
+                            motive="Subprime specialist whose high-risk bucket is nearly full, so it prices firmly "
+                                   "and gives up its fee before its rate."),
+}
+
+
+def priced(lender_id, p, reason):
+    """An eligible Quote, priced from the lender's books at its default terms. If even its floor is above the legal
+    rate cap, it can't cover the risk and declines (rate caps make lenders decline, not lend at a loss)."""
+    b = BOOKS[lender_id]
+    amt, term = b.max_amount, b.preferred_term
+    flo = P.floor(b, p, amt, term)
+    if flo > APR_CAP:
+        return Quote(False, f"at this score the risk can't be priced under the {APR_CAP:g}% rate cap")
+    return Quote(True, reason, min(P.opening(b, p, amt, term), APR_CAP), flo,
+                 round(flo - P.floor(b, p, amt, term, autopay=True), 2), amt, term, b.fee, round(P.pd_annual(p)[0], 4))
 
 
 def prime_bank(p):
@@ -34,8 +78,7 @@ def prime_bank(p):
         return Quote(False, "needs at least 3 accounts of history")
     if p["bureau_disagreements"]:
         return Quote(False, "the bureaus disagree about this file; we only lend on consistent files")
-    apr = 8.5 + max(0, (780 - p["score_low"]) / 20)
-    return Quote(True, "prime file", round(apr, 2), round(apr - 2.0, 2), 0.25, 25000, 36)
+    return priced("prime_bank", p, "prime file")
 
 
 def campus_cu(p):
@@ -45,8 +88,9 @@ def campus_cu(p):
         return Quote(False, "no collections, charge-offs or bankruptcies")
     if p["score_low"] is not None and p["score_low"] < 620:
         return Quote(False, f"lowest score {p['score_low']} is below our 620 minimum")
-    apr = 12.5 + (1.0 if p["thin_file"] or p["no_score"] else 0) + (0.5 if p["bureau_disagreements"] else 0)
-    return Quote(True, "short histories welcome", apr, 9.9, 0.5, 5000, 36)
+    if not (p["thin_file"] or p["no_score"] or (p["file_age_years"] or 0) <= 12):
+        return Quote(False, "membership is for students and people with short credit histories")
+    return priced("campus_cu", p, "short histories welcome")
 
 
 def newstart_fintech(p):
@@ -56,7 +100,7 @@ def newstart_fintech(p):
         return Quote(False, "no bankruptcies")
     if not (p["no_file"] or p["no_score"] or p["thin_file"] or (p["score_low"] or 0) >= 600):
         return Quote(False, "we focus on new-to-credit and thin files")
-    return Quote(True, "new to credit, strong identity", 19.9, 15.9, 0.5, 3000, 24)
+    return priced("newstart", p, "new to credit, strong identity")
 
 
 def second_chance(p):
@@ -66,7 +110,7 @@ def second_chance(p):
         return Quote(False, "needs a scored file")
     if p["score_low"] < 500:
         return Quote(False, f"lowest score {p['score_low']} is below our 500 minimum")
-    return Quote(True, "rebuilding credit", 29.9, 24.9, 1.0, 5000, 36, fee=150)
+    return priced("second_chance", p, "rebuilding credit")
 
 
 POLICIES = {
@@ -78,41 +122,115 @@ POLICIES = {
 
 
 class RuleLender:
+    """A lender's negotiating agent. Its limits come from its own books (`pricing.py`); this class decides how it
+    moves inside them:
+      - concedes from its opening rate toward its floor over the rounds, faster when it's behind its volume target
+      - prices whatever loan length the borrower asks for, if it offers that length (a restructure)
+      - knows nothing about rival lenders except a verified, anonymous competing offer the borrower chose to show
+    A Claude-powered lender overrides `respond_to_counter`; `floor_for` stays the hard limit."""
     role = "lender"
 
     def __init__(self, agent_id):
         self.id = agent_id
         self.name, self.policy = POLICIES[agent_id]
+        self.book = BOOKS.get(agent_id)
         self.quote: Optional[Quote] = None
         self.current: Optional[Terms] = None
+        self.passport, self.intent_ask = None, {}
+
+    # ---------------------------------------------------------------- economics for any terms
+    def floor_for(self, t):
+        """The lowest APR it accepts for these exact terms (amount, length, autopay, fee)."""
+        if not self.book:
+            return self.quote.floor_apr - (self.quote.autopay_discount if t.autopay else 0)
+        return P.floor(self.book, self.passport, t.amount, t.term_months, t.autopay, t.fee)
+
+    def opening_for(self, t):
+        """Its opening rate for these terms: the floor plus the room it starts with."""
+        if not self.book:
+            return self.quote.open_apr
+        return round(self.floor_for(t) + max(0.0, self.book.target_margin - self.book.effective_min_margin), 2)
+
+    def within_books(self, apr, term, autopay, fee):
+        """Final (apr, fee) for a reply: never below the floor for those exact terms, and on the same loan length
+        never worse for the borrower than the live offer (offers are binding). Waiving a fee costs the lender, so it
+        raises the rate to cover it; if that would leave the borrower worse off overall, it keeps the fee instead."""
+        cur = self.current
+        apr = max(apr, self.floor_for(Terms(cur.amount, 0.0, term, autopay, fee)))
+        if term != cur.term_months:
+            return round(apr, 2), fee        # a restructure the borrower asked for: priced fresh
+        cand = Terms(cur.amount, round(apr, 2), term, autopay, fee)
+        if fee != cur.fee and finance.cost_per_dollar(cand) > finance.cost_per_dollar(cur) + 1e-9:
+            fee = cur.fee                    # the waiver isn't worth it for the borrower: keep the fee
+        if fee == cur.fee:
+            apr = min(max(apr, self.floor_for(Terms(cur.amount, 0.0, term, autopay, fee))), cur.apr)
+        return round(apr, 2), fee
 
     def _term(self, ask):
         lo, hi = ask.get("term_range", [12, 48])
-        return max(lo, min(hi, self.quote.term))
+        if not self.book:
+            return max(lo, min(hi, self.quote.term))
+        ok = [n for n in self.book.terms if lo <= n <= hi]
+        if not ok:
+            return None
+        return min(ok, key=lambda n: (abs(n - self.book.preferred_term), -n))
 
+    # ---------------------------------------------------------------- messages
     def respond_to_intent(self, intent: Message, passport) -> Message:
+        self.passport, self.intent_ask = passport, intent.ask or {}
         self.quote = q = self.policy(passport)
         if not q.eligible:
             return Message(DECLINE, self.id, to=intent.sender, text=f"{self.name}: {q.reason}.")
-        amt = min(intent.ask["amount"], q.max_amount)
-        self.current = Terms(amt, q.open_apr, self._term(intent.ask), False, q.fee)
+        term = self._term(self.intent_ask)
+        if term is None:
+            return Message(DECLINE, self.id, to=intent.sender,
+                           text=f"{self.name}: we only lend for {', '.join(map(str, self.book.terms))} months.")
+        amt = min(self.intent_ask.get("amount", q.max_amount), q.max_amount)
+        base = Terms(amt, 0.0, term, False, q.fee)
+        apr = min(self.opening_for(base), APR_CAP)
+        if self.floor_for(base) > APR_CAP:
+            return Message(DECLINE, self.id, to=intent.sender,
+                           text=f"{self.name}: at this score the risk can't be priced under the {APR_CAP:g}% rate cap.")
+        self.current = Terms(amt, apr, term, False, q.fee)
         return Message(OFFER, self.id, to=intent.sender, terms=self.current,
-                       text=f"{self.name}: {q.reason}. ${amt:,.0f} at {q.open_apr}% for {self.current.term_months} months"
+                       text=f"{self.name}: {q.reason}. ${amt:,.0f} at {apr}% for {term} months"
                             + (f", ${q.fee:.0f} origination fee." if q.fee else "."))
 
     def respond_to_counter(self, counter: Message, passport, market) -> Optional[Message]:
-        """market = {"best_competing_apr": float|None}. Return a new OFFER, a DECLINE, or None (stand pat)."""
-        q, want = self.quote, counter.terms
-        floor = q.floor_apr - (q.autopay_discount if want.autopay else 0)
-        apr = round(max(want.apr, floor), 2)
-        fee = self.current.fee
-        if want.fee < fee:  # asked to waive the fee: we'll waive it if they take autopay
-            fee = 0.0 if want.autopay else fee
-        new = Terms(self.current.amount, min(apr, self.current.apr), self.current.term_months, want.autopay, fee)
-        if new.key() == self.current.key():
+        """market = {"round", "max_rounds", "verified_quote"}: verified_quote is an anonymous competing offer the
+        borrower cited and the referee checked ({apr, term_months, amount, ...}), or None. Never a rival's name."""
+        cur, want = self.current, counter.terms
+        rnd, rounds, vq = market.get("round", 1), market.get("max_rounds", 4), market.get("verified_quote")
+        term = want.term_months if (self.book and want.term_months in self.book.terms) else cur.term_months
+        autopay = want.autopay
+        fee = cur.fee
+        if want.fee < fee and autopay:      # it trades its fee for autopay, and prices the lost fee in
+            fee = 0.0
+        shape = Terms(cur.amount, 0.0, term, autopay, fee)
+        flo = self.floor_for(shape)
+        target = P.concession_target(self.book, self.opening_for(shape), flo, rnd, rounds) if self.book else flo
+        why = ""
+        if vq and vq.get("apr") is not None:
+            beat = round(vq["apr"] - 0.1, 2)
+            if beat >= flo and beat < target:
+                target, why = beat, f" to beat the verified {vq['apr']}% offer"
+            elif beat < flo:
+                why = f"; we can't profitably match {vq['apr']}%"
+        apr, fee = self.within_books(round(max(want.apr, target, flo), 2), term, autopay, fee)
+        if apr > APR_CAP:
             return Message(DECLINE, self.id, to=counter.sender, offer_id=counter.offer_id,
-                           text=f"{self.name}: {self.current.apr}% is our best.")
+                           text=f"{self.name}: at {term} months we can't price it under the {APR_CAP:g}% cap.")
+        new = Terms(cur.amount, apr, term, autopay, fee)
+        if new.key() == cur.key():
+            return Message(DECLINE, self.id, to=counter.sender, offer_id=counter.offer_id,
+                           text=f"{self.name}: {cur.apr}% is our best{why}.")
         self.current = new
+        parts = [f"we can do {apr}%"]
+        if term != cur.term_months:
+            parts.append(f"over {term} months")
+        if autopay:
+            parts.append("with autopay")
+        if cur.fee and not fee:
+            parts.append("fee waived")
         return Message(OFFER, self.id, to=counter.sender, terms=new,
-                       text=f"{self.name}: we can do {new.apr}%" + (" with autopay" if new.autopay else "")
-                            + (", fee waived" if q.fee and not new.fee else "") + ".")
+                       text=f"{self.name}: " + ", ".join(parts) + f"{why}.")
