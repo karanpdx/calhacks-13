@@ -68,3 +68,11 @@ def test_spanish_translation_note_only_shows_in_spanish():
     js = client.get('/static/chat-access.js').text
     css = client.get('/static/chat-access.css').text
     assert "footer.hidden=lang!=='es'" in js and '.borrower-translation[hidden]{display:none!important}' in css
+
+
+def test_pages_and_assets_are_always_revalidated():
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    for path in ("/phone", "/demo", "/static/chat-access.js", "/static/chat-access.css"):
+        assert c.get(path).headers.get("cache-control") == "no-cache", path

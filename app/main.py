@@ -38,6 +38,16 @@ print(f"[exchange] Claude: {'on' if _cfg['claude'] else 'off (rules)'} · live C
 app = FastAPI(title="Credit-file trust agent", description=NOTICE)
 
 
+@app.middleware("http")
+async def revalidate_pages(request: Request, call_next):
+    """Pages, scripts and styles: browsers must check for a newer copy on every load (cheap: the ETag answers 304),
+    so a plain refresh on a laptop or phone always shows the latest demo."""
+    response = await call_next(request)
+    if not request.url.path.startswith("/api/") and "cache-control" not in response.headers:
+        response.headers["Cache-Control"] = "no-cache"
+    return response
+
+
 @lru_cache(maxsize=1)
 def _rows():
     """Scorecard rows (samples only, deterministic). Cached: 20 personas run in well under a second."""
