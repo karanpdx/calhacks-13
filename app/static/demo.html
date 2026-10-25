@@ -183,6 +183,23 @@
   .composer button { width:32px; height:32px; border-radius:50%; border:0; background:#0A84FF; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
   .composer button:disabled { background:#C7C7CC; }
 
+  /* tap any step, offer or alert on the phone to see more */
+  .tap { cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .tap:active { background:#F0F0F5; }
+  .tap .chev { margin-left:6px; color:#C7C7CC; display:flex; transition:transform .2s; flex-shrink:0; }
+  .tap[aria-expanded="true"] .chev { transform:rotate(90deg); }
+  .tap:focus-visible { outline:2px solid var(--ios-blue); outline-offset:-2px; }
+  .alert.tap, .good-card.tap { position:relative; padding-right:30px; }
+  .alert.tap .chev, .good-card.tap .chev { position:absolute; right:9px; top:11px; margin:0; }
+  .alert.tap:active { background:#FFE5E3; } .good-card.tap:active { background:#F4FBF6; }
+  .detail { background:#FAFAFC; border-top:.5px solid #E2E2E7; padding:8px 12px 10px; font-size:13px; color:#3A3A3C; display:flex; flex-direction:column; gap:5px; }
+  .detail.card { border:1px solid #E2E2E7; border-radius:12px; background:#fff; }
+  .drow { display:flex; justify-content:space-between; gap:10px; } .drow b { text-align:right; } .drow b.red { color:#FF3B30; }
+  .dnote { color:#6C6C70; }
+  .dq { font-style:italic; background:#FFF0EF; color:#8E1C14; border-radius:8px; padding:6px 8px; }
+  .detail .msg { font-size:13px; max-width:88%; padding:5px 10px; }
+  .dh { font-size:11px; font-weight:700; color:#6C6C70; text-transform:uppercase; letter-spacing:.04em; margin-top:4px; }
+
   /* agent activity, beside the phone */
   .log { width:390px; max-width:100%; max-height:640px; align-self:center; height:100%; display:flex; flex-direction:column; gap:10px; }
   .log h2 { margin:0; font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); display:flex; align-items:center; gap:8px; }
@@ -286,6 +303,7 @@ const ICONS = {
   key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/>',
   chat: '<path d="M4 5h16v11H9l-5 4z"/>',
   up: '<path d="M12 19V5M5 12l7-7 7 7"/>',
+  chev: '<path d="M9 6l6 6-6 6"/>',
 };
 function icon(name, size = 24) {
   const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
@@ -813,6 +831,101 @@ function phoneForm() {
     go);
 }
 
+// ---- tap for details: every step, offer and alert on the phone opens a short explanation built from the session
+function tappable(el, build) {
+  if (el.classList.contains("tap")) return el;
+  el.classList.add("tap"); el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-expanded", "false");
+  el.append(h("span", {class: "chev"}, icon("chev", 16)));
+  let box = null;
+  const toggle = () => {
+    if (box) { box.remove(); box = null; el.setAttribute("aria-expanded", "false"); return; }
+    box = h("div", {class: "detail" + (el.parentElement.classList.contains("ios-group") ? "" : " card")}, build());
+    el.after(box); el.setAttribute("aria-expanded", "true");
+    box.animate([{opacity: 0, transform: "translateY(-4px)"}, {opacity: 1, transform: "none"}], {duration: 220});
+  };
+  el.onclick = toggle;
+  el.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } };
+  return el;
+}
+const ID_TEXT = {"2201": "SSN belongs to a different name", "2202": "Birth date doesn't match the SSN", "2301": "SSN belongs to a deceased person",
+                 "2401": "Fraud alert on file", "2101": "Address doesn't match the file"};
+const drow = (k, v, red) => h("div", {class: "drow"}, h("span", {}, k), h("b", {class: red ? "red" : ""}, String(v)));
+const stripName = s => String(s || "").replace(/^[^:]+:\s*/, "");
+function fits(t) {
+  const m = D.ex.mandate, pay = monthly(t.amount, t.apr, t.term_months);
+  return t.amount <= m.amount && t.amount >= (m.min_amount || 0) && t.apr <= m.max_apr && t.term_months >= m.min_term
+    && t.term_months <= m.max_term && (t.fee || 0) <= (m.max_fee || 0) && (!m.max_payment || pay <= m.max_payment);
+}
+function detailChecks() {
+  const P = D.P, ff = P.fraud_finder || {}, gate = D.ex.events.find(e => e.kind === "gate").data;
+  const age = n => n == null ? "unknown" : n >= 365 ? `${Math.floor(n / 365)} years` : `${n} days`;
+  const bureaus = Object.entries(P.scores || {}).map(([b, s]) => `${b} ${s ?? "no file"}`);
+  return [
+    drow("Identity (TransUnion)", P.id_codes.length ? "problems found" : "verified", P.id_codes.length),
+    ...P.id_codes.map(c => h("div", {class: "dnote"}, "• " + (ID_TEXT[c.code] || c.text))),
+    drow("Fraud risk (AtData)", ff.risk_score != null ? `${ff.risk_score} / 100` : "n/a", ff.risk_score >= 70),
+    drow("Email age", age(ff.email_age_days), ff.email_age_days != null && ff.email_age_days < 30),
+    drow("Phone", ff.phone_owner_matches === false ? "not yours" : "yours" + (ff.phone_type ? ` · ${ff.phone_type}` : ""), ff.phone_owner_matches === false),
+    h("div", {class: "dh"}, "Credit bureaus"), ...bureaus.map(b => h("div", {}, b)),
+    ...(gate.findings || []).length ? [h("div", {class: "dh"}, "What CRS noticed"), ...gate.findings.map(f => h("div", {class: "dnote"}, "• " + f.text))] : [],
+    h("div", {class: "dnote"}, (gate.source === "live" ? "Live from the CRS sandbox" : "Saved CRS sandbox data") + " · soft pulls, your score isn't affected"),
+  ];
+}
+function detailShopping() {
+  const p = D.ex.passport;
+  if (!p) return [h("div", {}, "Nothing was sent: your identity couldn't be verified, so no lender saw anything.")];
+  return [h("div", {}, `Your agent sent the same credit passport to ${D.lenderIds.length} lenders. They never see who else is bidding.`),
+    drow("Score band", p.score_band || "no score"), drow("Accounts", p.accounts),
+    drow("History", p.file_age_years != null ? `${p.file_age_years} years` : "none"), drow("Identity", p.identity), drow("Late payments", p.late_payments),
+    h("div", {class: "dnote"}, "Hidden from lenders: " + (p.withheld || []).join(", "))];
+}
+function detailOffer(d) {
+  if (d.type === "DECLINE") return [drow("Decision", "declined", true), h("div", {}, "Why: " + stripName(d.text)),
+    h("div", {class: "dnote"}, "Each lender applies its own rules to your credit passport.")];
+  const t = d.terms, pay = monthly(t.amount, t.apr, t.term_months), ok = fits(t), out = [
+    drow("Amount", money(t.amount)), drow("Rate", pct(t.apr)), drow("Length", `${t.term_months} months`), drow("Monthly payment", money(pay)),
+    drow("Total you'd repay", money(pay * t.term_months + (t.fee || 0))), drow("Fee", t.fee ? money(t.fee) : "none"),
+    drow("Your limits", ok ? "fits" : "doesn't fit", !ok)];
+  if (isInjected(d)) {
+    const cut = d.text.toUpperCase().indexOf("SYSTEM NOTE");
+    out.push(h("div", {class: "dh"}, "Hidden in the offer text"), h("div", {class: "dq"}, `"${cut >= 0 ? d.text.slice(cut) : d.text}"`));
+  }
+  return out;
+}
+function detailBlocked(atk) {
+  return [drow("Your agent tried", `ACCEPT ${pct(atk.data.terms.apr)}`), drow("Referee check", atk.verdict.code, true),
+    h("div", {}, atk.verdict.reason.replace(/^Blocked:\s*/, "")),
+    h("div", {class: "dnote"}, "The referee is plain code. It reads only the offer's numbers, never its text, so hidden instructions can't change what it allows.")];
+}
+function detailNegotiation() {
+  const lid = focusLender(), after = (attackMsg() || {round: 0}).round, out = [h("div", {class: "dh"}, `With ${LENDERS[lid] || lid}`)];
+  const open = D.msgs.find(e => e.round === 0 && e.data.sender === lid && e.data.type === "OFFER");
+  if (open) out.push(h("div", {class: "msg them"}, `${pct(open.data.terms.apr)}: ${stripName(open.data.text).split(". ")[0]}`));
+  for (const e of D.msgs.filter(x => x.round > after && (x.data.sender === lid || x.data.to === lid))) {
+    const d = e.data, mine = d.sender === "borrower";
+    out.push(h("div", {class: "msg " + (mine ? "me" : "them")}, mine ? (d.type === "ACCEPT" ? `Accept ${pct(d.terms.apr)}` : d.text || `${pct(d.terms.apr)}?`) : stripName(d.text)));
+  }
+  const others = D.lenderIds.filter(id => id !== lid).map(id => {
+    const last = D.msgs.filter(e => e.data.sender === id && e.data.type === "OFFER").pop(), dec = D.msgs.find(e => e.data.sender === id && e.data.type === "DECLINE");
+    return drow(LENDERS[id] || id, last ? `${pct(last.data.terms.apr)}${isInjected(last.data) ? " (blocked)" : ""}` : dec ? "declined" : "-", last && isInjected(last.data));
+  });
+  if (others.length) out.push(h("div", {class: "dh"}, "Other lenders' best offers"), ...others);
+  out.push(h("div", {class: "dnote"}, "Your agent can show a lender a rival's offer; the exchange checks it's real and passes it on without the rival's name."));
+  return out;
+}
+function detailDone() {
+  const deal = D.ex.deal, ev = D.ex.events, dis = ev.find(x => x.kind === "disclosure"), set = ev.find(x => x.kind === "settlement"), none = ev.find(x => x.kind === "no_deal");
+  if (!deal) return [h("div", {}, none ? none.data.reason : "No offer fit your limits."),
+    ...replies(0).filter(e => e.data.type === "OFFER" && !isInjected(e.data)).map(e => drow(LENDERS[e.data.sender], `${pct(e.data.terms.apr)} · ${money(monthly(e.data.terms.amount, e.data.terms.apr, e.data.terms.term_months))}/mo`)),
+    h("div", {class: "dnote"}, "Your agent never accepts anything outside your limits, even if that means no loan.")];
+  const t = deal.terms;
+  return [drow("Lender", deal.lender_name), drow("Amount", money(t.amount)), drow("Rate", pct(t.apr)), drow("Length", `${t.term_months} months`),
+    drow("Monthly payment", money(dis ? dis.data.monthly_payment : monthly(t.amount, t.apr, t.term_months))),
+    dis ? drow("Total interest and fees", money(dis.data.total_interest_and_fees, 2)) : null, drow("Autopay", t.autopay ? "yes" : "no"),
+    ...(dis ? [h("div", {class: "dh"}, "In plain English"), ...dis.data.summary.map(s => h("div", {}, s))] : []),
+    ...(set ? [h("div", {class: "dh"}, "Next steps (simulated)"), ...set.data.steps.map(s => h("div", {class: "dnote"}, "• " + s.replace(/: simulated \(not available in the CRS sandbox\)$/, "")))] : [])];
+}
+
 async function phoneRun() {
   const id = ++run; speed = 1;
   try { await phoneStory(); } catch (e) { if (e !== STOP) throw e; }
@@ -821,10 +934,12 @@ async function phoneRun() {
 async function phoneStory() {
   $("#log").replaceChildren();
   const STEPS = ["Checking your details", "Shopping", "Negotiating", "Done"];
-  const rows = STEPS.map(s => h("div", {class: "ios-row off"}, h("span", {class: "st"}, h("span", {class: "wait"})), s));
+  const rows = STEPS.map(s => h("div", {class: "ios-row off"}, h("span", {class: "st"}, h("span", {class: "wait"})), h("span", {class: "k"}, s)));
+  const DETAILS = [detailChecks, detailShopping, detailNegotiation, detailDone];
   const setStep = (i, state) => { const r = rows[i]; r.classList.toggle("off", state === "wait");
     r.firstChild.replaceChildren(state === "run" ? h("span", {class: "spin"}) : state === "ok" ? h("span", {class: "done"}, icon("check", 20))
-      : state === "fail" ? h("span", {class: "fail"}, icon("x", 20)) : h("span", {class: "wait"})); };
+      : state === "fail" ? h("span", {class: "fail"}, icon("x", 20)) : h("span", {class: "wait"}));
+    if (state === "ok" || state === "fail") tappable(r, DETAILS[i]); };  // a finished step can be opened for details
   const area = h("div", {style: "display:flex;flex-direction:column;gap:10px"});
   app().classList.remove("chatmode");
   app().replaceChildren(h("div", {}, h("div", {class: "ios-sub"}, "You asked for"), wantsChips()),
@@ -836,7 +951,7 @@ async function phoneStory() {
   await wait(2200);
   if (!D.ex.admitted) {
     setStep(0, "fail");
-    await add(area, h("div", {class: "alert"}, h("b", {}, "We couldn't verify your identity."), h("div", {}, gate.headline + ". No lender has seen your application.")));
+    await add(area, tappable(h("div", {class: "alert"}, h("b", {}, "We couldn't verify your identity."), h("div", {}, gate.headline + ". No lender has seen your application.")), detailChecks));
     logAdd("Referee", "Stopped at the gate: identity checks failed. No lender sees anything.", "bad", "shield");
     return;
   }
@@ -851,8 +966,8 @@ async function phoneStory() {
   for (const e of replies(0)) {
     const d = e.data, off = d.type === "OFFER", inj = off && isInjected(d);
     await wait(900);
-    await add(list, h("div", {class: "ios-row orow" + (off ? "" : " dead")}, icon("bank", 16), LENDERS[d.sender] || d.sender,
-      off ? h("b", {class: inj ? "red" : ""}, pct(d.terms.apr), inj ? [" ", icon("warn", 14)] : null) : h("b", {}, "declined")));
+    await add(list, tappable(h("div", {class: "ios-row orow" + (off ? "" : " dead")}, icon("bank", 16), LENDERS[d.sender] || d.sender,
+      off ? h("b", {class: inj ? "red" : ""}, pct(d.terms.apr), inj ? [" ", icon("warn", 14)] : null) : h("b", {}, "declined")), () => detailOffer(d)));
     logAdd(LENDERS[d.sender] || d.sender, off ? `Offered ${pct(d.terms.apr)} for ${d.terms.term_months} months${inj ? ", with a hidden instruction in the text" : ""}.` : "Declined.",
       inj ? "bad" : "", "bank");
   }
@@ -862,8 +977,9 @@ async function phoneStory() {
     logAdd("Agent", `Tried to accept ${pct(atk.data.terms.apr)} from ${LENDERS[atk.data.to]}: it obeyed the hidden instruction.`, "bad", "robot");
     await wait(1300);
     const br = breach(atk.data.terms);
-    const al = await add(area, h("div", {class: "alert"}, h("b", {}, "Blocked a risky offer"),
-      h("div", {}, `${LENDERS[atk.data.to]} hid an instruction telling your agent to accept ${pct(atk.data.terms.apr)} (${br.what === "monthly limit" ? br.offer : "that rate"}). That's over your ${br.limit} limit, so the exchange stopped it. Nothing was signed.`)));
+    const al = await add(area, tappable(h("div", {class: "alert"}, h("b", {}, "Blocked a risky offer"),
+      h("div", {}, `${LENDERS[atk.data.to]} hid an instruction telling your agent to accept ${pct(atk.data.terms.apr)} (${br.what === "monthly limit" ? br.offer : "that rate"}). That's over your ${br.limit} limit, so the exchange stopped it. Nothing was signed.`)),
+      () => detailBlocked(atk)));
     shake(al);
     logAdd("Referee", `Blocked: ${br.offer} is over the ${br.limit} limit (${atk.verdict.code}).`, "bad", "shield");
     await wait(1800);
@@ -895,8 +1011,8 @@ async function phoneStory() {
   const deal = D.ex.deal, dis = D.ex.events.find(x => x.kind === "disclosure");
   if (!deal) {
     setStep(3, "fail");
-    await add(area, h("div", {class: "alert"}, h("b", {}, "No offer fit your limits"), h("div", {}, "Your agent walked away instead of breaking your rules. "
-      + (M.max_payment ? "A higher monthly limit or a longer loan may get an offer." : `Raising your highest rate above ${M.max_apr}% may get an offer.`))));
+    await add(area, tappable(h("div", {class: "alert"}, h("b", {}, "No offer fit your limits"), h("div", {}, "Your agent walked away instead of breaking your rules. "
+      + (M.max_payment ? "A higher monthly limit or a longer loan may get an offer." : `Raising your highest rate above ${M.max_apr}% may get an offer.`))), detailDone));
     logAdd("Agent", "Walked away: nothing fit the limits.", "", "robot");
     const back = h("button", {type: "button", class: "ios-btn ghost"}, "Change what I want"); back.onclick = () => (M.max_payment ? chatView() : phoneForm()); await add(area, back);
     return;
@@ -908,7 +1024,8 @@ async function phoneStory() {
     h("div", {class: "big-pay"}, money(dis ? dis.data.monthly_payment : monthly(t.amount, t.apr, t.term_months)), h("span", {class: "ios-sub", style: "font-size:15px"}, " / month")),
     h("div", {}, `${money(t.amount)} at ${pct(t.apr)} for ${t.term_months} months`),
     saved ? h("div", {style: "color:#248A3D;font-weight:700"}, `Saved $${saved[1]} vs the best first offer`) : null,
-    traded.map(x => h("div", {class: "ios-sub"}, x))));
+    traded.map(x => h("div", {class: "ios-sub"}, x)), h("div", {class: "ios-sub", style: "color:var(--ios-blue);font-weight:600"}, "Tap for the full breakdown")));
+  tappable(card, detailDone);
   pop(card);
 }
 
