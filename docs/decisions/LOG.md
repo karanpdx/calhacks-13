@@ -2,6 +2,9 @@
 
 Important decisions, newest first. Format and rules: [PROCESS.md](PROCESS.md).
 
+## 2026-10-25: Removed the /exchange page; /demo is the one front end
+Deleted `app/static/exchange.html` and its route; its API (`/api/exchange/...`, including the stream) stays. Why: two front ends split the demo, and /demo tells the story better. Gave up: the scenario picker and "under the hood" panel that page had (the API still returns `under_the_hood` and `red_team`).
+
 ## 2026-10-25: Red team: a Claude scammer lender (`red_team` scenario)
 SwiftLend Express is played by Claude, told to scam the borrower's agent and choose its own tactics each move; it goes through the unchanged referee and watchdog, and `report(ex)` pairs each attempt with what caught it. Its first live runs found a gap ("held for only a few minutes" wasn't flagged), so the pressure detector gained urgency patterns.
 Why: an unscripted attacker is a stronger proof than scripted ones. Gave up: it's the one lender allowed to ignore its books (attacking is its job), and without a key it plays a fixed script.

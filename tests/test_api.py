@@ -84,11 +84,6 @@ def test_index_served():
     assert r.status_code == 200 and "fictional" in r.text.lower()
 
 
-def test_exchange_page_served():
-    r = client.get("/exchange")
-    assert r.status_code == 200 and "simulated" in r.text.lower() and "/api/exchange/" in r.text
-
-
 def test_scenarios_include_lender_names():
     d = client.get("/api/exchange/scenarios").json()
     assert "normal" in d["scenarios"]

@@ -82,21 +82,21 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
   `session_id`); nothing settles until `POST /api/session/{id}/approve {"offer_id"}` or `/decline` (sessions in memory)
 - `app/static/index.html`: screening view
 - `app/static/fairness.html` (`/fairness`): the fairness matrix, test results and disparity table; linked from the demo footer
-- `app/static/exchange.html`: borrower app: chat -> limits (monthly payment first) -> live market -> deal / no deal /
-  blocked, plus the "How your deal was made" judge panel. http://127.0.0.1:8000/static/exchange.html
+- `app/static/demo.html` (`/demo`, `/phone`): the demo: scenes 1-4 with Everyone / Borrower / Lender views, the
+  iPhone chat with the agent (`approval=1`: the person accepts the loan), phone pairing (`/api/pair`)
 - `docs/crs-brief.md`: what CRS wants / what the sandbox has
 
 ## Commands
 ```
 pip install -r requirements.txt
-pytest                                        # 194 offline tests
+pytest                                        # 192 offline tests
 python -m exchange.demo P01                   # one market session in the terminal
 python -m exchange.demo P01 --scenario injection
 python -m exchange.demo P03 --max-apr 16 --json
 python -m exchange.demo P17 --watchdog             # bureau disagreement flags + what to do
 python -m exchange.demo P01 --scenario drift --watchdog --review   # + Claude review (needs ANTHROPIC_API_KEY)
 uvicorn app.main:app --reload                 # http://127.0.0.1:8000
-# live CRS: export CRS_USER/CRS_PASS, put the Postman collection in crs/, open /static/exchange.html?live=1
+# live CRS: export CRS_USER/CRS_PASS, put the Postman collection in crs/, open /demo (live by default; /demo?live=0 for samples)
 ```
 
 ## Agent interfaces (how to plug in Claude-powered agents)

@@ -343,11 +343,6 @@ def index():
     return FileResponse(os.path.join(STATIC, "index.html"))
 
 
-@app.get("/exchange")
-def exchange_page():
-    return FileResponse(os.path.join(STATIC, "exchange.html"))
-
-
 @app.get("/demo")
 def demo_page():
     return FileResponse(os.path.join(STATIC, "demo.html"))
