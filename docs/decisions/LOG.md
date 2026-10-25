@@ -2,6 +2,10 @@
 
 Important decisions, newest first. Format and rules: [PROCESS.md](PROCESS.md).
 
+## 2026-10-25: Thin-file lending: identity score, positive evidence, specialist lenders, reason codes, reconciliation
+Newcomers are priced on a 0-100 identity score plus positive evidence (thin/no-file only, so full files aren't rewarded twice); Harbor and Ladder serve no-file and rebuilding borrowers; declines carry 12 fixed codes (3 added to the brief's 9 so charge-off, bankruptcy and bureau declines aren't mislabelled); one-bureau items are "unconfirmed" and lenders opt in per Book to price on that view.
+Why: thin and no-file people get competing offers and exact reasons. Gave up: address/phone "stable" is approximated (no history in the sandbox), Prime Bank keeps the worst-bureau view, and small add-only edits landed outside the owned files (signals.py, messages.py, scenarios.py, llm_agents.py), agreed in session.
+
 ## 2026-10-24: Live CRS mode with per-product fallback
 `?live=1` calls the CRS sandbox and, if one product call fails, uses that product's saved sample and says so on screen. Why: the live demo is CRS's one hard rule, and a flaky call at the table must not break it. Gave up: a run can be partly live; the label says which.
 

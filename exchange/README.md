@@ -3,14 +3,15 @@
 ```
 python -m exchange.demo P01                        # prime borrower: lenders compete, agent negotiates
 python -m exchange.demo P03                        # thin-file student: prime bank passes, credit union wins
-python -m exchange.demo P04 --max-apr 20           # no file at all: identity-based lender steps in
+python -m exchange.demo P04                        # no file at all: Harbor and NewStart compete on identity strength
+python -m exchange.demo P06 --amount 2000 --min-amount 1000   # discharged bankruptcy: Ladder builder loan
 python -m exchange.demo P13                        # fraud: blocked before any lender sees anything
 python -m exchange.demo P01 --scenario bait_switch # lender worsens terms + forges acceptance: both blocked
 python -m exchange.demo P01 --scenario injection   # hidden "ignore your mandate" + compromised agent: blocked
 python -m exchange.demo P01 --scenario injection --watchdog  # ...and the injecting lender is excluded
 python -m exchange.demo P01 --scenario drift --watchdog      # agent takes 12.5% over 8.5%: allowed, flagged
 python -m exchange.demo P01 --scenario data_grab --watchdog  # lender asks for SSN/DOB: flagged
-python -m exchange.demo P17 --watchdog                       # one-bureau collection: reconcile/dispute advice
+python -m exchange.demo P17 --watchdog                       # one-bureau collection: Campus CU reconciles and lends
 ```
 API: `GET /api/exchange/{P01..P20}?scenario=normal&amount=5000&min_amount=3000&max_apr=18&autopay=1&max_fee=0&watchdog=1&review=0`
 
@@ -18,7 +19,8 @@ API: `GET /api/exchange/{P01..P20}?scenario=normal&amount=5000&min_amount=3000&m
 1. **Gate** (`agent.screen`): CRS FraudFinder, TU identity verification, reverse lookup, 3-bureau soft pull.
    `STOP_FRAUD` = nobody in the market sees anything.
 2. **Passport**: derived attributes only (score band, accounts, file age, lates, collections, thin/no-score/no-file,
-   identity strength, bureau disagreements, verification required). Name, SSN, DOB, contact info and accounts are withheld.
+   identity strength and a 0-100 `identity_score` with `identity_signals`, positive evidence, bureau disagreements and
+   a `reconciled` view, verification required). Name, SSN, DOB, contact info and accounts are withheld.
 3. **Market**: borrower sends `INTENT` (amount + term range, never the max APR). Lenders `OFFER` or `DECLINE` from
    their policy. Borrower `COUNTER`s, lenders respond, borrower `ACCEPT`s the best offer inside the mandate.
 4. **Referee checks every message**: registered + signed sender, role, valid terms, APR cap (36%), no amount above
@@ -63,16 +65,38 @@ Every number a lender quotes comes from its own private **books**, not a fixed r
   term if only the payment doesn't fit, and walks away when nothing fits. `lender_books` (break-even build-up, floor,
   opening, motive) are shown to judges only after the session closes.
 
+## Thin-file and no-file borrowers (Phase 2)
+- **Identity score** (`passport.py`): 100 minus points per identity finding (note 10, concern 25, blocker 60), same
+  neutral cases as `identity`. `identity_signals`: SSN-name match, phone owned, email owned, email age >= 30 days,
+  address deliverable, IP within 100 miles, as booleans only.
+- **Positive evidence**: `months_on_time` (longest current on-time run, capped at months reviewed),
+  `oldest_account_years`, `never_late`, `address_stable`, `phone_stable`. The sandbox has no address or phone
+  history, so the last two are approximations from FraudFinder (name tied to the street; own postpaid, non-VoIP phone).
+  `pricing.positive_evidence` turns them into small odds multipliers (never late x1.15, 12+ months on time x1.10,
+  each stable x1.05), only for thin, no-score and no-file passports: a full scored file already reflects them.
+- **Specialist lenders**: Harbor Newcomer Lending (no-file or thin file, `identity_score` >= 80, up to $3,000 over
+  12-24 months, `pd_model="identity"`) and Ladder Credit Builder (charge-offs or a discharged bankruptcy, $500-$2,000,
+  a margin cut for autopay, on-time reporting labelled simulated).
+- **Reason codes**: every lender `DECLINE` carries `reason_code` from `messages.REASON_CODES` (NO_SCORE, FEW_ACCOUNTS,
+  FILE_TOO_NEW, SCORE_BELOW_MIN, RECENT_LATES, COLLECTION_ON_FILE, CHARGEOFF_ON_FILE, BANKRUPTCY_ON_FILE,
+  BUREAUS_DISAGREE, IDENTITY_UNCONFIRMED, OVER_RATE_CAP, OUTSIDE_PRODUCT) next to its unchanged sentence. "X% is our
+  best" counter replies carry none: the offer stays live.
+- **Reconciliation** (`reconcile.py`): an item one bureau reports while another bureau with a file doesn't is
+  "unconfirmed"; reconciled counts are what two bureaus agree on. Books with `reconciled=True` (Campus CU, Harbor,
+  Ladder) price on that view; Prime Bank, NewStart and Second Chance keep the worst-bureau view.
+
 ## Current results on the samples (rule-based agents, default mandate: $5,000, 18% max, autopay ok)
 | Persona | Outcome |
 |---|---|
 | P01 prime | Prime Bank opens 11.22%, cited rival + autopay -> 10.17% |
-| P03 thin file | Campus CU 10.59% -> 8.69% (beats Prime's quote) |
-| P04 no file | NewStart only, above 18%: no deal (fits a 20% mandate) |
+| P03 thin file | 4 offers; Campus CU 9.83% -> 8.0% (Harbor bids 14.5% on $3,000) |
+| P04 no file | Harbor 15.05% -> 13.15% on $3,000 / 24 months; NewStart also bids (20.98%) |
 | P05 subprime | Only Second Chance, above the mandate: agent walks away |
+| P06 discharged bankruptcy | Second Chance and Ladder bid; Ladder's $2,000 is below the $3,000 minimum, so no deal. With a $2,000 mandate: Ladder 14.62% with autopay |
 | P10 | Campus CU 8.07% -> 6.5% |
 | P12 / P13 / P14 | Blocked at the gate |
 | P16 fraud alert | Prime Bank 11.93% -> 10.77%, step-up verification in settlement |
-| P17 bureaus disagree | NewStart $3,000 at 16.49%; watchdog says how to dispute the one-bureau collection |
-| P20 no score | Campus CU 10.87% -> 8.97% on file history |
-| P03 with a $150/month limit | Campus CU restructures to 48 months when the borrower asks |
+| P17 bureaus disagree | Experian-only collection is unconfirmed: Campus CU 7.53% -> 6.04% on $5,000 (Prime still declines) |
+| P18 old charge-offs | NewStart $3,000 at 17.33%; Ladder bids 13.6% on $2,000 (with a $2,000 mandate: Ladder 11.7%) |
+| P20 no score | Campus CU 9.78% -> 7.95% on file history |
+| P03 with a $150/month limit | Campus CU restructures to 48 months when the borrower asks (7.93%) |
