@@ -1,0 +1,25 @@
+{
+  "_note": "CRS sandbox test-persona request bodies (fictional people), copied from the crs-calhacks MCP server's get_personas. Used when the Postman collection isn't present. No credentials in here.",
+  "P03": {
+    "TransUnion credit report": {"firstName": "JASMINE", "lastName": "REYES", "ssn": "666701003", "addresses": [{"addressLine1": "2210 UNIVERSITY AVE APT 4B", "city": "BERKELEY", "state": "CA", "postalCode": "94704", "borrowerResidencyType": "Current"}]},
+    "Equifax credit report": {"firstName": "JASMINE", "lastName": "REYES", "ssn": "666701003", "addresses": [{"addressLine1": "2210 UNIVERSITY AVE APT 4B", "city": "BERKELEY", "state": "CA", "postalCode": "94704", "borrowerResidencyType": "Current"}]},
+    "Experian credit report": {"firstName": "JASMINE", "lastName": "REYES", "ssn": "666701003", "addresses": [{"addressLine1": "2210 UNIVERSITY AVE APT 4B", "city": "BERKELEY", "state": "CA", "postalCode": "94704", "borrowerResidencyType": "Current"}]},
+    "Criminal search": {"subjectInfo": {"first": "JASMINE", "last": "REYES", "ssn": "666-70-1003", "dob": "06-21-2004", "zip": "94704"}},
+    "Eviction search": {"subjectInfo": {"first": "JASMINE", "last": "REYES", "ssn": "666-70-1003", "dob": "06-21-2004", "zip": "94704"}},
+    "AtData FraudFinder": {"firstName": "JASMINE", "lastName": "REYES", "phoneNumber": "5550101003", "email": "jasmine.reyes@example.com", "ipAddress": "203.0.113.13", "address": {"addressLine1": "2210 UNIVERSITY AVE APT 4B", "city": "BERKELEY", "state": "CA", "postalCode": "94704"}},
+    "PitchPoint FCRA BLJ (data)": {"terms": {"term": [{"person": {"firstName": "JASMINE", "lastName": "REYES", "ssn": "666701003"}}]}},
+    "AccurateAppend Reverse Unified": {"phoneNumber": "5550101003"},
+    "TransUnion identity verification (TUC3002)": {"firstName": "JASMINE", "lastName": "REYES", "ssn": "666701003", "dob": "2004-06-21", "street1": "2210 UNIVERSITY AVE APT 4B", "city": "BERKELEY", "state": "CA", "zip": "94704"}
+  },
+  "P13": {
+    "TransUnion credit report": {"firstName": "KAYLA", "lastName": "BRENNAN", "ssn": "666701013", "addresses": [{"addressLine1": "9021 KINGSTON PIKE", "city": "KNOXVILLE", "state": "TN", "postalCode": "37923", "borrowerResidencyType": "Current"}]},
+    "Equifax credit report": {"firstName": "KAYLA", "lastName": "BRENNAN", "ssn": "666701013", "addresses": [{"addressLine1": "9021 KINGSTON PIKE", "city": "KNOXVILLE", "state": "TN", "postalCode": "37923", "borrowerResidencyType": "Current"}]},
+    "Experian credit report": {"firstName": "KAYLA", "lastName": "BRENNAN", "ssn": "666701013", "addresses": [{"addressLine1": "9021 KINGSTON PIKE", "city": "KNOXVILLE", "state": "TN", "postalCode": "37923", "borrowerResidencyType": "Current"}]},
+    "Criminal search": {"subjectInfo": {"first": "KAYLA", "last": "BRENNAN", "ssn": "666-70-1013", "dob": "12-24-1999", "zip": "37923"}},
+    "Eviction search": {"subjectInfo": {"first": "KAYLA", "last": "BRENNAN", "ssn": "666-70-1013", "dob": "12-24-1999", "zip": "37923"}},
+    "AtData FraudFinder": {"firstName": "KAYLA", "lastName": "BRENNAN", "phoneNumber": "5550101013", "email": "kb.9921x@example.com", "ipAddress": "198.51.100.13", "address": {"addressLine1": "9021 KINGSTON PIKE", "city": "KNOXVILLE", "state": "TN", "postalCode": "37923"}},
+    "PitchPoint FCRA BLJ (data)": {"terms": {"term": [{"person": {"firstName": "KAYLA", "lastName": "BRENNAN", "ssn": "666701013"}}]}},
+    "AccurateAppend Reverse Unified": {"phoneNumber": "5550101013"},
+    "TransUnion identity verification (TUC3002)": {"firstName": "KAYLA", "lastName": "BRENNAN", "ssn": "666701013", "dob": "1999-12-24", "street1": "9021 KINGSTON PIKE", "city": "KNOXVILLE", "state": "TN", "zip": "37923"}
+  }
+}

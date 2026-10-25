@@ -2,13 +2,15 @@
 
 Reads CRS_USER / CRS_PASS from the environment. Persona request bodies are
 loaded by name from the Postman collection (CRS_COLLECTION, default
-calhacks13-20261024-CRS-Sandbox.json next to this file).
+calhacks13-20261024-CRS-Sandbox.json next to this file), or, when that file
+isn't present, from persona_bodies.json (copied from the crs-calhacks MCP server).
 """
 import json, os, re, time
 import requests
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 COLLECTION = os.environ.get("CRS_COLLECTION", os.path.join(HERE, "calhacks13-20261024-CRS-Sandbox.json"))
+BODIES = os.path.join(HERE, "persona_bodies.json")
 BASE = "https://api-sandbox.stitchcredit.com/api"  # sandbox only
 
 # product -> (persona request name in collection, path)
@@ -27,6 +29,9 @@ PRODUCTS = {
 
 def load_personas(path=COLLECTION):
     """Return {'P01': {request_name: body_dict, ...}, ...}."""
+    if not os.path.exists(path):
+        with open(BODIES) as f:
+            return {k: v for k, v in json.load(f).items() if not k.startswith("_")}
     with open(path) as f:
         col = json.load(f)
     out = {}

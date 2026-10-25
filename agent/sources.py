@@ -35,10 +35,22 @@ class LiveSource:
     """Calls the CRS sandbox through crs/crs_client.py (needs CRS_USER, CRS_PASS and the collection)."""
     name = "live"
 
+    _client, _login_error = None, None  # shared per process: log in once, never retry a failed login
+
     def __init__(self):
-        sys.path.insert(0, os.path.join(ROOT, "crs"))
-        import crs_client
-        self.c = crs_client.CRS().login()
+        # Repeated failed logins disable the CRS account, so a failed login is remembered and not retried
+        # until the server restarts (fix the credentials first).
+        if LiveSource._login_error:
+            raise RuntimeError("CRS login failed earlier in this run; not retrying: " + LiveSource._login_error)
+        if LiveSource._client is None:
+            sys.path.insert(0, os.path.join(ROOT, "crs"))
+            import crs_client
+            try:
+                LiveSource._client = crs_client.CRS().login()
+            except Exception as e:
+                LiveSource._login_error = type(e).__name__
+                raise
+        self.c = LiveSource._client
         self.log = []
 
     def get(self, persona, product):

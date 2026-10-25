@@ -100,3 +100,34 @@ def test_demo_page_served_and_its_data_loads():
     assert r.status_code == 200 and "scenario=demo" in r.text
     d = client.get("/api/exchange/P03?scenario=demo").json()
     assert [b["code"] for b in d["blocked"]] == ["OUTSIDE_MANDATE"] and d["deal"]["lender"] == "campus_cu"
+
+
+def test_persona_bodies_used_when_collection_missing():
+    import sys
+    sys.path.insert(0, "crs")
+    import crs_client
+    p = crs_client.load_personas("does-not-exist.json")
+    assert p["P03"]["TransUnion credit report"]["lastName"] == "REYES"
+    assert {"P03", "P13"} <= set(p)
+
+
+def test_live_source_never_retries_a_failed_login(monkeypatch):
+    from agent import sources
+    import sys
+    sys.path.insert(0, "crs")
+    import crs_client
+    calls = []
+
+    def bad_login(self):
+        calls.append(1)
+        raise RuntimeError("401")
+
+    monkeypatch.setenv("CRS_USER", "u")
+    monkeypatch.setenv("CRS_PASS", "p")
+    monkeypatch.setattr(crs_client.CRS, "login", bad_login)
+    monkeypatch.setattr(sources.LiveSource, "_client", None)
+    monkeypatch.setattr(sources.LiveSource, "_login_error", None)
+    for _ in range(3):
+        with pytest.raises(Exception):
+            sources.LiveSource()
+    assert len(calls) == 1

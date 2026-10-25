@@ -5,159 +5,167 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Agent credit exchange: demo</title>
 <style>
-  :root { --bg:#F6F7F9; --card:#fff; --ink:#121826; --ink2:#3A4352; --mute:#586172; --line:#E3E6EB;
-          --blue:#2453C4; --blue-soft:#E7EEFB; --green:#157347; --green-soft:#EAF6EF; --red:#B4232B; --red-soft:#FDECEC;
-          --amber:#6B4700; --amber-soft:#FFF4D6; --navy:#0F1B2D; }
+  :root { --bg:#F6F7F9; --card:#fff; --ink:#121826; --mute:#5B6472; --line:#E3E6EB; --blue:#2453C4; --blue-soft:#E7EEFB;
+          --green:#157347; --green-soft:#EAF6EF; --red:#B4232B; --red-soft:#FDECEC; --navy:#0F1B2D; }
   * { box-sizing:border-box; }
   html, body { height:100%; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
          display:flex; flex-direction:column; overflow:hidden; }
-  header { background:var(--navy); color:#fff; padding:10px 28px; display:flex; flex-wrap:wrap; align-items:center; gap:10px 18px; }
-  header .brand { font-weight:800; font-size:18px; }
-  header .sub { font-size:13px; color:#C9D3E3; }
-  nav { display:flex; gap:6px; margin-left:auto; flex-wrap:wrap; }
-  nav button { font:inherit; font-size:13px; padding:5px 12px; border-radius:99px; border:1px solid #52627A; background:transparent; color:#E6ECF5; cursor:pointer; }
-  nav button[aria-current="step"] { background:#fff; color:var(--navy); font-weight:700; border-color:#fff; }
-  .chip-sandbox { font-size:12px; padding:3px 10px; border-radius:99px; background:var(--amber-soft); color:var(--amber); font-weight:600; }
-  header a { color:#CFE0FF; font-size:13px; }
-  .intro { padding:16px 28px 4px; max-width:1500px; width:100%; margin:0 auto; }
-  .intro .kicker { font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--mute); }
-  .intro h1 { margin:2px 0 4px; font-size:30px; font-weight:800; letter-spacing:-.02em; }
-  .intro p { margin:0; font-size:16px; color:var(--ink2); max-width:900px; }
-  main { flex:1; min-height:0; width:100%; max-width:1500px; margin:0 auto; padding:12px 28px; display:grid;
-         grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) minmax(0,1fr); gap:18px; }
-  .lane { min-height:0; overflow:auto; display:flex; flex-direction:column; gap:12px; padding:2px; scrollbar-width:thin; }
-  .lane-h .t { font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--mute); }
-  .lane-h .s { font-size:13px; color:var(--mute); }
-  #R .lane-h .t { color:var(--blue); }
-  .card { position:relative; background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px 16px; }
-  .card h3 { margin:0 0 6px; font-size:15px; }
-  .muted { color:var(--mute); } .small { font-size:13px; }
-  footer { width:100%; max-width:1500px; margin:0 auto; padding:6px 28px 14px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
-  footer button { font:inherit; font-weight:700; min-height:44px; padding:0 20px; border-radius:10px; cursor:pointer; }
+  header { background:var(--navy); color:#fff; padding:10px 28px; display:flex; align-items:center; gap:16px; }
+  header .brand { font-weight:800; font-size:17px; }
+  nav { display:flex; gap:8px; margin-left:auto; }
+  #src { display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:700; padding:5px 12px; border-radius:99px; background:#2A3A52; color:#C9D3E3; }
+  #src i { width:9px; height:9px; border-radius:50%; background:#8A96A8; }
+  #src.live { background:#E3F5EA; color:#0E5233; } #src.live i { background:#1F9D55; animation:blink 1.6s infinite; }
+  @keyframes blink { 50% { opacity:.3; } }
+  nav button { width:34px; height:34px; border-radius:50%; border:1px solid #52627A; background:transparent; color:#E6ECF5; font:inherit; font-weight:700; cursor:pointer; }
+  nav button[aria-current="step"] { background:#fff; color:var(--navy); border-color:#fff; }
+  .intro { text-align:center; padding:18px 20px 0; }
+  .intro h1 { margin:0; font-size:34px; font-weight:800; letter-spacing:-.02em; }
+  .intro p { margin:4px 0 0; font-size:18px; color:var(--mute); }
+  main { flex:1; min-height:0; width:100%; max-width:1300px; margin:0 auto; padding:18px 28px;
+         display:grid; grid-template-columns:1fr 1.15fr 1fr; gap:28px; align-items:start; }
+  .lane { display:flex; flex-direction:column; gap:14px; align-items:stretch; }
+  .lane-t { text-align:center; font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); }
+  footer { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:8px 28px 16px; max-width:1300px; width:100%; margin:0 auto; }
+  footer .fine { font-size:12px; color:var(--mute); }
+  footer button { font:inherit; font-weight:700; min-height:46px; padding:0 22px; border-radius:12px; cursor:pointer; }
   #next { background:var(--blue); color:#fff; border:0; display:inline-flex; gap:8px; align-items:center; }
-  #back, #replay { background:#fff; color:var(--blue); border:1px solid #C9D8F5; }
-  footer .keys { font-size:12px; color:var(--mute); }
-  @media (max-width:1000px) { body { overflow:auto; display:block; } main { grid-template-columns:1fr; } .lane { overflow:visible; } }
+  #back { background:#fff; color:var(--blue); border:1px solid #C9D8F5; }
+  @media (max-width:1000px) { body { overflow:auto; display:block; } main { grid-template-columns:1fr; } }
 
-  /* borrower */
-  .who { display:flex; align-items:center; gap:12px; }
-  .avatar { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; background:var(--blue-soft); color:var(--blue); flex-shrink:0; }
-  .avatar.grey { background:#F1F2F4; color:var(--mute); }
-  .name { font-weight:700; font-size:17px; }
-  .consent { display:flex; align-items:center; gap:7px; font-size:13px; color:var(--green); font-weight:600; margin-top:8px; }
-  .sim { display:inline-block; font-size:10.5px; font-weight:700; letter-spacing:.03em; color:var(--amber); background:var(--amber-soft); border-radius:4px; padding:1px 6px; vertical-align:1px; }
-  .card.ok { border:2px solid var(--green); }
-  .card.dead { opacity:.55; filter:grayscale(1); }
-  .agent { margin-top:8px; font-size:13px; padding:6px 10px; border-radius:8px; background:#F1F4F9; color:var(--ink2); }
-  .agent.warn { background:var(--amber-soft); color:#4D3600; font-weight:600; }
-  .agent.good { background:var(--green-soft); color:#0E5233; font-weight:600; }
-  .kv { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:5px 12px; font-size:14px; }
-  .kv .k { color:var(--mute); } .kv .v { font-weight:600; text-align:right; }
-  .kv .hot { color:var(--red); font-weight:800; }
-  .withheld { display:flex; flex-wrap:wrap; gap:6px; }
-  .withheld span { font-size:13px; padding:2px 8px; border-radius:6px; background:#F1F2F4; color:var(--ink2); transition:color .3s; }
-  .withheld span.struck { text-decoration:line-through; color:var(--mute); }
-  .facts { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
-  .facts span { font-size:13px; padding:3px 10px; border-radius:99px; background:var(--blue-soft); color:#1A3F99; font-weight:600; }
-  .deal-big { font-size:30px; font-weight:800; letter-spacing:-.02em; }
-  .steps div { padding:5px 0; font-size:14px; border-top:1px solid var(--line); }
+  .tile { position:relative; background:var(--card); border:1px solid var(--line); border-radius:18px; padding:16px 18px;
+          display:flex; align-items:center; gap:14px; transition:opacity .6s, filter .6s, border-color .6s, background .6s; }
+  .tile.ok { border:2px solid var(--green); }
+  .tile.bad { border:2px solid var(--red); }
+  .tile.dead { opacity:.4; filter:grayscale(1); }
+  .tile.won { border:2px solid var(--green); background:var(--green-soft); }
+  .ico { width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:var(--blue-soft); color:var(--blue); }
+  .ico.round { border-radius:50%; }
+  .ico.grey { background:#EEF0F3; color:var(--mute); }
+  .ico.red { background:var(--red-soft); color:var(--red); }
+  .tname { font-weight:700; font-size:17px; }
+  .tsub { font-size:13px; color:var(--mute); }
+  .big { font-size:34px; font-weight:800; letter-spacing:-.02em; margin-left:auto; }
+  .pill { display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:700; padding:5px 12px; border-radius:99px; background:#EEF0F3; color:var(--ink); }
+  .pill.hot { background:var(--red); color:#fff; }
 
-  /* referee */
-  #hub { background:#fff; border:2px solid #C9D8F5; border-radius:16px; padding:12px 16px; display:flex; gap:12px; align-items:center; }
-  #hub .shield { width:42px; height:42px; border-radius:12px; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-  #hub .ht { font-weight:800; font-size:16px; }
-  #hubSt { font-size:14px; color:var(--ink2); }
-  .crs { display:flex; flex-wrap:wrap; gap:6px; }
-  .crs span { font-size:12px; padding:3px 9px; border-radius:99px; border:1px solid var(--line); background:#fff; color:var(--mute); transition:all .3s; }
-  .crs span.lit { background:var(--blue); border-color:var(--blue); color:#fff; }
-  .checks .crow { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr); gap:8px; padding:9px 0; border-top:1px solid var(--line); align-items:center; font-size:14px; }
-  .checks .crow.head { border-top:0; font-size:12px; font-weight:700; color:var(--mute); text-transform:uppercase; letter-spacing:.05em; padding-top:2px; }
-  .checks .ck { font-weight:600; }
-  .cell.good { color:var(--green); font-weight:700; } .cell.bad { color:var(--red); font-weight:700; }
-  .callout { font-size:13px; font-weight:600; color:var(--amber); background:var(--amber-soft); border-radius:8px; padding:6px 10px; margin:2px 0 4px; }
-  .spin { width:14px; height:14px; border-radius:50%; border:2px solid #C9D8F5; border-top-color:var(--blue); display:inline-block; animation:spin .7s linear infinite; }
+  #hub { align-self:center; display:flex; flex-direction:column; align-items:center; gap:6px; }
+  #hub .shield { width:84px; height:84px; border-radius:24px; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center;
+                 transition:background .5s; }
+  #hub.bad .shield { background:var(--red); } #hub.good .shield { background:var(--green); }
+  #hubSt { font-size:15px; font-weight:700; color:var(--mute); min-height:21px; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:14px 18px; }
+  .grid { display:grid; grid-template-columns:1fr 84px 84px; gap:10px 8px; align-items:center; }
+  .grid .lbl { display:flex; align-items:center; gap:10px; font-weight:600; font-size:15px; }
+  .grid .lbl .ico { width:36px; height:36px; border-radius:10px; }
+  .grid .hd { text-align:center; font-size:13px; font-weight:700; color:var(--mute); }
+  .res { display:flex; flex-direction:column; align-items:center; font-size:12px; color:var(--mute); }
+  .badge { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#EEF0F3; color:var(--mute); font-weight:800; font-size:13px; }
+  .badge.good { background:var(--green); color:#fff; } .badge.bad { background:var(--red); color:#fff; }
+  .spin { width:22px; height:22px; border-radius:50%; border:3px solid #C9D8F5; border-top-color:var(--blue); animation:spin .8s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
-  .verdicts { display:flex; flex-direction:column; gap:7px; }
-  .vrow { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; }
-  .vrow.good { color:var(--green); } .vrow.bad { color:var(--red); }
-  .block-panel { border:3px solid var(--red); }
-  .reason { font-size:16px; font-weight:600; color:#7E1218; margin-top:10px; }
-  .code { font-family:ui-monospace,Consolas,monospace; font-size:13px; font-weight:700; color:#7E1218; }
-  #R-log { display:flex; flex-direction:column; gap:6px; }
-  .log { display:flex; align-items:center; gap:8px; font-size:13px; background:#fff; border:1px solid var(--line); border-radius:10px; padding:7px 10px; }
-  .log .lt { font-family:ui-monospace,Consolas,monospace; font-size:11px; font-weight:700; background:#EEF2F6; border-radius:4px; padding:1px 6px; }
-  .log .lw { flex:1; min-width:0; color:var(--ink2); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .log .lv { font-weight:700; color:var(--green); display:inline-flex; align-items:center; gap:4px; white-space:nowrap; }
-  .log.bad { border-color:var(--red); background:var(--red-soft); } .log.bad .lv { color:var(--red); }
-  .log.deal { border-color:var(--green); background:var(--green-soft); }
-  .summary { display:flex; flex-direction:column; gap:4px; font-size:14px; }
-  .summary div { display:flex; gap:7px; align-items:center; font-weight:600; }
+  .vs { display:flex; align-items:center; justify-content:center; gap:18px; padding:6px 0; }
+  .vs .n { font-size:46px; font-weight:800; letter-spacing:-.03em; }
+  .vs .cap { font-size:13px; color:var(--mute); text-align:center; }
+  .doc { position:relative; padding:14px 18px; }
+  .doc-h { display:flex; align-items:center; gap:8px; font-weight:700; }
+  .doc-t { font-size:20px; font-weight:800; margin:6px 0 8px; }
+  .bars i { display:block; height:7px; border-radius:4px; background:#EEF0F3; margin:6px 0; }
+  .bars i:nth-child(2) { width:85%; } .bars i:nth-child(3) { width:60%; }
+  .hidden-line { color:#FBFBFB; font-size:7px; line-height:1.3; transition:all 1.4s ease; border-radius:10px; }
+  .hidden-line.shown { color:#7E1218; font-size:15px; font-weight:600; background:var(--red-soft); padding:8px 10px; margin-top:4px; }
+  .doc-cap { display:flex; align-items:center; gap:6px; margin-top:8px; font-size:13px; font-weight:700; color:var(--mute); }
+  .doc-cap.alarm { color:var(--red); }
+  .vs.compact { padding:2px 0; } .vs.compact .n { font-size:38px; }
+  .say { font-size:15px; font-style:italic; color:var(--ink); }
+  .tile.warn { border:2px solid #C98A00; background:#FFF8E6; }
+  .deal { flex-direction:column; align-items:flex-start; gap:4px; }
+  .thread { display:flex; flex-direction:column; gap:7px; padding:12px 16px; }
+  .thread .hd { display:flex; justify-content:space-between; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--mute); }
+  .bub { max-width:85%; padding:6px 13px; border-radius:14px; font-size:13px; white-space:nowrap; }
+  .bub b { font-size:19px; letter-spacing:-.01em; margin-right:6px; }
+  .bub.me { align-self:flex-start; background:var(--blue-soft); color:#13306F; border-bottom-left-radius:4px; }
+  .bub.them { align-self:flex-end; background:#EEF0F3; color:var(--ink); border-bottom-right-radius:4px; text-align:right; }
+  .bub.yes { background:var(--green); color:#fff; }
 
-  /* lenders */
-  .lender .rate { font-size:30px; font-weight:800; letter-spacing:-.02em; margin-top:4px; }
-  .lender .terms { font-size:13px; color:var(--ink2); }
-  .lender.waiting { border-style:dashed; color:var(--mute); }
-  .lender.active { border:2px solid var(--blue); }
-  .lender.won { border:2px solid var(--green); background:var(--green-soft); }
-  .lender.evil { border:2px solid var(--red); }
-  .fine { margin-top:8px; background:#F6F7F9; border-radius:10px; padding:8px 10px; font-size:13px; color:var(--ink2); font-style:italic; }
-  .fine .lbl { font-style:normal; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--mute); display:block; }
-  .fine mark { background:var(--amber-soft); color:#4D3600; padding:0 2px; border-radius:3px; }
-  .fine.alarm { background:var(--red-soft); } .fine.alarm mark { background:var(--red); color:#fff; }
-  .note { font-size:13px; border-radius:10px; padding:10px 12px; background:#F1F2F4; color:var(--ink2); }
+  /* perspective switch */
+  .seg { display:inline-flex; background:#E6E9EE; border-radius:99px; padding:3px; margin-top:10px; }
+  .seg button { font:inherit; font-size:14px; font-weight:700; border:0; background:transparent; color:var(--mute); padding:6px 16px; border-radius:99px; cursor:pointer; display:inline-flex; gap:6px; align-items:center; }
+  .seg button[aria-pressed="true"] { background:#fff; color:var(--ink); box-shadow:0 1px 4px rgba(16,36,62,.15); }
+  #persp { flex:1; min-height:0; display:none; align-items:center; justify-content:center; padding:10px 28px; }
+  body[data-view="j"] main, body[data-view="l"] main { display:none; }
+  body[data-view="j"] #persp, body[data-view="l"] #persp { display:flex; }
+  .dev-wrap { display:flex; flex-direction:column; align-items:center; gap:10px; max-height:100%; }
+  .dev-label { display:flex; align-items:center; gap:7px; font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); }
+  .phone { width:340px; height:520px; border:10px solid #121826; border-radius:42px; background:#fff; overflow:hidden; box-shadow:0 18px 40px rgba(16,36,62,.18); }
+  .phone-screen { height:100%; padding:20px 16px; display:flex; flex-direction:column; gap:10px; overflow:hidden; }
+  .p-h { font-size:22px; font-weight:800; letter-spacing:-.01em; }
+  .pcard { border:1px solid var(--line); border-radius:14px; padding:10px 12px; background:#fff; transition:background .6s, border-color .6s; }
+  .pcard.okc { border-color:var(--green); background:var(--green-soft); }
+  .pcard.badc { border:2px solid var(--red); background:var(--red-soft); color:#7E1218; }
+  .p-row { display:flex; align-items:center; gap:10px; }
+  .p-row .big { font-size:26px; }
+  .ico.sm { width:38px; height:38px; border-radius:11px; }
+  .tog { margin-left:auto; width:44px; height:26px; border-radius:99px; background:#C9CED6; position:relative; transition:background .4s; flex-shrink:0; }
+  .tog::after { content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:left .4s; }
+  .tog.on { background:var(--green); } .tog.on::after { left:21px; }
+  .chips { display:flex; flex-wrap:wrap; gap:5px; margin:6px 0; }
+  .chips span { font-size:12px; font-weight:600; padding:3px 9px; border-radius:99px; background:var(--blue-soft); color:#1A3F99; }
+  .orow { padding:7px 0; border-top:1px solid var(--line); font-size:15px; } .orow:first-of-type { border-top:0; }
+  .orow .on { flex:1; } .orow b { font-size:18px; } .orow.dead { opacity:.45; }
+  .red { color:var(--red); }
+  .dash { width:820px; max-width:100%; height:470px; border-radius:16px; border:1px solid var(--line); background:#fff; overflow:hidden;
+          display:flex; flex-direction:column; box-shadow:0 18px 40px rgba(16,36,62,.14); }
+  .dash-top { background:var(--navy); color:#fff; padding:11px 16px; display:flex; align-items:center; gap:10px; font-size:14px; }
+  .dash-top span { color:#C9D3E3; }
+  .dash.evil .dash-top { background:#5C1015; }
+  .simtag { margin-left:auto; font-size:11px; font-weight:700; color:#6B4700 !important; background:#FFF4D6; border-radius:4px; padding:1px 6px; }
+  .dash-body { flex:1; min-height:0; padding:18px; display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; }
+  .dcard { border:1px solid var(--line); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:8px; }
+  .dcard h3 { margin:0; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--mute); }
+  .redact { display:inline-block; background:#121826; color:transparent; border-radius:3px; user-select:none; }
+  .kv2 { display:grid; grid-template-columns:1fr auto; gap:6px 12px; font-size:15px; } .kv2 .v { font-weight:700; text-align:right; }
+  .verdict-bad { border:2px solid var(--red); background:var(--red-soft); color:#7E1218; }
+  .verdict-ok { border:2px solid var(--green); background:var(--green-soft); color:#0E5233; }
 
-  /* effects */
   #fx { position:fixed; inset:0; pointer-events:none; z-index:50; }
-  .token { position:fixed; left:0; top:0; padding:5px 12px; border-radius:99px; background:var(--blue); color:#fff; font-size:13px; font-weight:700;
-           white-space:nowrap; box-shadow:0 6px 18px rgba(16,36,62,.25); }
-  .token.good { background:var(--green); } .token.bad { background:var(--red); } .token.grey { background:#556070; }
-  .stamp { position:absolute; right:14px; top:12px; border:3px solid currentColor; border-radius:8px; padding:3px 10px; font-weight:900;
-           letter-spacing:.06em; font-size:18px; background:rgba(255,255,255,.92); transform:rotate(-8deg); }
+  .token { position:fixed; left:0; top:0; padding:7px 14px; border-radius:99px; background:var(--blue); color:#fff; font-size:15px; font-weight:800;
+           white-space:nowrap; box-shadow:0 8px 22px rgba(16,36,62,.28); }
+  .token.good { background:var(--green); } .token.bad { background:var(--red); } .token.grey { background:#6B7480; }
+  .stamp { position:absolute; right:12px; top:-12px; border:3px solid currentColor; border-radius:8px; padding:2px 10px; font-weight:900;
+           letter-spacing:.06em; font-size:17px; background:#fff; transform:rotate(-8deg); }
   .stamp.good { color:var(--green); } .stamp.bad { color:var(--red); }
-  .stamp.big { position:static; display:inline-block; font-size:28px; padding:4px 16px; }
+  .stamp.center { position:static; display:inline-block; font-size:30px; padding:4px 18px; margin-top:6px; }
 </style>
 </head>
 <body>
 <header>
   <div class="brand">Agent credit exchange</div>
-  <div class="sub">Live demo on the CRS sandbox</div>
+  <span id="src"><i></i><span>Connecting</span></span>
   <nav aria-label="Demo scenes" id="steps"></nav>
-  <span class="chip-sandbox">Sandbox personas: fictional people</span>
-  <a href="/exchange">Details view</a>
 </header>
 
-<section class="intro" aria-live="polite">
-  <div class="kicker" id="kicker"></div>
-  <h1 id="title">Loading the market...</h1>
-  <p id="caption"></p>
+<section class="intro"><h1 id="title" aria-live="polite">Loading...</h1><p id="caption"></p>
+  <div class="seg" role="group" aria-label="Whose view">
+    <button type="button" data-view="all" aria-pressed="true">Everyone</button>
+    <button type="button" data-view="j" aria-pressed="false">Jasmine</button>
+    <button type="button" data-view="l" aria-pressed="false">Lender</button>
+  </div>
 </section>
+<div id="persp"></div>
 
 <main>
-  <section class="lane" id="B" aria-label="Borrower">
-    <div class="lane-h"><div class="t">Borrower</div><div class="s">The person and their AI agent</div></div>
-    <div id="B-app" style="display:flex;flex-direction:column;gap:12px"></div>
-    <div id="B-rules"></div><div id="B-pass"></div><div id="B-deal"></div>
-  </section>
-  <section class="lane" id="R" aria-label="Exchange referee">
-    <div class="lane-h"><div class="t">Exchange referee</div><div class="s">Rules in code, no AI · checks powered by CRS data</div></div>
-    <div id="hub"><div class="shield" data-icon="shield"></div><div><div class="ht">Referee</div><div id="hubSt">Waiting</div></div></div>
-    <div class="crs" id="crs"></div>
-    <div id="R-checks"></div><div id="R-block"></div><div id="R-log"></div>
-  </section>
-  <section class="lane" id="L" aria-label="Lenders">
-    <div class="lane-h"><div class="t">Lenders</div><div class="s">Simulated lenders and their agents</div></div>
-    <div id="L-cards" style="display:flex;flex-direction:column;gap:12px"></div>
-    <div id="L-note"></div>
-  </section>
+  <section class="lane" aria-label="Borrower"><div class="lane-t">Borrower</div><div id="B" class="lane"></div></section>
+  <section class="lane" aria-label="Referee"><div class="lane-t">Referee · CRS data</div>
+    <div id="hub"><div class="shield" data-icon="shield"></div><div id="hubSt"></div></div>
+    <div id="R" class="lane"></div></section>
+  <section class="lane" aria-label="Lenders"><div class="lane-t">Lenders</div><div id="L" class="lane"></div></section>
 </main>
 
 <footer>
-  <div style="display:flex;gap:10px;align-items:center">
-    <button id="back" type="button">Back</button>
-    <button id="replay" type="button">Replay scene</button>
-    <span class="keys">Keys: → next · ← back · R replay</span>
-  </div>
+  <button id="back" type="button">Back</button>
+  <div class="fine">Fictional CRS sandbox personas · simulated lenders and settlement</div>
   <button id="next" type="button"><span id="nextLbl">Next</span><span data-icon="arrow"></span></button>
 </footer>
 <div id="fx" aria-hidden="true"></div>
@@ -173,24 +181,34 @@ function h(tag, attrs, ...kids) {  // strings become text nodes: agent text can 
 }
 const ICONS = {
   check: '<path d="M5 12l5 5L20 7"/>', x: '<path d="M6 6l12 12M18 6L6 18"/>', arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
-  key: '<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M17 6l3 3M15 8l2 2"/>',
   shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+  bank: '<path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8"/><path d="M3 21h18"/>',
+  id: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.6-1.4 1.7-2 3-2s2.4.6 3 2M14 10h4M14 13h3"/>',
+  alert: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M12 8v5M12 16h.01"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  phone: '<rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/>',
+  gauge: '<path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4-5"/>',
+  hidden: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 10h10M7 14h6"/><path d="M3 3l18 18"/>',
+  warn: '<path d="M12 3l10 18H2z"/><path d="M12 10v4M12 17h.01"/>',
+  robot: '<rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9.5 17h5"/>',
+  eye: '<path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
 };
-function icon(name, size = 16) {
+function icon(name, size = 24) {
   const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
   for (const [k, v] of Object.entries({width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
-    "stroke-width": 2.4, "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": "true"})) s.setAttribute(k, v);
+    "stroke-width": 2.2, "stroke-linecap": "round", "stroke-linejoin": "round", "aria-hidden": "true"})) s.setAttribute(k, v);
   s.innerHTML = ICONS[name];  // static icon paths only
   return s;
 }
-document.querySelectorAll("[data-icon]").forEach(e => e.append(icon(e.dataset.icon, e.dataset.icon === "shield" ? 24 : 18)));
+document.querySelectorAll("[data-icon]").forEach(e => e.append(icon(e.dataset.icon, e.dataset.icon === "shield" ? 44 : 20)));
 const money = (n, d = 0) => "$" + Number(n).toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d});
 const pct = n => (Math.round(n * 10) / 10).toFixed(1) + "%";
+const first = name => String(name || "").split(" ")[0];
 const get = async u => { const r = await fetch(u); if (!r.ok) throw new Error(`${r.status} ${u}`); return r.json(); };
 
 // ------------------------------------------------------------------ animation engine
-// Every scene is an async function. goTo(n) replays scenes 0..n-1 instantly (speed 0), then plays scene n.
-// Starting a new goTo bumps `run`, which cancels whatever was still animating.
+// goTo(n) replays scenes 0..n-1 instantly (speed 0), then plays scene n. A newer goTo cancels the old one.
 const STOP = Symbol("stop"), reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 let run = 0, speed = 1, cur = 0;
 const alive = id => { if (id !== run) throw STOP; };
@@ -200,10 +218,10 @@ async function anim(el, kf, ms, easing = "cubic-bezier(.2,.8,.2,1)") {
   try { await a.finished; } catch (e) { /* cancelled */ }
   alive(id); return a;
 }
-const appear = el => anim(el, [{opacity: 0, transform: "translateY(10px)"}, {opacity: 1, transform: "none"}], 380);
-function shake(el) { if (speed && !reduced) el.animate([{transform: "translateX(0)"}, {transform: "translateX(-7px)"}, {transform: "translateX(7px)"},
-  {transform: "translateX(-4px)"}, {transform: "translateX(0)"}], {duration: 340}); }
-function pulse(el, color) { if (speed) el.animate([{boxShadow: `0 0 0 0 ${color}`}, {boxShadow: `0 0 0 10px transparent`}], {duration: 600}); }
+const appear = el => anim(el, [{opacity: 0, transform: "translateY(12px)"}, {opacity: 1, transform: "none"}], 600);
+const vanish = el => anim(el, [{opacity: 1}, {opacity: 0, transform: "scale(.96)"}], 500).then(() => el.remove());
+function shake(el) { if (speed && !reduced) el.animate([{transform: "translateX(0)"}, {transform: "translateX(-8px)"}, {transform: "translateX(8px)"},
+  {transform: "translateX(-5px)"}, {transform: "translateX(0)"}], {duration: 420}); }
 async function countTo(el, from, to, ms, fmt) {
   const id = run;
   if (!speed) { el.textContent = fmt(to); return; }
@@ -212,317 +230,419 @@ async function countTo(el, from, to, ms, fmt) {
     el.textContent = fmt(from + (to - from) * e); k < 1 ? requestAnimationFrame(step) : res(); }; requestAnimationFrame(step); });
   alive(id);
 }
-async function stamp(card, text, tone, big = false) {
-  const s = h("div", {class: `stamp ${tone}${big ? " big" : ""}`}, text);
-  card.append(s);
-  await anim(s, [{transform: "rotate(-8deg) scale(2.4)", opacity: 0}, {transform: "rotate(-8deg) scale(1)", opacity: 1}], 380, "cubic-bezier(.3,1.5,.5,1)");
-  if (tone === "bad") shake(card);
+async function stamp(where, text, tone, cls = "") {
+  const s = h("div", {class: `stamp ${tone} ${cls}`}, text);
+  where.append(s);
+  await anim(s, [{transform: "rotate(-8deg) scale(2.6)", opacity: 0}, {transform: "rotate(-8deg) scale(1)", opacity: 1}], 520, "cubic-bezier(.3,1.5,.5,1)");
+  if (tone === "bad") shake(where);
+  await wait(600);
 }
+function hub(text, tone = "") { $("#hubSt").textContent = text; $("#hub").className = tone; }
 const center = el => { const r = el.getBoundingClientRect(); return {x: r.left + r.width / 2, y: r.top + r.height / 2}; };
 const at = (p, extra = "") => `translate(${p.x}px, ${p.y}px) translate(-50%, -50%) ${extra}`;
-// A message token flies from its sender, through the referee hub, to its receiver. stopAtHub: it never gets through.
+// A message token flies from sender to the referee, pauses while it's checked, then on to the receiver (or stops there).
 async function fly(from, to, label, tone = "", stopAtHub = false) {
   if (!speed || reduced) return null;
-  const t = h("div", {class: "token " + tone}, label), hub = $("#hub");
+  const t = h("div", {class: "token " + tone}, label), shield = $("#hub .shield");
   $("#fx").append(t);
   try {
-    const a = center(from), b = center(hub);
-    await anim(t, [{transform: at(a, "scale(.5)"), opacity: 0}, {transform: at(a), opacity: 1, offset: .15}, {transform: at(b), opacity: 1}], 650);
-    pulse(hub, tone === "bad" ? "rgba(180,35,43,.45)" : "rgba(36,83,196,.4)");
-    await wait(280);
+    const a = center(from), b = center(shield);
+    await anim(t, [{transform: at(a, "scale(.5)"), opacity: 0}, {transform: at(a), opacity: 1, offset: .12}, {transform: at(b), opacity: 1}], 1100);
+    shield.animate([{transform: "scale(1)"}, {transform: "scale(1.1)"}, {transform: "scale(1)"}], {duration: 500});
+    await wait(650);
     if (stopAtHub) return t;
     const c = center(to);
-    await anim(t, [{transform: at(b), opacity: 1}, {transform: at(c, "scale(.9)"), opacity: 1, offset: .85}, {transform: at(c, "scale(.5)"), opacity: 0}], 600);
+    await anim(t, [{transform: at(b), opacity: 1}, {transform: at(c, "scale(.9)"), opacity: 1, offset: .85}, {transform: at(c, "scale(.5)"), opacity: 0}], 950);
     t.remove(); return null;
   } catch (e) { t.remove(); throw e; }
 }
 async function dropToken(t) {
   if (!t) return;
   const base = getComputedStyle(t).transform;
-  try { await anim(t, [{transform: base, opacity: 1}, {transform: base + " translateY(50px) rotate(14deg)", opacity: 0}], 550); } finally { t.remove(); }
+  try { await anim(t, [{transform: base, opacity: 1}, {transform: base + " translateY(60px) rotate(16deg)", opacity: 0}], 700); } finally { t.remove(); }
 }
 
-// ------------------------------------------------------------------ data + names
+// ------------------------------------------------------------------ tiles
 let D = {}, LENDERS = {};
-const who = id => id === "borrower" ? "Jasmine's agent" : id ? (LENDERS[id] || id) : "all lenders";
-const first = name => String(name || "").split(" ")[0];
-const PRODUCTS = [["fraudfinder", "AtData fraud risk"], ["idv", "TransUnion identity"], ["reverse", "AccurateAppend phone owner"],
-                  ["tu", "TransUnion credit"], ["efx", "Equifax credit"], ["exp", "Experian credit"]];
-const ID_TEXT = {"2201": "SSN belongs to another name", "2202": "Birth date doesn't match", "2301": "SSN of a deceased person",
-                 "2401": "Fraud alert on file", "2101": "Address doesn't match"};
-const hub = text => { $("#hubSt").textContent = text; };
-function lightChips(ids) { for (const id of ids) { const c = $(`#crs [data-p="${id}"]`); if (c) { c.classList.add("lit"); pulse(c, "rgba(36,83,196,.4)"); } } }
-const tokenLabel = d => d.type + (d.terms ? ` ${pct(d.terms.apr)}` : d.ask ? ` ${money(d.ask.amount)}` : "");
-
-function addLog(e) {
-  const d = e.data, ok = e.verdict.ok, deal = ok && d.type === "ACCEPT";
-  const row = h("div", {class: "log" + (ok ? (deal ? " deal" : "") : " bad")}, h("span", {class: "lt"}, d.type),
-    h("span", {class: "lw"}, `${who(d.sender)} → ${who(d.to)}` + (d.terms ? ` · ${pct(d.terms.apr)}` : "")),
-    h("span", {class: "lv"}, ok ? [icon("key", 13), deal ? "Deal" : "Passed"] : [icon("x", 13), e.verdict.code]));
-  $("#R-log").append(row);
-  while ($("#R-log").children.length > 6) $("#R-log").firstChild.remove();  // keep the feed readable: latest six only
-  if (speed) appear(row).catch(() => {});
-  row.scrollIntoView({block: "nearest"});
+function person(d, initials, fake) {
+  const score = Math.min(...Object.values(d.scores).filter(x => x != null));
+  return h("div", {class: "tile", id: fake ? "pK" : "pJ"},
+    h("div", {class: "ico round" + (fake ? " grey" : "")}, icon("user", 28)),
+    h("div", {}, h("div", {class: "tname"}, fake ? `"${d.name}"` : d.name), h("div", {class: "tsub"}, "credit score")),
+    h("div", {class: "big"}, String(score)));
 }
+function lender(id) {
+  return h("div", {class: "tile", id: "l-" + id}, h("div", {class: "ico grey"}, icon("bank", 26)),
+    h("div", {}, h("div", {class: "tname"}, LENDERS[id] || id), h("div", {class: "tsub st"}, "waiting")),
+    h("div", {class: "big rate", hidden: ""}));
+}
+const L = id => $("#l-" + id);
 
-// ------------------------------------------------------------------ lanes
 function reset() {
-  $("#fx").replaceChildren();
-  for (const id of ["#B-app", "#B-rules", "#B-pass", "#B-deal", "#R-checks", "#R-block", "#R-log", "#L-cards", "#L-note"]) $(id).replaceChildren();
-  $("#crs").replaceChildren(...PRODUCTS.map(([id, label]) => h("span", {"data-p": id}, label)));
-  hub("Waiting for applications");
-  for (const id of D.lenderIds) $("#L-cards").append(h("div", {class: "card lender waiting", id: "lc-" + id},
-    h("h3", {}, LENDERS[id] || id, " ", h("span", {class: "sim"}, "SIMULATED")), h("div", {class: "small st"}, "Waiting for applications")));
-}
-const lenderCard = id => $("#lc-" + id);
-
-function applicantCard(d, initials, sub, grey) {
-  return h("div", {class: "card", id: grey ? "card-K" : "card-J"},
-    h("div", {class: "who"}, h("div", {class: "avatar" + (grey ? " grey" : "")}, initials),
-      h("div", {}, h("div", {class: "name"}, grey ? `"${d.name}"` : d.name), h("div", {class: "small muted"}, sub))),
-    h("div", {class: "consent", hidden: ""}, icon("check"), "Allowed an identity check and a soft pull ", h("span", {class: "sim"}, "SIMULATED SIGN-IN")),
-    h("div", {class: "agent", hidden: ""}));
-}
-function agentSay(text, tone = "") {
-  const a = $("#card-J .agent"); if (!a) return;
-  a.hidden = false; a.className = "agent " + tone; a.textContent = text;
+  $("#fx").replaceChildren(); $("#B").replaceChildren(); $("#R").replaceChildren(); $("#L").replaceChildren();
+  hub("");
+  for (const id of D.lenderIds) $("#L").append(lender(id));
 }
 
 // ------------------------------------------------------------------ scene 1: who's real?
-function checkRows(J, K) {
-  const low = d => Math.min(...Object.values(d.scores).filter(x => x != null));
+function checks(J, K) {
   const ff = d => d.fraud_finder || {};
-  const ident = d => d.id_codes.length ? {text: ID_TEXT[d.id_codes[0].code] || d.id_codes[0].text, bad: true} : {text: "Verified", good: true};
-  const age = n => n == null ? "unknown" : n >= 365 ? `${Math.floor(n / 365)} years` : `${n} days`;
-  const phone = f => f.phone_owner_matches ? {text: "Matches", good: true}
-    : {text: "Not theirs" + (f.phone_type ? ` (${f.phone_prepaid ? "prepaid " : ""}${f.phone_type})` : ""), bad: true};
-  const risk = f => ({count: f.risk_score, fmt: n => `${Math.round(n)} / 100`, bad: f.risk_score >= 70, good: f.risk_score < 30});
+  const age = n => n == null ? "?" : n >= 365 ? `${Math.floor(n / 365)} yr` : `${n} days`;
+  const res = (good, note) => ({good, note});
   return [
-    {label: "Credit score · 3 bureaus", chips: ["tu", "efx", "exp"], j: {count: low(J), fmt: n => `${Math.round(n)}`}, k: {count: low(K), fmt: n => `${Math.round(n)}`},
-     callout: "Both thin files with fair scores. A score alone can't tell them apart."},
-    {label: "Identity (TransUnion)", chips: ["idv"], j: ident(J), k: ident(K)},
-    {label: "Fraud risk (AtData)", chips: ["fraudfinder"], j: risk(ff(J)), k: risk(ff(K))},
-    {label: "Email age", chips: ["fraudfinder"], j: {text: age(ff(J).email_age_days), good: ff(J).email_age_days >= 365, bad: ff(J).email_age_days < 30},
-     k: {text: age(ff(K).email_age_days), good: ff(K).email_age_days >= 365, bad: ff(K).email_age_days < 30}},
-    {label: "Phone owner", chips: ["reverse"], j: phone(ff(J)), k: phone(ff(K))},
+    ["id", "Identity", res(!J.id_codes.length), res(!K.id_codes.length)],
+    ["alert", "Fraud risk", res(ff(J).risk_score < 70, String(ff(J).risk_score)), res(ff(K).risk_score < 70, String(ff(K).risk_score))],
+    ["mail", "Email age", res(ff(J).email_age_days >= 30, age(ff(J).email_age_days)), res(ff(K).email_age_days >= 30, age(ff(K).email_age_days))],
+    ["phone", "Phone owner", res(!!ff(J).phone_owner_matches), res(!!ff(K).phone_owner_matches)],
   ];
 }
-async function fillCell(cell, v) {
-  const span = h("span", {}); cell.replaceChildren(span);
-  if (v.count != null) await countTo(span, 0, v.count, 700, v.fmt); else span.textContent = v.text;
-  if (v.good) cell.classList.add("good");
-  if (v.bad) { cell.classList.add("bad"); shake(cell); }
+function result(r) { return h("div", {class: "res"}, h("div", {class: "badge"}, h("span", {class: "spin"})), h("span", {class: "nt"}, "")); }
+function settle(cell, r) {
+  const b = cell.querySelector(".badge");
+  b.replaceChildren(icon(r.good ? "check" : "x", 20)); b.classList.add(r.good ? "good" : "bad");
+  cell.querySelector(".nt").textContent = r.note || "";
+  if (speed) b.animate([{transform: "scale(.4)"}, {transform: "scale(1.15)"}, {transform: "scale(1)"}], {duration: 450});
 }
 
 async function scene1() {
   const {J, K} = D;
-  const cj = applicantCard(J, "JR", "Student · thin credit file"), ck = applicantCard(K, "KB", "New to credit · thin credit file", true);
-  for (const c of [cj, ck]) { $("#B-app").append(c); await appear(c); }
-  for (const c of [cj, ck]) { const cons = c.querySelector(".consent"); cons.hidden = false; await appear(cons); await wait(150); }
-  await wait(300);
-  hub("Checking both applicants with CRS data...");
-  const table = h("div", {class: "card checks"}, h("div", {class: "crow head"}, h("div", {}, "CRS check"), h("div", {}, first(J.name)), h("div", {}, first(K.name))));
-  $("#R-checks").append(table); await appear(table);
-  for (const row of checkRows(J, K)) {
-    lightChips(row.chips);
-    const a = h("div", {class: "cell"}, h("span", {class: "spin"})), b = h("div", {class: "cell"}, h("span", {class: "spin"}));
-    const r = h("div", {class: "crow"}, h("div", {class: "ck"}, row.label), a, b);
-    table.append(r); await appear(r); await wait(450);
-    await Promise.all([fillCell(a, row.j), fillCell(b, row.k)]);
-    if (row.callout) { const c = h("div", {class: "callout"}, row.callout); table.append(c); await appear(c); await wait(700); }
-    await wait(250);
+  const pj = person(J, "JR"), pk = person(K, "KB", true);
+  for (const p of [pj, pk]) { $("#B").append(p); await appear(p); await wait(400); }
+  hub("Checking with CRS");
+  const grid = h("div", {class: "panel grid"}, h("div", {}), h("div", {class: "hd"}, first(J.name)), h("div", {class: "hd"}, first(K.name)));
+  $("#R").append(grid); await appear(grid);
+  for (const [ic, label, rj, rk] of checks(J, K)) {
+    const a = result(), b = result();
+    const row = [h("div", {class: "lbl"}, h("div", {class: "ico"}, icon(ic, 20)), label), a, b];
+    grid.append(...row); await Promise.all(row.map(appear));
+    await wait(900);
+    settle(a, rj); await wait(250); settle(b, rk);
+    if (!rk.good) shake(b);
+    await wait(600);
   }
-  await wait(300);
-  hub(`${first(J.name)} admitted · ${first(K.name)} blocked`);
-  cj.classList.add("ok"); await stamp(cj, "ADMITTED", "good");
-  await wait(250);
-  await stamp(ck, "BLOCKED", "bad");
-  ck.classList.add("dead");
-  const t = await fly(ck, null, "APPLY", "bad", true);
+  hub(`${first(J.name)} verified`, "good");
+  pj.classList.add("ok"); await stamp(pj, "REAL", "good");
+  pk.classList.add("bad"); await stamp(pk, "FAKE", "bad");
+  const t = await fly(pk, null, "APPLY", "bad", true);
   await dropToken(t);
-  const note = h("div", {class: "note"}, `${first(K.name)}'s synthetic identity never reaches a lender. Only ${first(J.name)}'s application continues.`);
-  $("#L-note").append(note); await appear(note);
+  pk.classList.add("dead");
+  hub("Fake blocked", "bad");
 }
 
 // ------------------------------------------------------------------ scene 2: offers arrive
 async function scene2() {
-  const {J, ex} = D, p = ex.passport, m = ex.mandate;
-  const ck = $("#card-K");
-  if (ck) { await anim(ck, [{opacity: 1}, {opacity: 0, transform: "translateX(-30px)"}], 350); ck.remove(); }
-  $("#L-note").replaceChildren();
-  $("#R-checks").replaceChildren(h("div", {class: "card summary"},
-    h("div", {style: "color:var(--green)"}, icon("check"), `${first(J.name)} verified with CRS data`),
-    h("div", {style: "color:var(--red)"}, icon("x"), `${first(D.K.name)} blocked as a synthetic identity`)));
-  const rules = h("div", {class: "card"}, h("h3", {}, `${first(J.name)}'s rules for her agent`), h("div", {class: "kv"},
-    h("div", {class: "k"}, "Amount"), h("div", {class: "v"}, `${money(m.min_amount)}–${money(m.amount)}`),
-    h("div", {class: "k"}, "Highest APR"), h("div", {class: "v", id: "maxApr"}, `${m.max_apr}% · private`),
-    h("div", {class: "k"}, "Term"), h("div", {class: "v"}, `${m.min_term}–${m.max_term} months`),
-    h("div", {class: "k"}, "Autopay"), h("div", {class: "v"}, m.allow.includes("autopay") ? "OK" : "No"),
-    h("div", {class: "k"}, "Fees"), h("div", {class: "v"}, m.max_fee ? `up to ${money(m.max_fee)}` : "None")));
-  $("#B-rules").append(rules); await appear(rules);
-  hub("Building her credit passport: personal details stay with her");
-  const wh = h("div", {class: "withheld"}, p.withheld.map(w => h("span", {}, w)));
-  const facts = h("div", {class: "facts"});
-  const pass = h("div", {class: "card", id: "passCard"}, h("h3", {}, "Credit passport"), h("div", {class: "small muted", style: "margin-bottom:6px"}, "Withheld from lenders:"), wh, facts);
-  $("#B-pass").append(pass); await appear(pass);
-  for (const s of wh.children) { s.classList.add("struck"); await wait(140); }
-  const factList = [p.score_band ? `Score band ${p.score_band}` : "No score", `${p.accounts} accounts`,
-    p.file_age_years != null ? `${p.file_age_years}-year history` : "New to credit", `Identity ${p.identity}`,
-    p.late_payments ? `${p.late_payments} late payments` : "No late payments"];
-  for (const f of factList) { const c = h("span", {}, f); facts.append(c); await appear(c); }
-  await wait(300);
-  const round0 = D.msgs.filter(e => e.round === 0);
-  for (const e of round0) {
-    const d = e.data;
-    if (d.sender === "borrower") {
-      hub("Passport sent to every lender");
-      await fly(pass, $("#L-cards"), "PASSPORT", "");
-      for (const id of D.lenderIds) { const c = lenderCard(id); c.classList.remove("waiting"); c.querySelector(".st").textContent = "Reviewing the passport..."; }
-      addLog(e); await wait(250); continue;
-    }
-    const card = lenderCard(d.sender);
-    hub(`Checking ${who(d.sender)}'s ${d.type.toLowerCase()}`);
-    await fly(card, $("#card-J"), tokenLabel(d), d.type === "DECLINE" ? "grey" : "");
-    addLog(e);
-    await showLenderMsg(card, d);
-    await wait(250);
+  const {J, ex} = D, m = ex.mandate;
+  const pk = $("#pK"); if (pk) await vanish(pk);
+  const pj = $("#pJ"); pj.querySelector(".stamp")?.remove(); pj.classList.remove("ok");
+  $("#R").replaceChildren(); hub("");
+  const rule = h("div", {class: "tile"}, h("div", {class: "ico"}, icon("gauge", 24)),
+    h("div", {}, h("div", {class: "tname"}, "Her limit"), h("div", {class: "tsub"}, `${money(m.amount)} loan`)),
+    h("div", {class: "big", id: "maxApr"}, `${m.max_apr}%`));
+  $("#B").append(rule); await appear(rule);
+  const pass = h("div", {class: "tile", id: "pass"}, h("div", {class: "ico"}, icon("hidden", 26)),
+    h("div", {}, h("div", {class: "tname"}, "Credit passport"), h("div", {class: "tsub"}, "name, SSN, address hidden")));
+  $("#B").append(pass); await appear(pass); await wait(500);
+  hub("Passport to lenders");
+  await fly(pass, $("#L"), "PASSPORT");
+  for (const id of D.lenderIds) L(id).querySelector(".st").textContent = "reviewing...";
+  await wait(500);
+  for (const e of D.msgs.filter(x => x.round === 0 && x.data.sender !== "borrower")) {
+    const d = e.data, card = L(d.sender);
+    hub("Checking");
+    await fly(card, pj, d.type === "OFFER" ? pct(d.terms.apr) : "NO", d.type === "DECLINE" ? "grey" : "");
+    await showLender(card, d);
+    await wait(500);
   }
-  hub("Offers are in");
-  agentSay("Reading the offers...");
+  hub("Offers in");
 }
-async function showLenderMsg(card, d, prev) {
-  const st = card.querySelector(".st");
-  if (d.type === "DECLINE") {
-    st.textContent = "Passed: " + d.text.replace(/^[^:]+:\s*/, "");
-    card.classList.add("dead"); return;
-  }
+async function showLender(card, d, prev) {
+  const st = card.querySelector(".st"), rate = card.querySelector(".rate");
+  if (d.type === "DECLINE") { st.textContent = "declined"; card.classList.add("dead"); return; }
   if (d.type !== "OFFER") return;
-  let rate = card.querySelector(".rate");
-  if (!rate) {
-    rate = h("div", {class: "rate"}); const terms = h("div", {class: "terms"});
-    st.replaceWith(rate, terms);
-    const hidden = d.text.toUpperCase().indexOf("SYSTEM NOTE");
-    card.classList.add(hidden >= 0 ? "evil" : "active");
-    if (hidden >= 0) card.append(h("div", {class: "fine"}, h("span", {class: "lbl"}, "Offer text"), d.text.slice(0, hidden), h("mark", {}, d.text.slice(hidden))));
-    await appear(rate);
-  }
-  card.querySelector(".terms").textContent = `${money(d.terms.amount)} · ${d.terms.term_months} months` + (d.terms.autopay ? " · autopay" : "") + (d.terms.fee ? ` · ${money(d.terms.fee)} fee` : "");
-  await countTo(rate, prev != null ? prev : 0, d.terms.apr, prev != null ? 600 : 500, pct);
-  pulse(card, "rgba(36,83,196,.35)");
+  rate.hidden = false;
+  if (d.text.toUpperCase().includes("IGNORE")) { card.classList.add("bad"); card.querySelector(".ico").className = "ico red"; st.replaceChildren(icon("warn", 14), " hidden instruction"); }
+  else { st.textContent = `${d.terms.term_months} months` + (d.terms.autopay ? " · autopay" : ""); card.querySelector(".ico").className = "ico"; }
+  await countTo(rate, prev != null ? prev : 0, d.terms.apr, prev != null ? 1400 : 900, pct);
 }
 
 // ------------------------------------------------------------------ scene 3: an attack
-const CHECKS = [["Signed by a registered agent key", "BAD_SIGNATURE"], ["Borrowers may accept", "WRONG_ROLE"],
-                ["Terms match the offer", "TERMS_MISMATCH"], ["Inside the person's rules", "OUTSIDE_MANDATE"]];
+// Her AI agent, shown under her tiles: a robot with a speech line.
+function agentSay(text, tone = "") {
+  let a = $("#agent");
+  if (!a) { a = h("div", {class: "tile", id: "agent"}, h("div", {class: "ico"}, icon("robot", 26)),
+                  h("div", {}, h("div", {class: "tname"}, "Her AI agent"), h("div", {class: "say"}))); $("#B").append(a); }
+  a.className = "tile" + (tone ? " " + tone : "");
+  a.querySelector(".say").textContent = text;
+  return a;
+}
+
 async function scene3() {
   const e = D.msgs.find(x => !x.verdict.ok);
   if (!e) { hub("No attack in this run"); return; }
-  const d = e.data, card = lenderCard(d.to), fine = card && card.querySelector(".fine");
-  if (fine) { fine.classList.add("alarm"); shake(fine); }
-  agentSay("Agent reads the offer text...", "warn"); await wait(700);
-  agentSay(`Agent: "${d.text}"`, "warn"); await wait(400);
-  hub("Checking the acceptance...");
-  const t = await fly($("#card-J"), null, tokenLabel(d), "bad", true);
-  const panel = h("div", {class: "card block-panel"}, h("div", {class: "small muted"}, `${who(d.sender)} → ${who(d.to)} · ACCEPT · ${money(d.terms.amount)} at ${d.terms.apr}%`));
-  const list = h("div", {class: "verdicts", style: "margin-top:10px"}); panel.append(list);
-  $("#R-block").append(panel); await appear(panel);
-  for (const [label, code] of CHECKS) {
-    const failed = e.verdict.code === code, row = h("div", {class: "vrow"}, h("span", {class: "spin"}), label);
-    list.append(row); await wait(420);
-    row.firstChild.replaceWith(icon(failed ? "x" : "check")); row.classList.add(failed ? "bad" : "good");
-    if (failed) break;
-  }
-  await wait(250);
-  const stampRow = h("div", {style: "display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px"});
-  panel.append(stampRow);
-  await stamp(stampRow, "BLOCKED", "bad", true);
-  stampRow.append(h("span", {class: "code"}, e.verdict.code));
-  shake(panel);
-  panel.append(h("div", {class: "reason"}, e.verdict.reason.replace(/^Blocked:\s*/, "")));
-  await dropToken(t);
-  addLog(e);
-  const mx = $("#maxApr"); if (mx) { mx.classList.add("hot"); shake(mx); }
-  hub("Attack blocked: the referee never reads message text");
-  await wait(300);
-  agentSay(`${first(D.J.name)} is protected: nothing outside her rules can go through.`, "good");
+  const d = e.data, card = L(d.to), t = d.terms;
+  const offer = D.msgs.find(x => x.data.sender === d.to && x.data.type === "OFFER").data;
+  const cut = offer.text.toUpperCase().indexOf("SYSTEM NOTE"), hiddenText = cut >= 0 ? offer.text.slice(cut) : offer.text;
+  // 1. the offer as a person sees it: terms, fine print, and a line too faint to notice
+  await appear(agentSay(`Reading ${LENDERS[d.to] || "the"} offer...`));
+  const hid = h("div", {class: "hidden-line"}, hiddenText), cap = h("div", {class: "doc-cap"}, icon("user", 16), "What a person sees");
+  const doc = h("div", {class: "panel doc"}, h("div", {class: "doc-h"}, icon("bank", 18), LENDERS[d.to] || d.to),
+    h("div", {class: "doc-t"}, `${money(t.amount)} · ${pct(t.apr)} APR`), h("div", {class: "bars"}, h("i"), h("i"), h("i")), hid, cap);
+  $("#R").append(doc); await appear(doc);
+  card.classList.add("warn");
+  await wait(1800);
+  // 2. what the AI agent reads: the hidden text, written for agents
+  cap.replaceChildren(icon("robot", 16), "What the AI agent reads"); cap.classList.add("alarm");
+  hid.classList.add("shown");
+  await wait(1800); shake(hid);
+  await wait(1200);
+  agentSay(`"${d.text}"`, "warn");
+  await wait(1600);
+  // 3. the agent obeys, and the referee stops it
+  hub("Checking");
+  const tok = await fly($("#agent"), null, `ACCEPT ${pct(t.apr)}`, "bad", true);
+  const m = D.ex.mandate;
+  const panel = h("div", {class: "panel", style: "text-align:center;position:relative"},
+    h("div", {class: "vs compact"}, h("div", {}, h("div", {class: "n", style: "color:var(--red)"}, pct(t.apr)), h("div", {class: "cap"}, "offer")),
+      h("div", {class: "n", style: "color:var(--mute)"}, ">"),
+      h("div", {}, h("div", {class: "n"}, `${m.max_apr}%`), h("div", {class: "cap"}, "her limit"))));
+  $("#R").append(panel); await appear(panel); await wait(900);
+  hub("Blocked", "bad");
+  await stamp(panel, "BLOCKED", "bad");
+  await dropToken(tok);
+  const mx = $("#maxApr"); if (mx) mx.parentElement.classList.add("ok");
+  card.classList.remove("warn"); card.classList.add("dead");
+  agentSay("Blocked. Her limit holds.", "ok");
 }
 
 // ------------------------------------------------------------------ scene 4: the deal
 async function scene4() {
   const blockedRound = (D.msgs.find(x => !x.verdict.ok) || {round: 0}).round;
   const rest = D.msgs.filter(e => e.round > blockedRound);
-  const attack = D.msgs.find(x => !x.verdict.ok);
-  if (attack) $("#R-block").replaceChildren(h("div", {class: "log bad"}, h("span", {class: "lt"}, "ATTACK"),
-    h("span", {class: "lw"}, `Hidden instruction from ${who(attack.data.to)}`), h("span", {class: "lv"}, icon("x", 13), "Blocked")));
-  agentSay("Negotiating within her rules...");
+  $("#R").replaceChildren();
+  const pj = $("#agent") || $("#pJ"), rates = {};
+  agentSay("Negotiating...");
+  for (const id of D.lenderIds) { const r = L(id).querySelector(".rate"); if (!r.hidden) rates[id] = parseFloat(r.textContent); }
   hub("Negotiating");
-  const rates = {};
-  for (const id of D.lenderIds) { const r = lenderCard(id).querySelector(".rate"); if (r) rates[id] = parseFloat(r.textContent); }
+  // the negotiation as a chat: agent on the left (borrower side), lender on the right; starts from the lender's opening offer
+  const lid0 = (rest.find(e => e.data.sender === "borrower" && e.data.to) || {data: {}}).data.to;
+  const thread = h("div", {class: "panel thread"}, h("div", {class: "hd"}, h("span", {}, "Her agent"), h("span", {}, LENDERS[lid0] || "")));
+  $("#R").append(thread); await appear(thread);
+  const say = async (mine, big, small, yes) => {
+    const b = h("div", {class: `bub ${mine ? "me" : "them"}${yes ? " yes" : ""}`}, h("b", {}, big), small || null);
+    thread.append(b); await appear(b);
+  };
+  const open = D.msgs.find(e => e.round === 0 && e.data.sender === lid0 && e.data.type === "OFFER");
+  if (open) { await say(false, pct(open.data.terms.apr), "opening"); await wait(600); }
   for (const e of rest) {
-    const d = e.data, mine = d.sender === "borrower", lid = mine ? d.to : d.sender, card = lenderCard(lid);
-    if (!card) continue;
-    hub(`Checking ${who(d.sender)}'s ${d.type.toLowerCase()}`);
-    if (mine && d.type === "COUNTER") agentSay(`Agent: "${d.text}"`);
-    await fly(mine ? $("#card-J") : card, mine ? card : $("#card-J"), tokenLabel(d), !e.verdict.ok ? "bad" : d.type === "ACCEPT" ? "good" : d.type === "DECLINE" ? "grey" : "");
-    addLog(e);
-    if (!mine) { await showLenderMsg(card, d, rates[lid]); if (d.terms) rates[lid] = d.terms.apr; }
-    if (mine && d.type === "ACCEPT" && e.verdict.ok) { card.classList.remove("active"); card.classList.add("won"); await stamp(card, "DEAL", "good"); }
-    await wait(250);
+    const d = e.data, mine = d.sender === "borrower", lid = mine ? d.to : d.sender, card = L(lid);
+    if (!card || (!mine && d.type !== "OFFER")) continue;
+    const label = d.type === "ACCEPT" ? "ACCEPT" : mine ? `${pct(d.terms.apr)}?` : pct(d.terms.apr);
+    hub("Checking");
+    await fly(mine ? pj : card, mine ? card : pj, label, d.type === "ACCEPT" ? "good" : "");
+    if (d.type === "ACCEPT") await say(true, "Deal", `at ${pct(d.terms.apr)}`, true);
+    else if (mine) await say(true, `${pct(d.terms.apr)}?`, d.terms.autopay ? "with autopay" : "can you do better?");
+    else await say(false, pct(d.terms.apr), "agreed");
+    if (!mine) { await showLender(card, d, rates[lid]); rates[lid] = d.terms.apr; }
+    if (mine && d.type === "ACCEPT" && e.verdict.ok) { card.classList.add("won"); hub("Deal", "good"); await stamp(card, "DEAL", "good"); }
+    await wait(500);
   }
-  const ev = D.ex.events, set = ev.find(x => x.kind === "settlement"), dis = ev.find(x => x.kind === "disclosure"), none = ev.find(x => x.kind === "no_deal");
-  if (!D.ex.deal) {
-    hub("No deal"); agentSay("No offer fit her rules. The agent walked away.", "warn");
-    const c = h("div", {class: "card"}, h("h3", {}, "No deal"), none ? none.data.reason : ""); $("#B-deal").append(c); await appear(c); return;
-  }
-  const t = D.ex.deal.terms;
-  hub("Deal reached inside her rules");
-  agentSay("Done. Here's the deal in plain English.", "good");
-  $("#passCard").hidden = true;
-  const pay = h("span", {}), save = h("span", {});
-  const card = h("div", {class: "card ok"},
-    h("div", {class: "small", style: "color:var(--green);font-weight:700;display:flex;gap:6px;align-items:center"}, icon("check"), "Deal with ", D.ex.deal.lender_name, " ", h("span", {class: "sim"}, "SIMULATED LENDER")),
-    h("div", {class: "deal-big"}, `${money(t.amount)} at ${t.apr}%`),
-    h("div", {class: "small"}, `${t.term_months} months · `, pay, " a month" + (t.autopay ? " · autopay" : "")));
-  $("#B-deal").append(card); await appear(card);
-  await countTo(pay, 0, dis.data.monthly_payment, 900, n => money(n, 2));
-  const lines = h("div", {class: "card"}, h("h3", {}, "What your agent did"));
-  $("#B-deal").append(lines); await appear(lines);
-  for (const s of dis.data.summary.slice(1)) {
-    const m = s.match(/saves \$([\d,.]+)/);
-    const row = m ? h("div", {style: "padding:4px 0"}, s.slice(0, m.index), h("b", {}, "saves ", save), s.slice(m.index + m[0].length)) : h("div", {style: "padding:4px 0"}, s);
-    lines.append(row); await appear(row);
-    if (m) await countTo(save, 0, parseFloat(m[1].replace(/,/g, "")), 900, n => money(n, 2));
-  }
-  if (set) {
-    const steps = h("div", {class: "card steps"}, h("h3", {}, "Settlement"));
-    $("#B-deal").append(steps); await appear(steps);
-    for (const s of set.data.steps) {
-      const row = h("div", {}, h("span", {class: "sim"}, "SIMULATED"), " ", s.replace(/: simulated \(not available in the CRS sandbox\)$/, ""));
-      steps.append(row); await appear(row); await wait(120);
-    }
-  }
-  card.scrollIntoView({block: "start", behavior: speed ? "smooth" : "auto"});
+  const deal = D.ex.deal, dis = D.ex.events.find(x => x.kind === "disclosure");
+  if (!deal) { hub("No deal"); return; }
+  agentSay("Done: inside her limit.", "ok");
+  const t = deal.terms, pay = h("span", {}, "$0"), save = h("span", {}, "$0");
+  const saved = dis && dis.data.summary.join(" ").match(/saves \$([\d,.]+)/);
+  $("#pass")?.remove();
+  const card = h("div", {class: "tile won deal"},
+    h("div", {class: "tsub"}, deal.lender_name),
+    h("div", {style: "font-size:30px;font-weight:800;letter-spacing:-.02em"}, `${money(t.amount)} at ${pct(t.apr)}`),
+    h("div", {style: "display:flex;gap:8px;flex-wrap:wrap"}, h("span", {class: "pill"}, pay, " / month"),
+      saved ? h("span", {class: "pill", style: "background:var(--green);color:#fff"}, "saved ", save) : null));
+  $("#B").append(card); await appear(card);
+  await countTo(pay, 0, dis.data.monthly_payment, 1200, n => money(n));
+  if (saved) await countTo(save, 0, parseFloat(saved[1].replace(/,/g, "")), 1200, n => money(n));
 }
+
+// ------------------------------------------------------------------ perspectives: Jasmine's phone, a lender's dashboard
+const low = d => Math.min(...Object.values(d.scores).filter(x => x != null));
+const attackMsg = () => D.msgs.find(x => !x.verdict.ok);
+const dealLender = () => (D.ex.deal && D.ex.deal.lender) || D.lenderIds.find(id => D.msgs.some(e => e.round === 0 && e.data.sender === id && e.data.type === "OFFER"));
+const isInjected = d => /ignore/i.test(d.text || "");
+const lenderReplies = round => D.msgs.filter(e => e.round === round && e.data.sender !== "borrower");
+function frame(kind, label, lenderId, tone = "") {
+  const wrap = h("div", {class: "dev-wrap"}, h("div", {class: "dev-label"}, icon(kind === "phone" ? "user" : "bank", 16), label));
+  let screen;
+  if (kind === "phone") { screen = h("div", {class: "phone-screen"}); wrap.append(h("div", {class: "phone"}, screen)); }
+  else {
+    screen = h("div", {class: "dash-body"});
+    wrap.append(h("div", {class: "dash" + (tone ? " " + tone : "")}, h("div", {class: "dash-top"}, icon("bank", 18),
+      h("b", {}, LENDERS[lenderId] || lenderId), h("span", {}, "Lender dashboard"), h("span", {class: "simtag"}, "SIMULATED LENDER")), screen));
+  }
+  $("#persp").replaceChildren(wrap);
+  return screen;
+}
+async function add(parent, el, pause = 0) { parent.append(el); await appear(el); if (pause) await wait(pause); return el; }
+const pop = el => { if (speed) el.animate([{transform: "scale(.94)"}, {transform: "scale(1.03)"}, {transform: "scale(1)"}], {duration: 450}); };
+function offerRow(d) {
+  const dead = d.type !== "OFFER";
+  return h("div", {class: "p-row orow" + (dead ? " dead" : "")}, icon("bank", 18), h("span", {class: "on"}, LENDERS[d.sender] || d.sender),
+    dead ? h("span", {class: "tsub"}, "declined") : h("b", {class: isInjected(d) ? "red" : ""}, pct(d.terms.apr), isInjected(d) ? [" ", icon("warn", 15)] : null));
+}
+function passportChips(p) {
+  return h("div", {class: "chips"}, [p.score_band ? `score ${p.score_band}` : "no score", `${p.accounts} accounts`,
+    p.file_age_years != null ? `${p.file_age_years}-yr history` : "new to credit", `identity ${p.identity}`].map(t => h("span", {}, t)));
+}
+
+// Jasmine's phone
+async function jScene1() {
+  const s = frame("phone", "Jasmine's view");
+  await add(s, h("div", {class: "p-h"}, `Hi ${first(D.J.name)}`), 300);
+  const tog = h("span", {class: "tog"});
+  await add(s, h("div", {class: "pcard p-row"}, h("div", {class: "ico sm"}, icon("shield", 20)),
+    h("div", {}, h("b", {}, "Check my identity"), h("div", {class: "tsub"}, "soft pull · score not affected")), tog), 1000);
+  tog.classList.add("on"); await wait(900);
+  const st = await add(s, h("div", {class: "pcard p-row"}, h("span", {class: "spin"}), "Checking with the credit bureaus"), 2000);
+  st.replaceChildren(h("div", {class: "badge good"}, icon("check", 18)), h("div", {}, h("b", {}, "Identity verified"), h("div", {class: "tsub"}, "credit score")),
+    h("div", {class: "big"}, String(low(D.J))));
+  st.classList.add("okc"); pop(st);
+}
+async function jScene2() {
+  const s = frame("phone", "Jasmine's view"), m = D.ex.mandate;
+  await add(s, h("div", {class: "p-h"}, "Your loan"));
+  await add(s, h("div", {class: "pcard p-row"}, h("div", {class: "ico sm"}, icon("gauge", 20)),
+    h("div", {}, h("b", {}, `${money(m.amount)} loan`), h("div", {class: "tsub"}, "your limit")), h("div", {class: "big"}, `${m.max_apr}%`)), 700);
+  await add(s, h("div", {class: "pcard"}, h("div", {class: "tsub"}, "Lenders see only"), passportChips(D.ex.passport),
+    h("div", {class: "tsub p-row"}, icon("hidden", 15), "name, SSN, address hidden")), 1100);
+  const list = await add(s, h("div", {class: "pcard"}, h("div", {class: "tsub"}, "Offers")));
+  for (const e of lenderReplies(0)) await add(list, offerRow(e.data), 1000);
+}
+async function jScene3() {
+  const s = frame("phone", "Jasmine's view"), e = attackMsg(), m = D.ex.mandate;
+  s.append(h("div", {class: "p-h"}, "Your loan"));
+  const list = h("div", {class: "pcard"}, h("div", {class: "tsub"}, "Offers"), lenderReplies(0).map(x => offerRow(x.data)));
+  s.append(list); await wait(900);
+  if (!e) return;
+  const alert = await add(s, h("div", {class: "pcard badc"}, h("div", {class: "p-row"}, icon("warn", 26), h("b", {style: "font-size:20px"}, "Blocked")),
+    h("div", {}, `Your agent tried to accept ${pct(e.data.terms.apr)} from ${LENDERS[e.data.to] || e.data.to}.`),
+    h("div", {style: "font-weight:700"}, `Above your ${m.max_apr}% limit. Nothing was signed.`)));
+  shake(alert); await wait(1600);
+  await add(s, h("div", {class: "pcard okc p-row"}, h("div", {class: "badge good"}, icon("check", 18)), h("b", {}, "Your limit held")));
+}
+async function jScene4() {
+  const s = frame("phone", "Jasmine's view"), lid = dealLender(), deal = D.ex.deal;
+  s.append(h("div", {class: "p-h"}, "Your loan"));
+  const open = D.msgs.find(e => e.round === 0 && e.data.sender === lid && e.data.type === "OFFER");
+  const rate = h("div", {class: "big"}, open ? pct(open.data.terms.apr) : "");
+  const neg = await add(s, h("div", {class: "pcard p-row"}, h("div", {class: "ico sm"}, icon("robot", 20)),
+    h("div", {}, h("b", {}, "Your agent is negotiating"), h("div", {class: "tsub"}, `with ${LENDERS[lid] || lid}`)), rate), 900);
+  let prev = open ? open.data.terms.apr : 0;
+  for (const e of D.msgs.filter(x => x.round > ((attackMsg() || {round: 0}).round) && x.data.sender === lid && x.data.type === "OFFER")) {
+    await countTo(rate, prev, e.data.terms.apr, 1400, pct); prev = e.data.terms.apr; await wait(700);
+  }
+  if (!deal) return;
+  neg.classList.add("okc"); neg.querySelector("b").textContent = `Your agent negotiated ${pct(open ? open.data.terms.apr : prev)} → ${pct(prev)}`;
+  const dis = D.ex.events.find(x => x.kind === "disclosure"), saved = dis && dis.data.summary.join(" ").match(/saves \$([\d,.]+)/);
+  const pay = h("span", {}, "$0"), save = h("span", {}, "$0");
+  await add(s, h("div", {class: "pcard okc"}, h("div", {class: "tsub"}, deal.lender_name),
+    h("div", {style: "font-size:26px;font-weight:800"}, `${money(deal.terms.amount)} at ${pct(deal.terms.apr)}`),
+    h("div", {class: "chips"}, h("span", {}, pay, " / month"), saved ? h("span", {style: "background:var(--green);color:#fff"}, "saved ", save) : null),
+    h("div", {class: "p-row", style: "font-weight:700;color:var(--green)"}, icon("check", 18), "Accepted inside your limit")));
+  await countTo(pay, 0, dis.data.monthly_payment, 1100, n => money(n));
+  if (saved) await countTo(save, 0, parseFloat(saved[1].replace(/,/g, "")), 1100, n => money(n));
+}
+
+// A lender's dashboard (the winning lender; the attacker in scene 3)
+async function lScene1() {
+  const lid = dealLender(), s = frame("dash", "Lender's view", lid);
+  const apps = await add(s, h("div", {class: "dcard"}, h("h3", {}, "Applications")));
+  const wait1 = await add(apps, h("div", {class: "p-row tsub"}, h("span", {class: "spin"}), "Waiting for verified applicants"), 2200);
+  wait1.replaceChildren(h("div", {class: "badge good"}, icon("check", 18)), h("div", {}, h("b", {}, "1 new applicant"), h("div", {class: "tsub"}, "identity verified by the exchange")));
+  pop(wait1);
+  const n = h("div", {class: "big", style: "margin:0"}, "0");
+  await add(s, h("div", {class: "dcard verdict-bad"}, h("h3", {style: "color:#7E1218"}, "Screened out before you"), n,
+    h("div", {}, "synthetic identity · never shown to you")), 300);
+  await countTo(n, 0, D.K.decision === "STOP_FRAUD" ? 1 : 0, 900, x => String(Math.round(x)));
+}
+async function lScene2() {
+  const lid = dealLender(), s = frame("dash", "Lender's view", lid), p = D.ex.passport;
+  const pass = await add(s, h("div", {class: "dcard"}, h("h3", {}, "Applicant's credit passport"),
+    h("div", {class: "kv2"}, h("span", {}, "Score band"), h("span", {class: "v"}, p.score_band || "none"), h("span", {}, "Accounts"), h("span", {class: "v"}, p.accounts),
+      h("span", {}, "History"), h("span", {class: "v"}, p.file_age_years != null ? `${p.file_age_years} yrs` : "none"),
+      h("span", {}, "Identity"), h("span", {class: "v"}, p.identity), h("span", {}, "Late payments"), h("span", {class: "v"}, p.late_payments))), 600);
+  for (const [k, w] of [["Name", "xxxxxxxxxxxx"], ["SSN", "xxx-xx-xxxx"], ["Address", "xxxxxxxxxxxxxxx"]]) {  // blacked out: never sent to lenders
+    await add(pass, h("div", {class: "kv2"}, h("span", {}, k), h("span", {class: "v"}, h("span", {class: "redact"}, w))), 350);
+  }
+  const offer = D.msgs.find(e => e.round === 0 && e.data.sender === lid);
+  if (!offer) return;
+  const why = offer.data.text.replace(/^[^:]+:\s*/, "").split(". ")[0];
+  const dec = await add(s, h("div", {class: "dcard"}, h("h3", {}, "Your decision"), h("div", {class: "p-row"}, icon("check", 18), why)), 900);
+  if (offer.data.type === "OFFER") {
+    await add(dec, h("div", {style: "font-size:30px;font-weight:800"}, `Offer ${pct(offer.data.terms.apr)}`), 500);
+    await add(dec, h("div", {class: "p-row tsub"}, icon("key", 15), offer.verdict.ok ? "Signed and passed the exchange" : offer.verdict.code));
+  }
+}
+async function lScene3() {
+  const e = attackMsg();
+  if (!e) { frame("dash", "Lender's view", dealLender()); return; }
+  const lid = e.data.to, s = frame("dash", "Attacker's view", lid, "evil");
+  const offer = D.msgs.find(x => x.data.sender === lid && x.data.type === "OFFER").data;
+  const cut = offer.text.toUpperCase().indexOf("SYSTEM NOTE");
+  await add(s, h("div", {class: "dcard"}, h("h3", {}, "Your offer"), h("div", {style: "font-size:30px;font-weight:800"}, pct(offer.terms.apr)),
+    h("div", {class: "tsub"}, "Offer text"), h("div", {style: "font-size:14px"}, cut >= 0 ? offer.text.slice(0, cut) : offer.text,
+      cut >= 0 ? h("span", {style: "background:var(--red);color:#fff;border-radius:4px;padding:0 3px"}, offer.text.slice(cut)) : null)), 1200);
+  const inbox = await add(s, h("div", {class: "dcard"}, h("h3", {}, "Incoming"), h("div", {class: "p-row"}, h("span", {class: "spin"}), `ACCEPT ${pct(e.data.terms.apr)} from the borrower's agent`)), 1800);
+  const v = await add(inbox, h("div", {class: "dcard verdict-bad"}, h("div", {class: "p-row"}, icon("x", 22), h("b", {style: "font-size:20px"}, "Rejected by the exchange")),
+    h("div", {class: "code"}, e.verdict.code), h("div", {}, "Above the borrower's limit. The exchange never acts on message text.")));
+  inbox.querySelector(".spin").replaceWith(icon("x", 18));
+  shake(v);
+}
+async function lScene4() {
+  const lid = dealLender(), s = frame("dash", "Lender's view", lid);
+  const blocked = (attackMsg() || {round: 0}).round;
+  const thread = await add(s, h("div", {class: "dcard thread"}, h("div", {class: "hd"}, h("span", {}, "Borrower's agent"), h("span", {}, "You"))));
+  const say = (mine, big, small, yes) => add(thread, h("div", {class: `bub ${mine ? "me" : "them"}${yes ? " yes" : ""}`}, h("b", {}, big), small || null), 700);
+  const open = D.msgs.find(e => e.round === 0 && e.data.sender === lid && e.data.type === "OFFER");
+  if (open) await say(false, pct(open.data.terms.apr), "your offer");
+  for (const e of D.msgs.filter(x => x.round > blocked && (x.data.sender === lid || x.data.to === lid))) {
+    const d = e.data, mine = d.sender === "borrower";
+    if (d.type === "ACCEPT") await say(true, "Accepted", pct(d.terms.apr), true);
+    else if (mine && d.terms) await say(true, `${pct(d.terms.apr)}?`, d.terms.autopay ? "with autopay" : "");
+    else if (d.type === "OFFER") await say(false, pct(d.terms.apr), "you agreed");
+  }
+  if (!D.ex.deal) return;
+  const t = D.ex.deal.terms;
+  await add(s, h("div", {class: "dcard verdict-ok"}, h("div", {class: "p-row"}, icon("check", 22), h("b", {style: "font-size:20px"}, "New loan")),
+    h("div", {style: "font-size:26px;font-weight:800"}, `${money(t.amount)} at ${pct(t.apr)}`),
+    h("div", {class: "p-row tsub"}, h("span", {class: "simtag", style: "margin:0"}, "SIMULATED"), "full credit file unlocked, funding, bureau reporting")));
+}
+const VIEWS = {j: [jScene1, jScene2, jScene3, jScene4], l: [lScene1, lScene2, lScene3, lScene4]};
+let view = "all";
+function setView(v) {
+  view = v; document.body.dataset.view = v;
+  document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === v)));
+  goTo(cur);
+}
+document.querySelectorAll(".seg button").forEach(b => b.onclick = () => setView(b.dataset.view));
 
 // ------------------------------------------------------------------ scenes + controls
 const SCENES = [
-  {title: "Who's real?", caption: "Two applicants with thin credit files and similar scores. A score can't tell them apart. CRS identity and fraud data can.", fn: scene1},
-  {title: "Offers arrive", caption: "Jasmine's agent sends lenders a credit passport, never her personal details. Every message passes through the referee.", fn: scene2},
-  {title: "An attack", caption: "One lender hid an instruction in its offer to trick Jasmine's agent. The agent falls for it. The referee doesn't.", fn: scene3},
-  {title: "The deal", caption: "The agent negotiates inside Jasmine's rules, and she sees exactly what it traded to get the deal.", fn: scene4},
+  {title: "Who's real?", caption: "Same thin file. CRS data tells them apart.", fn: scene1},
+  {title: "Offers arrive", caption: "Lenders see a passport, not her identity.", fn: scene2},
+  {title: "An attack", caption: "A hidden instruction tricks her agent.", fn: scene3},
+  {title: "The deal", caption: "Negotiated inside her limit.", fn: scene4},
 ];
-$("#steps").replaceChildren(...SCENES.map((s, i) => { const b = h("button", {type: "button"}, `${i + 1} ${s.title}`); b.onclick = () => goTo(i); return b; }));
+$("#steps").replaceChildren(...SCENES.map((s, i) => { const b = h("button", {type: "button", title: s.title, "aria-label": s.title}, String(i + 1)); b.onclick = () => goTo(i); return b; }));
 
 async function goTo(n) {
   n = Math.max(0, Math.min(SCENES.length - 1, n));
+  if (!D.msgs) return;  // data still loading
   const id = ++run; cur = n;
   [...$("#steps").children].forEach((b, i) => i === n ? b.setAttribute("aria-current", "step") : b.removeAttribute("aria-current"));
-  $("#kicker").textContent = `Scene ${n + 1} of ${SCENES.length}`;
   $("#title").textContent = SCENES[n].title; $("#caption").textContent = SCENES[n].caption;
-  $("#nextLbl").textContent = n < SCENES.length - 1 ? `Next: ${SCENES[n + 1].title}` : "Start over";
+  $("#nextLbl").textContent = n < SCENES.length - 1 ? "Next" : "Start over";
   $("#back").disabled = n === 0;
   try {
-    speed = 0; reset();
+    speed = 0; reset(); $("#persp").replaceChildren();
+    if (view !== "all") { speed = 1; await VIEWS[view][n](); return; }
     for (let i = 0; i < n; i++) await SCENES[i].fn();
     speed = 1; await SCENES[n].fn();
   } catch (e) { if (e !== STOP) throw e; }
@@ -530,17 +650,29 @@ async function goTo(n) {
 }
 $("#next").onclick = () => goTo(cur < SCENES.length - 1 ? cur + 1 : 0);
 $("#back").onclick = () => goTo(cur - 1);
-$("#replay").onclick = () => goTo(cur);
 document.addEventListener("keydown", e => {
-  if (e.target.closest("input, select, textarea")) return;
-  if (e.key === "ArrowRight") goTo(cur < SCENES.length - 1 ? cur + 1 : 0);
+  if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); goTo(cur < SCENES.length - 1 ? cur + 1 : 0); }
   else if (e.key === "ArrowLeft") goTo(cur - 1);
   else if (e.key === "r" || e.key === "R") goTo(cur);
 });
 
+// Live CRS sandbox by default; /demo?live=0 uses the saved sandbox responses. The server falls back to saved data
+// on any live failure, and the badge shows what was actually used.
+function showSource(J, K, ex) {
+  const gate = ex.events.find(e => e.kind === "gate"), srcs = [J.source, K.source, gate ? gate.data.source : "samples"];
+  const live = srcs.filter(s => s === "live").length, el = $("#src");
+  el.className = live === srcs.length ? "live" : "";
+  el.querySelector("span").textContent = live === srcs.length ? "Live · CRS sandbox" : live ? "Partly live · CRS sandbox" : "Saved CRS sandbox data";
+  el.title = J.live_note || K.live_note || ex.live_note || "";
+}
+
 (async () => {
+  const q = new URLSearchParams(location.search).get("live") === "0" ? "" : "live=1";
+  $("#title").textContent = q ? "Pulling live CRS data..." : "Loading...";
   try {
-    const [J, K, ex, sc] = await Promise.all([get("/api/decide/P03"), get("/api/decide/P13"), get("/api/exchange/P03?scenario=demo"), get("/api/exchange/scenarios")]);
+    const [J, K, ex, sc] = await Promise.all([get(`/api/decide/P03?${q}`), get(`/api/decide/P13?${q}`),
+                                              get(`/api/exchange/P03?scenario=demo&${q}`), get("/api/exchange/scenarios")]);
+    showSource(J, K, ex);
     LENDERS = sc.lenders || {};
     const msgs = ex.events.filter(e => e.kind === "message");
     D = {J, K, ex, msgs, lenderIds: [...new Set(msgs.filter(e => e.data.sender !== "borrower").map(e => e.data.sender))]};
