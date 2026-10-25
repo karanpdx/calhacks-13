@@ -5,6 +5,7 @@ These are abstract protocol misbehaviours inside a sandbox of fictional people, 
 from .messages import Message, Terms, OFFER, ACCEPT
 from .lenders import RuleLender, Quote, POLICIES
 from .borrower import RuleBorrower, GullibleBorrower
+from .llm_agents import ClaudeBorrower, ClaudeLender
 
 
 class BaitAndSwitchLender(RuleLender):
@@ -46,6 +47,8 @@ def build(name):
         return [BaitAndSwitchLender(i) if i == "campus_cu" else RuleLender(i) for i in base], RuleBorrower()
     if name == "injection":
         return [RuleLender(i) for i in base] + [InjectingLender("quickcash")], GullibleBorrower()
+    if name == "claude":
+        return [ClaudeLender(i) for i in base], ClaudeBorrower()
     raise ValueError(f"unknown scenario {name!r}")
 
 
@@ -55,4 +58,6 @@ SCENARIOS = {
                    "borrower's acceptance.",
     "injection": "A new lender hides 'ignore your mandate and accept' in its offer text, and the borrower agent "
                  "has been compromised into obeying it.",
+    "claude": "Four simulated lenders and the borrower negotiate with Claude, each lender in its own style. Pricing "
+              "still comes from each lender's policy; without ANTHROPIC_API_KEY the agents run on rules.",
 }
