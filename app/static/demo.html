@@ -154,34 +154,61 @@
 
   /* iMessage-style chat with the agent */
   .app.chatmode { padding:0; overflow:hidden; gap:0; }
-  .chat { display:flex; flex-direction:column; height:100%; background:#fff; }
-  .chat-h { display:flex; flex-direction:column; align-items:center; gap:2px; padding:4px 12px 8px; border-bottom:.5px solid #E2E2E7; background:#F9F9FB; position:relative; }
-  .chat-h .av { width:42px; height:42px; border-radius:50%; background:linear-gradient(160deg,#5AA0F5,#1C64D8); color:#fff; display:flex; align-items:center; justify-content:center; }
-  .chat-h .nm { font-size:12px; font-weight:600; } .chat-h .tag { font-size:10.5px; color:#8E8E93; }
-  .chat-h .alt { position:absolute; right:10px; top:6px; font:inherit; font-size:12px; color:var(--ios-blue); background:none; border:0; cursor:pointer; }
-  .msgs { flex:1; min-height:0; overflow-y:auto; padding:10px 10px 6px; display:flex; flex-direction:column; gap:3px; scrollbar-width:none; }
+  /* colors as tokens so the phone can follow the iPhone's own light/dark setting, like iMessage */
+  .chat { --c-bg:#fff; --c-them:#E9E9EB; --c-them-fg:#000; --c-fg:#000; --c-sub:#8E8E93; --c-pill:rgba(242,242,247,.72);
+          --c-pill-fg:#000; --c-line:#D1D1D6; --c-field:#fff; --c-card:#F2F2F7; --c-chip:#0A84FF; --c-fade:255,255,255;
+          position:relative; display:flex; flex-direction:column; height:100%; background:var(--c-bg); color:var(--c-fg); }
+  /* like iMessage: avatar + name pill float over the conversation; messages scroll underneath, fading out at the top */
+  .chat-h { position:absolute; top:0; left:0; right:0; z-index:2; display:flex; flex-direction:column; align-items:center; gap:5px;
+            padding:8px 12px 18px; pointer-events:none;
+            background:linear-gradient(rgba(var(--c-fade),.96) 0%, rgba(var(--c-fade),.82) 60%, rgba(var(--c-fade),0) 100%); }
+  .chat-h > * { pointer-events:auto; }
+  .chat-h .av { width:50px; height:50px; border-radius:50%; background:linear-gradient(160deg,#6AAEF8,#1C64D8); color:#fff; display:flex;
+                align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(0,0,0,.18); }
+  .pill { display:inline-flex; align-items:center; gap:4px; border-radius:99px; background:var(--c-pill); color:var(--c-pill-fg);
+          -webkit-backdrop-filter:saturate(180%) blur(18px); backdrop-filter:saturate(180%) blur(18px); box-shadow:0 1px 6px rgba(0,0,0,.12); }
+  .chat-h .nm { font-size:14px; font-weight:600; padding:4px 12px; }
+  .chat-h .side { position:absolute; top:8px; height:36px; padding:0 12px; font-size:14px; font-weight:600; }
+  .chat-h .side.l { left:10px; } .chat-h .side.r { right:10px; }
+  .chat-h .side select { position:absolute; inset:0; opacity:0; width:100%; font-size:16px; }  /* tap the pill: the iPhone's own picker opens */
+  .chat-h .dot { width:8px; height:8px; border-radius:50%; background:#30D158; }
+  .msgs { flex:1; min-height:0; overflow-y:auto; padding:96px 10px 6px; display:flex; flex-direction:column; gap:3px; scrollbar-width:none; }
   .msgs::-webkit-scrollbar { display:none; }
+  .sysnote { align-self:center; text-align:center; font-size:12px; color:var(--c-sub); margin:4px 0 8px; }
+  .sysnote button { font:inherit; color:var(--c-chip); background:none; border:0; padding:0; cursor:pointer; }
   .msg { max-width:78%; padding:7px 12px; border-radius:18px; font-size:15px; line-height:1.3; word-wrap:break-word; white-space:pre-wrap; }
-  .msg.them { align-self:flex-start; background:#E9E9EB; color:#000; border-bottom-left-radius:5px; }
+  .msg.them { align-self:flex-start; background:var(--c-them); color:var(--c-them-fg); border-bottom-left-radius:5px; }
   .msg.me { align-self:flex-end; background:#0A84FF; color:#fff; border-bottom-right-radius:5px; }
   .msg + .msg.me, .msg.me + .msg.them, .msg.them + .msg.me { margin-top:6px; }
   .msg.typing { display:flex; gap:4px; padding:11px 13px; }
   .msg.typing i { width:7px; height:7px; border-radius:50%; background:#9B9BA0; animation:dot 1.2s infinite; }
   .msg.typing i:nth-child(2) { animation-delay:.2s; } .msg.typing i:nth-child(3) { animation-delay:.4s; }
   @keyframes dot { 0%, 60%, 100% { opacity:.35; transform:translateY(0); } 30% { opacity:1; transform:translateY(-3px); } }
-  .plan { align-self:stretch; margin:8px 2px 4px; border:1px solid #E2E2E7; border-radius:16px; padding:12px; background:#F9F9FB; display:flex; flex-direction:column; gap:8px; }
-  .plan .t { font-size:13px; font-weight:700; color:#6C6C70; text-transform:uppercase; letter-spacing:.04em; }
+  .plan { align-self:stretch; margin:8px 2px 4px; border-radius:18px; padding:14px; background:var(--c-card); display:flex; flex-direction:column; gap:8px; }
+  .plan .t { font-size:13px; font-weight:700; color:var(--c-sub); text-transform:uppercase; letter-spacing:.04em; }
   .plan .r { display:flex; justify-content:space-between; font-size:15px; } .plan .r b { font-weight:700; }
-  .plan .fine { font-size:12px; color:#6C6C70; }
-  .chips { display:flex; gap:6px; overflow-x:auto; padding:6px 10px 2px; scrollbar-width:none; }
-  .chips::-webkit-scrollbar { display:none; }
-  .chips button { font:inherit; font-size:13px; white-space:nowrap; border:1px solid #C7DBF8; background:#fff; color:var(--ios-blue); border-radius:99px; padding:5px 11px; cursor:pointer; }
-  .composer { display:flex; align-items:center; gap:8px; padding:6px 10px 26px; }
+  .plan .fine { font-size:12px; color:var(--c-sub); }
+  /* suggestions are quick replies at the end of the conversation (they scroll with it), not a fixed strip */
+  .chips { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; padding:8px 0 2px; align-self:stretch; }
+  .chips:empty { display:none; }
+  .chips button { font:inherit; font-size:14px; white-space:nowrap; border:1px solid var(--c-chip); background:transparent; color:var(--c-chip); border-radius:99px; padding:6px 12px; cursor:pointer; }
+  .composer { display:flex; align-items:center; gap:8px; padding:6px 10px 26px; background:var(--c-bg); }
   body[data-mode="phone"] .composer { padding-bottom:calc(10px + env(safe-area-inset-bottom)); }
-  .composer input { flex:1; min-width:0; font:inherit; font-size:15px; border:1px solid #D1D1D6; border-radius:18px; padding:7px 13px; outline:none; }
+  .composer input { flex:1; min-width:0; font:inherit; font-size:15px; border:1px solid var(--c-line); background:var(--c-field); color:var(--c-fg);
+                    border-radius:20px; padding:8px 14px; outline:none; }
+  .composer input::placeholder { color:var(--c-sub); }
   .composer input:focus { border-color:#0A84FF; }
   .composer button { width:32px; height:32px; border-radius:50%; border:0; background:#0A84FF; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
   .composer button:disabled { background:#C7C7CC; }
+  /* on a real phone: iOS-size text, and dark mode when the iPhone is in dark mode */
+  body[data-mode="phone"] .msg { font-size:17px; padding:8px 13px; }
+  body[data-mode="phone"] .composer input { font-size:17px; }
+  @media (prefers-color-scheme: dark) {
+    body[data-mode="phone"] .chat { --c-bg:#000; --c-them:#26252A; --c-them-fg:#fff; --c-fg:#fff; --c-sub:#8D8D93; --c-pill:rgba(44,44,46,.72);
+      --c-pill-fg:#fff; --c-line:#3A3A3C; --c-field:#000; --c-card:#1C1C1E; --c-chip:#409CFF; --c-fade:0,0,0; }
+  }
+  /* while the chat is open on the phone, the app's own top bar steps aside: the header pills do its job */
+  body[data-mode="phone"].chatting header { display:none; }
 
   /* tap any step, offer or alert on the phone to see more */
   .tap { cursor:pointer; -webkit-tap-highlight-color:transparent; }
@@ -220,13 +247,20 @@
   body[data-mode="phone"] header { padding:8px 12px; gap:8px; flex-wrap:nowrap; }
   body[data-mode="phone"] header .brand { display:none; }
   body[data-mode="phone"] header label { flex:1; min-width:0; }
-  body[data-mode="phone"] header select { width:100%; max-width:none; font-size:14px; }
+  body[data-mode="phone"] header select { width:100%; max-width:none; font-size:16px; }
+  /* the top bar floats too (blurred), so the screen below it is all content */
+  body[data-mode="phone"] { --hdr:48px; }
+  body[data-mode="phone"] header { position:absolute; top:0; left:0; right:0; z-index:6; height:var(--hdr);
+                                   background:rgba(15,27,45,.84); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); }
+  /* iPhone Safari zooms into any text box or dropdown under 16px when it's tapped */
+  body[data-mode="phone"] .composer input, body[data-mode="phone"] .ios-row select { font-size:16px; }
   body[data-mode="phone"] #src { font-size:11px; padding:3px 8px; white-space:nowrap; flex-shrink:0; }
   body[data-mode="phone"] #phoneView { display:flex !important; padding:0 !important; flex:1; min-height:0; }
   body[data-mode="phone"] .iphone { height:100%; max-height:none; aspect-ratio:auto; width:100%; padding:0; border-radius:0; background:none; box-shadow:none; }
   body[data-mode="phone"] .iphone::before, body[data-mode="phone"] .iphone::after { display:none; }
   body[data-mode="phone"] .screen { border-radius:0; }
-  body[data-mode="phone"] .app { padding:16px 16px calc(20px + env(safe-area-inset-bottom)); }
+  body[data-mode="phone"] .app { padding:calc(var(--hdr) + 14px) 16px calc(20px + env(safe-area-inset-bottom)); }
+  body[data-mode="phone"] .app.chatmode { padding:0; }
   body[data-mode="phone"] .ios-btn.dock { bottom:calc(8px + env(safe-area-inset-bottom)); }
 
   #fx { position:fixed; inset:0; pointer-events:none; z-index:50; }
@@ -720,26 +754,34 @@ const CHIPS = {start: ["$5,000 for a laptop", "$3,000 for car repairs", "$8,000 
 function chatView() {
   run++; speed = 1; CHAT = []; warmChat();
   $("#log").replaceChildren(h("li", {class: "empty"}, "The agent is chatting with the person to learn their limits."));
-  app().classList.add("chatmode");
+  app().classList.add("chatmode"); document.body.classList.add("chatting");
   const msgs = h("div", {class: "msgs", role: "log", "aria-live": "polite"}), chips = h("div", {class: "chips"});
   const input = h("input", {type: "text", placeholder: "iMessage", "aria-label": "Message your agent", enterkeyhint: "send"});
   const send = h("button", {type: "button", "aria-label": "Send"}, icon("up", 18));
-  const alt = h("button", {type: "button", class: "alt"}, "Use form");
-  alt.onclick = phoneForm;
+  // header pills, iMessage style: who you are (tap to switch person), the agent in the middle, live/saved data on the right
+  const who = h("select", {"aria-label": "Switch person"}, PEOPLE.map(p => h("option", {value: p.id}, p.name)));
+  who.value = D.pid;
+  who.onchange = () => { $("#who").value = who.value; $("#who").dispatchEvent(new Event("change")); };
+  const live = $("#src").classList.contains("live");
+  const form = h("button", {type: "button"}, "Use a form instead"); form.onclick = phoneForm;
   app().replaceChildren(h("div", {class: "chat"},
-    h("div", {class: "chat-h"}, alt, h("div", {class: "av"}, icon("robot", 22)), h("div", {class: "nm"}, "Your loan agent"),
-      h("div", {class: "tag"}, "AI · only acts inside your limits")),
-    msgs, chips, h("div", {class: "composer"}, input, send)));
+    h("div", {class: "chat-h"},
+      h("label", {class: "pill side l"}, "‹ " + first(D.P.name), who),
+      h("span", {class: "pill side r", title: $("#src").title || ""}, h("span", {class: "dot", style: live ? "" : "background:#8E8E93"}), live ? "Live" : "Saved"),
+      h("div", {class: "av"}, icon("robot", 24)), h("div", {class: "pill nm"}, "Your loan agent ›")),
+    msgs, h("div", {class: "composer"}, input, send)));
+  msgs.append(h("div", {class: "sysnote"}, "AI agent · only acts inside your limits", h("br"), form), chips);  // quick replies stay last
   const scroll = () => msgs.scrollTo({top: msgs.scrollHeight, behavior: "smooth"});
-  const bubble = (role, text) => { const b = h("div", {class: "msg " + (role === "user" ? "me" : "them")}, text); msgs.append(b); appear(b).catch(() => {}); scroll(); return b; };
-  const setChips = list => chips.replaceChildren(...list.map(t => { const b = h("button", {type: "button"}, t); b.onclick = () => submit(t); return b; }));
+  const put = el => msgs.insertBefore(el, chips);
+  const bubble = (role, text) => { const b = h("div", {class: "msg " + (role === "user" ? "me" : "them")}, text); put(b); appear(b).catch(() => {}); scroll(); return b; };
+  const setChips = list => { chips.replaceChildren(...list.map(t => { const b = h("button", {type: "button"}, t); b.onclick = () => submit(t); return b; })); scroll(); };
   const hello = `Hi ${first(D.P.name)}! I'm your loan agent. Tell me how much you need and what it's for, and I'll shop lenders for you.`;
   CHAT.push({role: "agent", content: hello}); bubble("agent", hello); setChips(CHIPS.start);
   async function submit(text) {
     text = text.trim(); if (!text) return;
     input.value = ""; send.disabled = true; chips.replaceChildren();
     CHAT.push({role: "user", content: text}); bubble("user", text);
-    const typing = h("div", {class: "msg them typing"}, h("i"), h("i"), h("i")); msgs.append(typing); scroll();
+    const typing = h("div", {class: "msg them typing"}, h("i"), h("i"), h("i")); put(typing); scroll();
     let r;
     try {
       const res = await fetch("/api/chat/mandate", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({messages: CHAT})});
@@ -754,6 +796,7 @@ function chatView() {
     setChips([...(CHIPS[r.missing[0]] || []), ...CHIPS.more]);
   }
   function showPlan(m) {
+    input.blur();  // close the keyboard so the whole plan card is visible
     const autopay = (m.allow || []).includes("autopay");
     const go = h("button", {type: "button", class: "ios-btn"}, "Start shopping"), edit = h("button", {type: "button", class: "ios-btn ghost", style: "min-height:40px;font-size:15px"}, "Change something");
     const plan = h("div", {class: "plan"}, h("div", {class: "t"}, "Here's what I'll do"),
@@ -765,7 +808,7 @@ function chatView() {
       h("div", {class: "r"}, h("span", {}, "Fees"), h("b", {}, m.max_fee ? `up to ${money(m.max_fee)}` : "None")),
       h("div", {class: "fine"}, "Starting checks your identity and credit with a soft pull (your score isn't affected). Nothing is signed outside these limits."),
       go, edit);
-    msgs.append(plan); appear(plan).catch(() => {}); scroll();
+    put(plan); appear(plan).catch(() => {}); scroll();
     edit.onclick = () => { plan.remove(); input.focus(); setChips(CHIPS.more); };
     go.onclick = async () => {
       M = {amount: m.amount, min_amount: m.min_amount, max_apr: m.max_apr, min_term: m.min_term, max_term: m.max_term,
@@ -778,6 +821,8 @@ function chatView() {
   }
   send.onclick = () => submit(input.value);
   input.onkeydown = e => { if (e.key === "Enter") submit(input.value); };
+  // like iMessage: tapping send or a quick reply keeps the keyboard up instead of closing it
+  for (const el of [send, chips]) el.addEventListener("pointerdown", e => { if (document.activeElement === input) e.preventDefault(); });
   if (MODE === "desk") setTimeout(() => input.focus({preventScroll: true}), 50);
 }
 function shareWithLaptop() {  // share this exact session with a laptop on /demo?follow=1 (best effort)
@@ -814,7 +859,7 @@ function phoneForm() {
   };
   const toChat = h("button", {type: "button", class: "ios-sub", style: "border:0;background:none;color:var(--ios-blue);font:inherit;font-size:13px;cursor:pointer;padding:0"}, "Chat with your agent instead");
   toChat.onclick = chatView;
-  app().classList.remove("chatmode");
+  app().classList.remove("chatmode"); document.body.classList.remove("chatting");
   app().replaceChildren(
     h("div", {style: "display:flex;justify-content:space-between;align-items:baseline"}, h("div", {class: "ios-sub"}, `Hi ${first(D.P.name)}`), toChat),
     h("div", {class: "ios-title"}, "What do you need?"),
@@ -941,7 +986,7 @@ async function phoneStory() {
       : state === "fail" ? h("span", {class: "fail"}, icon("x", 20)) : h("span", {class: "wait"}));
     if (state === "ok" || state === "fail") tappable(r, DETAILS[i]); };  // a finished step can be opened for details
   const area = h("div", {style: "display:flex;flex-direction:column;gap:10px"});
-  app().classList.remove("chatmode");
+  app().classList.remove("chatmode"); document.body.classList.remove("chatting");
   app().replaceChildren(h("div", {}, h("div", {class: "ios-sub"}, "You asked for"), wantsChips()),
     h("div", {class: "ios-title", style: "font-size:22px"}, "Your agent is shopping"), h("div", {class: "ios-group steps"}, rows), area);
   const gate = D.ex.events.find(e => e.kind === "gate").data;
@@ -1042,6 +1087,19 @@ let view = "all";
 const MODE = location.pathname.startsWith("/phone") ? "phone" : "desk";
 const FOLLOW = MODE === "desk" && new URLSearchParams(location.search).get("follow") === "1";
 if (MODE === "phone") { document.body.dataset.mode = "phone"; view = "b"; document.body.dataset.view = "b"; }
+// iPhone keyboard (like iMessage): fit the page to the area above the keyboard and keep it from scrolling away, so
+// the conversation fills everything between the floating header and the message box.
+if (MODE === "phone" && window.visualViewport) {
+  const vv = window.visualViewport;
+  const fit = () => {
+    document.body.style.height = vv.height + "px";
+    if (window.scrollY) window.scrollTo(0, 0);
+    const m = document.querySelector(".msgs"); if (m) m.scrollTop = m.scrollHeight;
+  };
+  vv.addEventListener("resize", fit);
+  vv.addEventListener("scroll", () => { if (window.scrollY) window.scrollTo(0, 0); });
+  fit();
+}
 
 async function follow() {
   const info = await get("/api/pair/info").catch(() => ({ip: location.hostname}));
@@ -1050,7 +1108,7 @@ async function follow() {
   run++;
   $("#title").textContent = "Waiting for the phone...";
   $("#caption").textContent = `On a phone on this network, open ${url}`;
-  app().classList.remove("chatmode");
+  app().classList.remove("chatmode"); document.body.classList.remove("chatting");
   app().replaceChildren(h("div", {style: "margin:auto;text-align:center"}, h("div", {class: "ios-title", style: "font-size:20px"}, "Waiting for the phone"),
     h("div", {class: "ios-sub"}, url)));
   $("#log").replaceChildren(h("li", {class: "empty"}, "When someone taps Start shopping on the phone, the same session plays here."));
