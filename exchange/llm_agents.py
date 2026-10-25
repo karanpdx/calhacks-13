@@ -231,24 +231,37 @@ class ClaudeLender(ClaudeMixin, RuleLender):
             self._fell_back(e)
             return super().respond_to_counter(counter, passport, market)
 
-    def floor(self, autopay):
-        return self.quote.floor_apr - (self.quote.autopay_discount if autopay else 0)
+    def floor(self, autopay, term=None, fee=None):
+        """The hard limit from the lender's own books, for the current loan reshaped this way."""
+        cur = self.current
+        return self.floor_for(Terms(cur.amount, 0.0, term or cur.term_months, autopay,
+                                    cur.fee if fee is None else fee))
 
     def _claude_respond(self, counter, passport, market):
         q, cur, want = self.quote, self.current, counter.terms
+        term = want.term_months if (self.book and want.term_months in self.book.terms) else cur.term_months
+        fee_if_waived = 0.0
         system = (PERSONALITIES.get(self.id, f"You are {self.name}'s lending agent.")
-                  + f" You negotiate for {self.name} on a credit exchange. Your pricing policy is fixed: never go below "
-                    "your floor APR, never offer worse terms than your current offer, and keep the amount and term. "
-                    "Decide whether to improve your offer for this counter, or DECLINE to stand firm. Keep your text "
-                    "to one or two sentences, in character. " + UNTRUSTED)
+                  + f" You negotiate for {self.name} on a sealed credit exchange: you never see rival lenders, only a "
+                    "competing quote the borrower chose to show, verified by the exchange. Your floor comes from your "
+                    "own books (cost of funds, expected loss, costs, capital); never go below it. On the same loan "
+                    "length an offer can only get better. Think like a lender: how much room you have, how far behind "
+                    "your monthly volume target you are, how many rounds are left, and whether a verified competing "
+                    "quote is one you can profitably beat. Decide whether to improve your offer, or DECLINE to stand "
+                    "firm. Keep your text to one or two sentences, in character. " + UNTRUSTED)
         prompt = "\n\n".join([
-            "Your policy: " + json.dumps({"opening_apr": q.open_apr, "floor_apr": q.floor_apr,
-                                          "floor_apr_with_autopay": round(self.floor(True), 2),
-                                          "origination_fee": q.fee, "fee_waivable_only_with_autopay": True,
-                                          "why_eligible": q.reason}),
+            "Your books for this borrower (private): " + json.dumps({
+                "loan_length_months": term, "your_floor_apr": self.floor(want.autopay, term),
+                "your_floor_apr_if_fee_waived": self.floor(want.autopay, term, fee_if_waived),
+                "estimated_default_probability": q.pd, "origination_fee": cur.fee,
+                "fee_waivable_only_with_autopay": True, "why_eligible": q.reason,
+                "volume_pressure_0_to_1": round(self.book.volume_pressure, 2) if self.book else None,
+                "motive": self.book.motive if self.book else None}),
+            "Round " + json.dumps(market.get("round")) + " of " + json.dumps(market.get("max_rounds")) + ".",
             "Your current offer: " + json.dumps(vars(cur)),
             "Borrower's counter: " + json.dumps(vars(want)) + "\nBorrower's message: " + untrusted(counter.text),
-            "Best competing APR in the market: " + json.dumps(market.get("best_competing_apr")),
+            "Verified competing quote the borrower showed (anonymous; null if none): "
+            + json.dumps(market.get("verified_quote")),
             "Borrower's credit passport: " + json.dumps(passport, default=str),
             "Return JSON: decision, the APR you'll offer, whether you waive the fee, and your text.",
         ])
@@ -259,10 +272,12 @@ class ClaudeLender(ClaudeMixin, RuleLender):
         cur, want = self.current, counter.terms
         if a["decision"] == DECLINE:
             return Message(DECLINE, self.id, to=counter.sender, offer_id=counter.offer_id, text=self._named(a["text"]))
-        # code enforces the policy whatever the model said: floor <= APR <= current APR, same amount and term
-        apr = round(min(max(float(a["apr"]), self.floor(want.autopay)), cur.apr), 2)
+        # code enforces the books whatever the model said: APR >= floor for these exact terms; on the same loan length
+        # it can't get worse; a different length only if the borrower asked for it and the lender offers it
+        term = want.term_months if (self.book and want.term_months in self.book.terms) else cur.term_months
         fee = 0.0 if a["waive_fee"] and want.autopay else cur.fee  # same rule as the policy: fee waived only for autopay
-        new = Terms(cur.amount, apr, cur.term_months, want.autopay, fee)
+        apr, fee = self.within_books(float(a["apr"]), term, want.autopay, fee)
+        new = Terms(cur.amount, apr, term, want.autopay, fee)
         if new.key() == cur.key():
             return Message(DECLINE, self.id, to=counter.sender, offer_id=counter.offer_id,
                            text=f"{self.name}: {cur.apr}% is our best.")

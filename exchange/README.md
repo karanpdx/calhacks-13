@@ -44,14 +44,35 @@ that signed it) or a rule-based `injection` flag is excluded: live offers withdr
 (messages, verdicts, rule flags, mandate, passport; never the applicant's name) and flags subtler goal drift. Advisory
 only: `source: "claude"` flags never change state. With no key, an API error or bad output, the rule results stand.
 
-## Current results on the samples (rule-based agents)
+## How negotiation works (`pricing.py`, `lenders.py`, `borrower.py`)
+Every number a lender quotes comes from its own private **books**, not a fixed rule. All values are illustrative.
+- **Probability of default** from a log-odds scorecard (50:1 odds at 700, doubling every 50 points), nudged only
+  for what a score misses: thin file, no score/no file, bureaus disagreeing, weak identity, a seasoned file.
+- **Break-even APR** = cost of funds + PD x LGD + servicing + origination cost spread over the loan - fee + capital
+  x ROE hurdle. Autopay lowers PD and servicing, so its discount is computed. **Floor** = break-even + the least
+  margin the lender accepts; **opening** = break-even + its target margin.
+- **Private motives** move the floor and the speed: behind its monthly volume target -> thinner margin and early
+  concessions (Faratin time-dependent curve); a full risk bucket -> a higher floor. Each lender has a one-line motive.
+- **Sealed market**: lenders never see each other. The borrower may `cite` a rival offer; the referee checks it is
+  real (`BAD_CITE` otherwise) and passes the lender only the anonymous terms as `verified_quote`. The lender beats it
+  if it still clears its floor, otherwise says it can't profitably match. No names, so no collusion.
+- **Binding offers**: a worse offer on the same term is `TERMS_WORSENED`. A longer loan is allowed only when the
+  borrower asked for it (e.g. to fit a monthly-payment limit). A fee waiver is priced into the rate.
+- **36% cap**: a lender whose floor is above it declines instead of bidding.
+- The borrower ranks offers by cost per dollar, cites the best rival, asks for autopay if allowed, asks for a longer
+  term if only the payment doesn't fit, and walks away when nothing fits. `lender_books` (break-even build-up, floor,
+  opening, motive) are shown to judges only after the session closes.
+
+## Current results on the samples (rule-based agents, default mandate: $5,000, 18% max, autopay ok)
 | Persona | Outcome |
 |---|---|
-| P01 prime | Prime Bank, 8.5% -> 7.0% with autopay |
-| P03 thin file | Prime declines; Campus CU, 13.5% -> 12.0% |
-| P04 no file | Only NewStart bids (identity-based); fits a 20% mandate |
-| P05 subprime | Only Second Chance bids, above the 18% mandate: agent walks away |
+| P01 prime | Prime Bank opens 11.22%, cited rival + autopay -> 10.17% |
+| P03 thin file | Campus CU 10.59% -> 8.69% (beats Prime's quote) |
+| P04 no file | NewStart only, above 18%: no deal (fits a 20% mandate) |
+| P05 subprime | Only Second Chance, above the mandate: agent walks away |
+| P10 | Campus CU 8.07% -> 6.5% |
 | P12 / P13 / P14 | Blocked at the gate |
-| P16 fraud alert | Deal, with step-up verification in settlement |
-| P17 bureaus disagree | A collection at one bureau knocks out the mainstream lenders; watchdog says how to dispute it |
-| P20 no score | Campus CU on file history |
+| P16 fraud alert | Prime Bank 11.93% -> 10.77%, step-up verification in settlement |
+| P17 bureaus disagree | NewStart $3,000 at 16.49%; watchdog says how to dispute the one-bureau collection |
+| P20 no score | Campus CU 10.87% -> 8.97% on file history |
+| P03 with a $150/month limit | Campus CU restructures to 48 months when the borrower asks |

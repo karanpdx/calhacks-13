@@ -61,12 +61,12 @@ def test_lender_asking_for_personal_data_and_undeclared_fee():
 
 
 def test_borrower_drift_flagged_but_not_blocked():
-    r = run("P01", "drift")
-    assert r["deal"]["lender"] == "campus_cu" and not r["blocked"]   # inside the mandate: the referee allows it
+    r = run("P01", "drift", max_fee=200)   # a fee limit wide enough that Second Chance's offer fits too
+    assert r["deal"]["lender"] == "second_chance" and not r["blocked"]   # inside the mandate: the referee allows it
     f = [x["note"] for x in flags(r, "borrower_drift", "borrower")]
-    assert any("12.5% while an 8.5% offer from Prime Bank" in n for n in f)
+    assert any("17.47% while an 11.22% offer from Prime Bank" in n for n in f)
     assert any("limit is 18%" in n for n in f)
-    assert "Your agent accepted 12.5% while an 8.5% offer" in notes(r)   # the person sees it in their disclosure
+    assert "Your agent accepted 17.47% while an 11.22% offer" in notes(r)   # the person sees it in their disclosure
 
 
 def test_bureau_disagreement_suggests_dispute():

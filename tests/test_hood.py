@@ -117,7 +117,8 @@ def test_describe_works_on_a_streamed_json_copy_without_the_exchange():
     assert [(x["id"], x["kind"], x["verdict"], x["simulated"]) for x in streamed] == \
            [(x["id"], x["kind"], x["verdict"], x["simulated"]) for x in batch]
     offer = next(x for x in streamed if x["who"] == "Campus Credit Union")
-    assert offer["what"] == "Offered $5,000 at 12.5% for 36 months, no fee" and offer["verdict_text"].startswith("Allowed")
+    assert re.fullmatch(r"Offered \$5,000 at [\d.]+% for 36 months, no fee", offer["what"])
+    assert offer["verdict_text"].startswith("Allowed")
 
 
 def test_describe_live_while_the_session_runs():

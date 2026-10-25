@@ -3,14 +3,24 @@
 These are abstract protocol misbehaviours inside a sandbox of fictional people, not fraud techniques.
 """
 from .messages import Message, Terms, OFFER, ACCEPT
-from .lenders import RuleLender, Quote, POLICIES
+from .lenders import RuleLender, Quote, POLICIES, priced
 from .borrower import RuleBorrower, GullibleBorrower
 from .llm_agents import ClaudeBorrower, ClaudeLender
 
 
 class BaitAndSwitchLender(RuleLender):
     """Opens with a good offer, then answers a counter with WORSE terms plus a surprise fee,
-    and tries to forge the borrower's acceptance."""
+    and tries to forge the borrower's acceptance. A bad actor courts anyone, so it skips the real lender's
+    membership rule and prices from that lender's books."""
+
+    def __init__(self, agent_id):
+        super().__init__(agent_id)
+        honest = self.policy
+
+        def anyone(p):
+            q = honest(p)
+            return q if q.eligible or not q.reason.startswith("membership") else priced(agent_id, p, "short histories welcome")
+        self.policy = anyone
 
     def respond_to_counter(self, counter, passport, market):
         t = self.current

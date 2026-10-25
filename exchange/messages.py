@@ -78,6 +78,8 @@ class Message:
     terms: Optional[Terms] = None
     offer_id: Optional[str] = None    # for OFFER: assigned by referee; for COUNTER/ACCEPT/WITHDRAW: the offer referred to
     ask: Optional[dict] = None        # INTENT only: {"amount", "term_range", "purpose"}; never the person's max APR
+    cite: Optional[str] = None        # COUNTER only: a rival's live offer id the borrower shows as proof of a better
+                                      # deal. The referee verifies it and passes the lender only its terms, never its source
     text: str = ""                    # free text: UNTRUSTED, never acted on by the referee
     round: int = 0
     id: str = field(default_factory=lambda: uuid.uuid4().hex[:8])

@@ -12,7 +12,7 @@ With `watchdog=True`, a flag-only watchdog (exchange/watchdog.py) reviews each e
 One referee rule uses it: a lender that commits a hard violation (TERMS_WORSENED, BAD_SIGNATURE, or a RULE-BASED
 injection flag) is excluded for the rest of the session and its live offers are withdrawn. Claude flags never count.
 """
-import os, secrets, time
+import dataclasses, os, secrets, time
 from datetime import date
 
 from agent import signals as S
@@ -63,6 +63,7 @@ class Exchange:
         for a in [self.borrower, *self.lenders]:
             self.register(a)
         self.events, self.offers, self.deal = [], {}, None
+        self.last_counter = {}   # lender id -> terms the borrower last asked it for (a consented restructure)
         self.round, self.closed, self.admitted = 0, False, False
         self.report = self.passport = None
         self.watchdog = Watchdog() if watchdog else None
@@ -186,7 +187,12 @@ class Exchange:
             prev = self._live_offer_of(m.sender)
             if prev:
                 old = self.offers[prev]["terms"]
-                if finance.cost_per_dollar(t) > finance.cost_per_dollar(old) + 1e-9 or t.amount < old.amount:
+                asked = self.last_counter.get(m.sender)
+                # binding: a lender can't worsen its own offer, unless it's pricing a different loan length the
+                # borrower itself asked for (both sides agreed to change the loan, so the old price doesn't apply)
+                restructure = asked is not None and t.term_months == asked.term_months != old.term_months
+                if (not restructure and finance.cost_per_dollar(t) > finance.cost_per_dollar(old) + 1e-9) \
+                        or t.amount < old.amount:
                     return V(False, "TERMS_WORSENED", f"New offer is worse than {m.sender}'s live offer "
                              f"({old.apr}%, ${old.fee:.0f} fee). Live offers are binding; no bait-and-switch.")
             return V(True, "OK", "Valid offer.")
@@ -201,6 +207,10 @@ class Exchange:
                 return V(False, "NOT_YOUR_OFFER", "Lenders can only withdraw their own offers.")
             if m.type == COUNTER and not m.terms:
                 return V(False, "TERMS_INVALID", "A counter needs terms.")
+            if m.type == COUNTER and m.cite is not None:
+                c = self.offers.get(m.cite)   # must be a real offer from ANOTHER lender; if it has since been
+                if not c or c["lender"] == o["lender"]:   # withdrawn, the counter stands and the citation just lapses
+                    return V(False, "BAD_CITE", "The competing offer cited isn't a live offer from another lender.")
             if m.type == ACCEPT:
                 if m.terms is None or m.terms.key() != o["terms"].key():
                     return V(False, "TERMS_MISMATCH", "Accepted terms must be exactly the offered terms.")
@@ -217,6 +227,8 @@ class Exchange:
                 self.offers[prev]["status"] = "superseded"
             self.offers[m.offer_id] = {"lender": m.sender, "terms": m.terms, "text": m.text, "status": "live",
                                        "round": self.round}
+        elif m.type == COUNTER:
+            self.last_counter[self.offers[m.offer_id]["lender"]] = m.terms
         elif m.type == WITHDRAW:
             self.offers[m.offer_id]["status"] = "withdrawn"
         elif m.type == ACCEPT:
@@ -244,10 +256,10 @@ class Exchange:
                 if m.type == DECLINE and v.ok:
                     ended = True
                 if m.type == COUNTER and v.ok and m.to in by_id and m.to not in self.excluded:
-                    others = [o["terms"].apr for o in self.offers.values()  # current, not the round-start snapshot:
-                              if o["status"] == "live" and o["lender"] != m.to]   # exclusion may withdraw offers mid-round
-                    reply = by_id[m.to].respond_to_counter(m, self.passport,
-                                                           {"best_competing_apr": min(others) if others else None})
+                    # Sealed market: a lender never sees rival offers or names. It learns about competition only if
+                    # the borrower cited a rival offer, and then only that offer's terms, verified by the referee.
+                    reply = by_id[m.to].respond_to_counter(dataclasses.replace(m, cite=None), self.passport,
+                                                           self.market_view(m, rnd))
                     for r in (reply if isinstance(reply, list) else [reply] if reply else []):
                         self.send(by_id[m.to], r)
             if self.deal or ended:
@@ -266,6 +278,43 @@ class Exchange:
                                                                 and self.roles.get(e["actor"]) == "lender"],
                                              "watchdog_notes": self.watchdog_notes()})
         return self.result()
+
+    def _cited(self, oid):
+        """The live offer behind a citation. A superseded offer was replaced by a better one from the same lender
+        (offers are binding), so the citation follows it to that lender's current live offer."""
+        c = self.offers.get(oid)
+        if not c:
+            return None
+        if c["status"] == "superseded":
+            live = self._live_offer_of(c["lender"])
+            c = self.offers.get(live) if live else None
+        return c if c and c["status"] == "live" else None
+
+    def market_view(self, counter, rnd):
+        """What a lender may know when answering a counter: the round, and a verified anonymous competing quote."""
+        vq = None
+        c = self._cited(counter.cite) if counter.cite else None
+        if c and c["lender"] != counter.to:
+            t = c["terms"]
+            vq = {"apr": t.apr, "amount": t.amount, "term_months": t.term_months, "autopay": t.autopay, "fee": t.fee,
+                  "monthly_payment": round(finance.monthly_payment(t.amount, t.apr, t.term_months), 2)}
+        return {"round": rnd + 1, "max_rounds": self.mandate.max_rounds, "verified_quote": vq}
+
+    def lender_books(self):
+        """Each lender's private economics for this borrower, revealed only after the session (judges' view)."""
+        from . import pricing
+        out = {}
+        for l in self.lenders:
+            book = getattr(l, "book", None)
+            if not book or not self.passport or not (l.quote and l.quote.eligible):
+                continue
+            t = l.current
+            first = next((o["terms"] for o in self.offers.values() if o["lender"] == l.id and o["round"] == 0), None)
+            out[l.id] = {"name": l.name, **(pricing.private_view(book, self.passport, t.amount, t.term_months,
+                                                                   t.autopay, t.fee, first.apr if first else None)
+                                            if t else pricing.private_view(book, self.passport, book.max_amount,
+                                                                           book.preferred_term))}
+        return out
 
     def watchdog_notes(self):
         """Plain-English watchdog flags for the person, most serious first. Flag-only: nothing here changed the deal."""
@@ -331,5 +380,6 @@ class Exchange:
             "blocked": [{"seq": e["seq"], "actor": e["actor"], **e["verdict"]} for e in blocked],
             "watchdog": [{"seq": e["seq"], **e["data"]} for e in self.events if e["kind"] == "watchdog"],
             "excluded": [{"seq": e["seq"], **e["data"]} for e in self.events if e["kind"] == "excluded"],
+            "lender_books": self.lender_books() if self.closed else {},
             "events": self.events,
         }

@@ -29,23 +29,32 @@ class RuleBorrower:
             return [Message(DECLINE, self.id, text="No offers. Ending the search.")]
 
         best = min(offers, key=rank)
-        best_apr = offers[best]["terms"].apr
         if not last:
             out = []
             for oid, o in offers.items():
                 if oid in self.countered:
                     continue
                 t = o["terms"]
-                # always ask for less than this lender's current rate; ask competitors to beat the best rate
-                target = t.apr - 0.5 if oid == best else min(t.apr, best_apr) - 0.25
-                want = Terms(t.amount, round(max(target, 0), 2), t.term_months,
-                             autopay="autopay" in mandate.allow, fee=0.0)
-                if want.key() != t.key():
-                    self.countered.add(oid)
-                    out.append(Message(COUNTER, self.id, to=o["lender"], offer_id=oid, terms=want,
-                                       text=(f"You're the best offer so far. Can you do {want.apr}%" if oid == best
-                                             else f"Another lender is at {best_apr}%. Can you do {want.apr}%")
-                                            + (" if I set up autopay" if want.autopay else "") + "?"))
+                # 1. if only the monthly payment breaks the person's limits, ask for a longer loan (a restructure)
+                term = t.term_months
+                fits, why = mandate.allows(t)
+                if not fits and mandate.max_payment and "monthly payment" in why:
+                    term = next((n for n in (24, 36, 48, 60) if t.term_months < n <= mandate.max_term and
+                                 finance.monthly_payment(t.amount, t.apr, n) <= mandate.max_payment), term)
+                # 2. show the best rival offer as verified proof (the referee checks it; the lender never learns who)
+                rivals = [x for x in offers if offers[x]["lender"] != o["lender"]]
+                ref = min(rivals, key=rank) if rivals else None
+                cite = ref if ref is not None and offers[ref]["terms"].apr < t.apr else None
+                # anchor low, then narrow: ask well below the current rate first, closer each round
+                target = offers[cite]["terms"].apr - 0.25 if cite else t.apr - (1.0, 0.6, 0.3)[min(rnd, 2)]
+                want = Terms(t.amount, round(max(target, 0), 2), term, autopay="autopay" in mandate.allow, fee=0.0)
+                if want.key() == t.key():
+                    continue
+                self.countered.add(oid)
+                ask = ("I have a better offer elsewhere, verified by the exchange. Can you beat it" if cite
+                       else f"Can you do {want.apr}%") + (f" over {term} months" if term != t.term_months else "") \
+                    + (" if I set up autopay" if want.autopay and not t.autopay else "") + "?"
+                out.append(Message(COUNTER, self.id, to=o["lender"], offer_id=oid, terms=want, cite=cite, text=ask))
             if out:
                 return out
         if ok:

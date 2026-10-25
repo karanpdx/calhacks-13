@@ -63,6 +63,12 @@ def show(r):
                 print(f"[deal] {s}")
         for n in d.get("watchdog_notes", []) if k in ("disclosure", "no_deal") else []:
             print(f"[watchdog] {n['note']}" + (f" Next step: {n['suggestion']}" if n.get("suggestion") else ""))
+    for b in r.get("lender_books", {}).values():   # private to each lender during the session; shown after it
+        ln = b["loan"]
+        print(f"[books] {b['name']}: default risk {b['probability_of_default']:.1%}; for its final terms "
+              f"({ln['term_months']} mo{', autopay' if ln['autopay'] else ''}{', no fee' if not ln['fee'] else ''}) "
+              f"break-even {b['break_even_apr']}%, floor {b['floor_apr']}%; opened at {b['opening_apr']}% "
+              f"({b['concession_style']}). {b['motive']}")
 
 
 def main(argv=None):
