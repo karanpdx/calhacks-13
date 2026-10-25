@@ -76,3 +76,15 @@ def test_pages_and_assets_are_always_revalidated():
     c = TestClient(app)
     for path in ("/phone", "/demo", "/static/chat-access.js", "/static/chat-access.css"):
         assert c.get(path).headers.get("cache-control") == "no-cache", path
+
+
+def test_page_assets_carry_a_version_so_cached_copies_cannot_be_reused():
+    import re
+    from fastapi.testclient import TestClient
+    from app.main import app
+    c = TestClient(app)
+    html = c.get("/phone").text
+    for asset in ("/static/chat-access.js", "/static/chat-access.css"):
+        assert re.search(re.escape(asset) + r'\?v=\d+"', html), asset
+    assert re.search(r'/static/lender\.js\?v=\d+"', c.get("/lender").text)
+    assert c.get(re.search(r'"(/static/chat-access\.js\?v=\d+)"', html).group(1)).status_code == 200

@@ -16,7 +16,7 @@ from functools import lru_cache
 from typing import Optional, Literal
 
 from fastapi import Body, FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, StreamingResponse, Response, RedirectResponse
+from fastapi.responses import FileResponse, HTMLResponse, StreamingResponse, Response, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -378,9 +378,24 @@ def borrower_catalog():
                     media_type="application/javascript", headers={"Cache-Control": "no-cache"})
 
 
+_ASSET = re.compile(r'((?:src|href)="/static/)([^"?#]+)"')
+
+
+def _page(name):
+    """An HTML page whose /static/ links carry each file's modified time (?v=...): an edited script or stylesheet
+    gets a new URL, so no browser (a phone's Safari included) can keep running a cached old copy."""
+    with open(os.path.join(STATIC, name), encoding="utf-8") as f:
+        html = f.read()
+
+    def stamp(m):
+        path = os.path.join(STATIC, m.group(2))
+        return f'{m.group(1)}{m.group(2)}?v={int(os.path.getmtime(path))}"' if os.path.isfile(path) else m.group(0)
+    return HTMLResponse(_ASSET.sub(stamp, html))
+
+
 @app.get("/")
 def index():
-    return FileResponse(os.path.join(STATIC, "index.html"))
+    return _page("index.html")
 
 
 @app.get("/exchange", include_in_schema=False)
@@ -395,18 +410,18 @@ def retired_borrower_page(request: Request):
 
 @app.get("/demo")
 def demo_page():
-    return FileResponse(os.path.join(STATIC, "demo.html"))
+    return _page("demo.html")
 
 
 @app.get("/fairness")
 def fairness_page():
-    return FileResponse(os.path.join(STATIC, "fairness.html"))
+    return _page("fairness.html")
 
 
 @app.get("/phone")
 def phone_page():
     """The borrower app alone, full screen, for a real phone on the same network (same file as /demo)."""
-    return FileResponse(os.path.join(STATIC, "demo.html"))
+    return _page("demo.html")
 
 
 # ---------------------------------------------------------------- fairness check (internal, offline samples)
@@ -438,7 +453,7 @@ def safety_report(fresh: int = 0):
 
 @app.get("/safety")
 def safety_page():
-    return FileResponse(os.path.join(STATIC, "safety.html"))
+    return _page("safety.html")
 @app.get("/api/lender/{lender_id}")
 def lender_queue(lender_id: str):
     """One lender's queue across every admitted sandbox session, from that lender's side only: passport (as it priced
@@ -453,7 +468,7 @@ def lender_queue(lender_id: str):
 @app.get("/lender")
 def lender_page():
     """Lender operations dashboard prototype for monitoring and exception triage."""
-    return FileResponse(os.path.join(STATIC, "lender.html"))
+    return _page("lender.html")
 
 
 # ---------------------------------------------------------------- phone pairing (demo only)
