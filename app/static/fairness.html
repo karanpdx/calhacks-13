@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0F1B2D">
+<title>Agent credit exchange: fairness check</title>
+<style>
+  :root { --bg:#F6F7F9; --card:#fff; --ink:#121826; --mute:#5B6472; --line:#E3E6EB; --blue:#2453C4; --blue-soft:#E7EEFB;
+          --green:#157347; --green-soft:#EAF6EF; --red:#B4232B; --red-soft:#FDECEC; --navy:#0F1B2D; --amber:#8A5A00; --amber-soft:#FFF8E6; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  header { background:var(--navy); color:#fff; padding:9px 28px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  header .brand { font-weight:800; font-size:17px; }
+  header .crumb { font-size:13px; color:#C9D3E3; }
+  header a { margin-left:auto; color:#E6ECF5; font-size:13px; font-weight:700; text-decoration:none; border:1px solid #52627A;
+             border-radius:99px; padding:5px 12px; }
+  header a:hover { background:#1C2C44; }
+  main { max-width:1300px; margin:0 auto; padding:16px 28px 28px; }
+  .intro { text-align:center; padding:6px 0 4px; }
+  .intro h1 { margin:0; font-size:32px; font-weight:800; letter-spacing:-.02em; }
+  .intro p { margin:2px 0 0; font-size:17px; color:var(--mute); }
+  .disc { display:inline-block; margin-top:10px; font-size:13px; font-weight:700; color:var(--amber); background:var(--amber-soft);
+          border:1px solid #F0D9A0; border-radius:99px; padding:4px 12px; }
+  h2 { font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); margin:26px 0 10px; }
+  .tests { display:grid; grid-template-columns:repeat(3, 1fr); gap:16px; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; }
+  .panel.ok { border:2px solid var(--green); } .panel.bad { border:2px solid var(--red); }
+  .ph { display:flex; align-items:center; gap:10px; font-weight:700; font-size:16px; }
+  .badge { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+           background:#EEF0F3; color:var(--mute); font-weight:800; }
+  .badge.good { background:var(--green); color:#fff; } .badge.bad { background:var(--red); color:#fff; }
+  .panel p { margin:8px 0 0; font-size:14px; color:var(--mute); }
+  .scroll { overflow-x:auto; background:var(--card); border:1px solid var(--line); border-radius:16px; }
+  table { border-collapse:collapse; width:100%; font-size:14px; }
+  th, td { padding:9px 12px; text-align:left; border-bottom:1px solid var(--line); vertical-align:top; }
+  tr:last-child td { border-bottom:0; }
+  thead th { font-size:12px; font-weight:700; color:var(--mute); background:#FAFBFC; white-space:nowrap; }
+  tbody th { font-weight:700; white-space:nowrap; position:sticky; left:0; background:var(--card); }
+  .tag { display:inline-block; font-size:11px; font-weight:700; color:var(--blue); background:var(--blue-soft); border-radius:99px;
+         padding:1px 7px; margin-left:6px; }
+  .cell { display:inline-flex; flex-direction:column; gap:1px; white-space:nowrap; }
+  .cell.offer b { color:var(--green); } .cell .sub { font-size:12px; color:var(--mute); }
+  .cell.no { color:var(--mute); font-size:12px; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
+  .cell.blocked { color:var(--red); font-size:12px; font-weight:700; }
+  tr.blocked th { color:var(--red); }
+  td.note { font-size:13px; color:var(--mute); min-width:260px; }
+  #disparity thead th { white-space:normal; min-width:90px; }
+  .num { font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .fine { font-size:12px; color:var(--mute); margin-top:14px; }
+  #err { display:none; background:var(--red-soft); color:var(--red); border-radius:12px; padding:12px 16px; margin-top:16px; font-weight:600; }
+  @media (max-width:900px) { .tests { grid-template-columns:1fr; } main { padding:12px 16px 24px; } header { padding:9px 16px; } }
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">Agent credit exchange</span>
+  <span class="crumb">Fairness check</span>
+  <a href="/demo">Back to the demo</a>
+</header>
+<main>
+  <section class="intro">
+    <h1>Do our lenders treat people fairly?</h1>
+    <p>Every sandbox persona through every lender, and three tests that decisions follow credit, not identity.</p>
+    <span class="disc" id="disc">Internal check, not a legal fair-lending review.</span>
+  </section>
+  <div id="err"></div>
+
+  <h2>Tests</h2>
+  <div class="tests" id="tests"></div>
+
+  <h2>Every persona, every lender <span style="text-transform:none;letter-spacing:0">(default terms, no negotiation)</span></h2>
+  <div class="scroll"><table id="matrix"></table></div>
+  <p class="fine">Offers show the lowest rate the lender accepts with autopay, up to its opening rate. Declines show the
+    lender's fixed reason code. Simulated lenders; illustrative pricing.</p>
+
+  <h2>Thin-file and no-file applicants vs everyone else</h2>
+  <div class="scroll"><table id="disparity"></table></div>
+  <p class="fine" id="dnote"></p>
+  <p class="fine" id="notice"></p>
+</main>
+<script>
+  function h(tag, attrs, kids) {
+    var e = document.createElement(tag);
+    for (var k in attrs || {}) { if (k === "class") e.className = attrs[k]; else e.setAttribute(k, attrs[k]); }
+    (kids || []).forEach(function (c) { if (c != null) e.append(c.nodeType ? c : document.createTextNode(String(c))); });
+    return e;
+  }
+  function pct(x) { return x == null ? "–" : Math.round(x * 100) + "%"; }
+  function apr(x) { return x == null ? "–" : x.toFixed(2) + "%"; }
+
+  function testCard(title, ok, text) {
+    return h("div", { class: "panel " + (ok ? "ok" : "bad") }, [
+      h("div", { class: "ph" }, [h("span", { class: "badge " + (ok ? "good" : "bad"), "aria-hidden": "true" }, [ok ? "✓" : "!"]),
+                                h("span", {}, [title + (ok ? ": passed" : ": failed")])]),
+      h("p", {}, [text])]);
+  }
+
+  function cell(c) {
+    if (c.code === "BLOCKED_AT_GATE") return h("span", { class: "cell blocked" }, ["blocked at gate"]);
+    if (!c.offer) return h("span", { class: "cell no", title: c.reason }, [c.code || "declined"]);
+    return h("span", { class: "cell offer" }, [h("b", { class: "num" }, [apr(c.apr_low) + " – " + apr(c.apr_high)]),
+      h("span", { class: "sub" }, ["$" + c.amount.toLocaleString() + " · " + c.term + " mo" + (c.fee ? " · $" + c.fee + " fee" : "")])]);
+  }
+
+  function render(d) {
+    document.getElementById("disc").textContent = d.disclaimer;
+    document.getElementById("notice").textContent = d.notice;
+    var t = d.tests, blind = t.blindness.personas, same = blind.filter(function (b) { return b.identical; }).length;
+    var tests = document.getElementById("tests");
+    tests.append(
+      testCard("Blindness", t.blindness.ok, "Changed each person's " + t.blindness.changed.join(", ") + ". Every gate decision, " +
+               "passport and lender price stayed identical for " + same + " of " + blind.length + " personas."),
+      testCard("No stand-in fields", t.proxy_fields.ok, (t.proxy_fields.ok ? "No passport field is a name, birth date, ZIP, " +
+               "address or language, and no applicant detail appears in any passport. " : t.proxy_fields.problems.length + " problem(s) found. ") +
+               t.proxy_fields.note),
+      testCard("Consistency", t.consistency.ok, t.consistency.note + " Same credit facts, same decision and price."));
+
+    var ids = d.lenders.map(function (l) { return l.id; });
+    var m = document.getElementById("matrix");
+    m.append(h("thead", {}, [h("tr", {}, [h("th", {}, ["Persona"])].concat(d.lenders.map(function (l) { return h("th", {}, [l.name]); })))]));
+    var body = h("tbody");
+    d.matrix.forEach(function (r) {
+      body.append(h("tr", { class: r.admitted ? "" : "blocked" }, [h("th", {}, [r.persona, r.thin_group ? h("span", { class: "tag" }, ["thin / no file"]) : null])]
+        .concat(ids.map(function (id) { return h("td", {}, [cell(r.cells[id])]); }))));
+    });
+    m.append(body);
+
+    var g = d.disparity, dt = document.getElementById("disparity");
+    var nT = g.groups.thin_or_no_file.length, nE = g.groups.everyone_else.length;
+    dt.append(h("thead", {}, [h("tr", {}, ["Lender", "Approved: thin / no file (" + nT + ")", "Approved: others (" + nE + ")",
+      "Median opening rate: thin / no file", "Median opening rate: others", "In plain English"].map(function (x) { return h("th", {}, [x]); }))]));
+    var db = h("tbody");
+    g.lenders.forEach(function (l) {
+      var a = l.thin_or_no_file, b = l.everyone_else;
+      db.append(h("tr", {}, [h("th", {}, [l.name]),
+        h("td", { class: "num" }, [a.approved + " of " + a.n + " (" + pct(a.approval_rate) + ")"]),
+        h("td", { class: "num" }, [b.approved + " of " + b.n + " (" + pct(b.approval_rate) + ")"]),
+        h("td", { class: "num" }, [apr(a.median_opening_apr)]), h("td", { class: "num" }, [apr(b.median_opening_apr)]),
+        h("td", { class: "note" }, [l.note])]));
+    });
+    dt.append(db);
+    document.getElementById("dnote").textContent = g.note + " Thin / no file: " + g.groups.thin_or_no_file.join(", ") +
+      ". Excluded: " + g.excluded.join(", ") + ". " + g.disclaimer;
+  }
+
+  fetch("/api/fairness").then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(render).catch(function (e) {
+      var el = document.getElementById("err");
+      el.style.display = "block"; el.textContent = "Couldn't load the fairness check (" + e.message + "). Is the server running?";
+    });
+</script>
+</body>
+</html>

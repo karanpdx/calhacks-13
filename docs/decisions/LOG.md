@@ -2,6 +2,10 @@
 
 Important decisions, newest first. Format and rules: [PROCESS.md](PROCESS.md).
 
+## 2026-10-25: Fairness check proves blindness by swapping protected data in the raw CRS responses
+We swap each applicant's name, address, ZIP, DOB, phone and email consistently across every CRS product and require identical decisions and prices, plus twins and a passport proxy scan; disparity compares thin/no-file vs others, labelled "internal check, not a legal fair-lending review".
+Why: it tests the whole pipeline, not just the lender functions. Gave up: no protected-class data in the sandbox, so no disparate-impact measure; file age is credit-relevant but age-correlated (flagged, kept); attack-scenario agents without books are left out of the matrix.
+
 ## 2026-10-25: Thin-file lending: identity score, positive evidence, specialist lenders, reason codes, reconciliation
 Newcomers are priced on a 0-100 identity score plus positive evidence (thin/no-file only, so full files aren't rewarded twice); Harbor and Ladder serve no-file and rebuilding borrowers; declines carry 12 fixed codes (3 added to the brief's 9 so charge-off, bankruptcy and bureau declines aren't mislabelled); one-bureau items are "unconfirmed" and lenders opt in per Book to price on that view.
 Why: thin and no-file people get competing offers and exact reasons. Gave up: address/phone "stable" is approximated (no history in the sandbox), Prime Bank keeps the worst-bureau view, and small add-only edits landed outside the owned files (signals.py, messages.py, scenarios.py, llm_agents.py), agreed in session.

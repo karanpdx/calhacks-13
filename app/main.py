@@ -288,10 +288,27 @@ def demo_page():
     return FileResponse(os.path.join(STATIC, "demo.html"))
 
 
+@app.get("/fairness")
+def fairness_page():
+    return FileResponse(os.path.join(STATIC, "fairness.html"))
+
+
 @app.get("/phone")
 def phone_page():
     """The borrower app alone, full screen, for a real phone on the same network (same file as /demo)."""
     return FileResponse(os.path.join(STATIC, "demo.html"))
+
+
+# ---------------------------------------------------------------- fairness check (internal, offline samples)
+from exchange import fairness  # noqa: E402
+
+
+@app.get("/api/fairness")
+def fairness_report():
+    """Every sandbox persona through every lender (offer/decline, APR range, reason code), plus the blindness,
+    proxy-field and consistency tests and the thin-file disparity report. Saved samples only. Internal check, not a
+    legal fair-lending review."""
+    return {"notice": NOTICE, **fairness.report()}
 
 
 # ---------------------------------------------------------------- phone pairing (demo only)
