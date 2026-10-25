@@ -37,8 +37,11 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
 - `agent/`: screening gate: `screen()` -> findings + decision; `signals.py` (CRS field parsing), `rules.py`,
   `scorecard.py` (19/20 vs CRS expected decisions; `AS_OF` pins the sample date)
 - `exchange/`: the marketplace
-  - `messages.py`: protocol: `Terms`, `Mandate`, `Message` (INTENT/OFFER/COUNTER/ACCEPT/DECLINE/WITHDRAW), signing
-  - `passport.py`: what lenders see
+  - `messages.py`: protocol: `Terms`, `Mandate`, `Message` (INTENT/OFFER/COUNTER/ACCEPT/DECLINE/WITHDRAW), signing;
+    `REASON_CODES`: the fixed codes a lender DECLINE carries in `Message.reason_code` (none on "X% is our best")
+  - `passport.py`: what lenders see: score/file fields, `identity` + 0-100 `identity_score` + `identity_signals`
+    (booleans), positive evidence (`months_on_time`, `oldest_account_years`, `never_late`, `address_stable`,
+    `phone_stable`), public-record bankruptcy fields, and the `reconciled` block
   - `referee.py`: `Exchange`: gate -> passport -> market loop -> settlement -> disclosure; `events` = audit log.
     Sealed market: a COUNTER may `cite` a rival offer id; the referee checks it (else BAD_CITE), strips it, and
     passes the lender only `market = {round, max_rounds, verified_quote}`. `lender_books` revealed after close.
@@ -46,9 +49,14 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
   - `watchdog.py`: rule-based detectors (injection, sales pressure (flag-only), text vs terms, personal data, borrower drift, bureau disagreement)
     + `ClaudeReview` (advisory, runs after close, falls back to rule results on any error)
   - `pricing.py`: lender economics: `Book` (cost of funds, LGD, capital x ROE, margins, volume target, risk bucket),
-    log-odds scorecard PD, break-even build-up, floor/opening, time-dependent concession curve, `private_view`
-  - `lenders.py`: 4 lenders (Prime Bank, Campus CU, NewStart Fintech, Second Chance): eligibility `POLICIES` +
-    private `BOOKS` + `RuleLender` stand-in agent (concedes by round and motive, answers verified quotes, 36% cap)
+    log-odds scorecard PD (+ `positive_evidence` odds for thin/no-score/no-file; `pd_model="identity"` prices
+    newcomers on identity score), break-even build-up, floor/opening, time-dependent concession curve, `private_view`
+  - `lenders.py`: 6 lenders (Prime Bank, Campus CU, NewStart Fintech, Second Chance, Harbor Newcomer Lending,
+    Ladder Credit Builder): eligibility `POLICIES` (each decline a `Quote.code`) + private `BOOKS` + `RuleLender`
+    stand-in agent (concedes by round and motive, answers verified quotes, 36% cap). `view_for` gives Books with
+    `reconciled=True` (Campus CU, Harbor, Ladder) the reconciled passport
+  - `reconcile.py`: bureau reconciliation: an item one bureau reports while another bureau with a file doesn't is
+    "unconfirmed"; reconciled counts = what two bureaus agree on
   - `borrower.py`: `RuleBorrower` stand-in agent (+ `GullibleBorrower` for the injection scenario)
   - `scenarios.py`: `normal`, `bait_switch` (worse terms + forged acceptance), `injection` (hidden instructions),
     `data_grab` (lender asks for SSN/DOB, undeclared fee), `drift` (borrower takes a costlier offer, leaks max APR)
@@ -72,7 +80,7 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
 ## Commands
 ```
 pip install -r requirements.txt
-pytest                                        # 139 offline tests
+pytest                                        # 170 offline tests
 python -m exchange.demo P01                   # one market session in the terminal
 python -m exchange.demo P01 --scenario injection
 python -m exchange.demo P03 --max-apr 16 --json

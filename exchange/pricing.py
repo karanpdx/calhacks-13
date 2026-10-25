@@ -51,6 +51,11 @@ class Book:
     max_amount: float = 5000
     fee: float = 0.0            # origination fee it charges by default, $
     motive: str = ""            # one line of why it behaves as it does (shown to judges after the session)
+    min_amount: float = 0       # smallest loan it makes, $
+    pd_model: str = "scorecard"  # "scorecard" (score first) or "identity" (identity strength + positive evidence)
+    autopay_margin_cut: float = 0.0  # % a year of margin it gives up for autopay, on top of the computed saving
+    reports_payments: bool = False   # reports on-time payments to the bureaus (simulated in the sandbox)
+    reconciled: bool = False    # prices on the reconciled view: items only one bureau reports count as unconfirmed
 
     @property
     def volume_pressure(self):
@@ -77,13 +82,64 @@ BASE_SCORE = 700
 PDO = 50               # points to double the odds
 
 
-def pd_annual(p):
-    """Annual probability of default from the passport. Returns (pd, list of what moved it)."""
+# Positive evidence (odds multipliers, applied only where the score says little: thin, no-score and no-file
+# passports; a full scored file already reflects its payment history, so rewarding it again would double count).
+NEVER_LATE_ODDS = 1.15      # no late month, charge-off or late count on any account
+ON_TIME_ODDS = 1.10         # 12+ months in a row paid as agreed on some account
+ON_TIME_MONTHS = 12
+STABLE_ODDS = 1.05          # each of: address tied to the name, phone the applicant's own (approximations, see passport)
+
+
+def positive_evidence(p):
+    """[(reason, odds multiplier)] for what a thin or missing file has going for it."""
+    if not (p.get("no_file") or p.get("no_score") or p.get("thin_file")):
+        return []
+    out = []
+    if p.get("never_late"):
+        out.append(("never late on any account", NEVER_LATE_ODDS))
+    if (p.get("months_on_time") or 0) >= ON_TIME_MONTHS:
+        out.append((f"{p['months_on_time']} months in a row paid on time", ON_TIME_ODDS))
+    if p.get("address_stable"):
+        out.append(("address tied to the applicant", STABLE_ODDS))
+    if p.get("phone_stable"):
+        out.append(("phone is the applicant's own", STABLE_ODDS))
+    return out
+
+
+IDENTITY_PD = (0.12, 0.0006)   # identity model prior: pd = 0.12 - 0.0006 x identity_score (100 -> 6%, 80 -> 7.2%)
+THIN_LATES_ODDS = 1.4          # identity model: late payments on a thin file count against it directly
+
+
+def pd_identity(p):
+    """Risk model for lenders that price newcomers on identity strength rather than a thin or missing score:
+    a prior from the 0-100 identity score, then the passport's positive evidence, then lates if there are any."""
+    a, b = IDENTITY_PD
+    pd = max(0.02, a - b * (p.get("identity_score") or 0))
+    why = [f"identity score {p.get('identity_score')}: {pd:.1%} prior"]
+    odds = (1 - pd) / pd
+    for text, f in positive_evidence(p):
+        odds *= f
+        why.append(text)
+    if (p.get("late_payments") or 0) > 0:
+        odds /= THIN_LATES_ODDS
+        why.append("late payments on file")
+    return min(0.40, max(0.003, 1 / (1 + odds))), why
+
+
+def pd_annual(p, model="scorecard"):
+    """Annual probability of default from the passport. Returns (pd, list of what moved it).
+    model="identity" prices no-file and thin-file passports on identity strength (`pd_identity`)."""
     why = []
+    if model == "identity" and (p.get("no_file") or p.get("thin_file")):
+        return pd_identity(p)
     if p.get("no_file"):
         pd = {"strong": 0.06, "ok": 0.09}.get(p.get("identity"), 0.15)
         why.append(f"no credit file: {pd:.0%} prior from identity strength alone")
-        return pd, why
+        odds = (1 - pd) / pd
+        for text, f in positive_evidence(p):
+            odds *= f
+            why.append(text)
+        return 1 / (1 + odds), why
     if p.get("no_score") or p.get("score_low") is None:
         pd = 0.05 if (p.get("file_age_years") or 0) >= 10 else 0.08
         why.append(f"file but no score: {pd:.0%} prior from file age")
@@ -112,6 +168,9 @@ def pd_annual(p):
     for text, f in adj:
         odds /= f
         why.append(text)
+    for text, f in positive_evidence(p):
+        odds *= f
+        why.append(text)
     pd = 1 / (1 + odds)
     return min(0.40, max(0.003, pd)), why
 
@@ -120,7 +179,7 @@ def pd_annual(p):
 def breakdown(book, passport, amount, term_months, autopay=False, fee=None):
     """Annual percentage-point build-up of the break-even APR for these loan terms."""
     fee = book.fee if fee is None else fee
-    pd, why = pd_annual(passport)
+    pd, why = pd_annual(passport, book.pd_model)
     if autopay:
         pd *= AUTOPAY_PD
     years = term_months / 12
@@ -142,7 +201,8 @@ def break_even(book, passport, amount, term_months, autopay=False, fee=None):
 
 def floor(book, passport, amount, term_months, autopay=False, fee=None):
     """The lowest APR this lender will accept for these exact terms."""
-    return round(break_even(book, passport, amount, term_months, autopay, fee) + book.effective_min_margin, 2)
+    cut = book.autopay_margin_cut if autopay else 0.0
+    return round(break_even(book, passport, amount, term_months, autopay, fee) + max(0.0, book.effective_min_margin - cut), 2)
 
 
 def opening(book, passport, amount, term_months, fee=None):
@@ -170,5 +230,6 @@ def private_view(book, passport, amount, term_months, autopay=False, fee=None, o
         "opening_apr": opened if opened is not None else opening(book, passport, amount, term_months),
         "volume_pressure": round(book.volume_pressure, 2), "concession_style":
             "concedes early" if book.concession_beta > 1.2 else "holds firm" if book.concession_beta < 0.9 else "steady",
-        "motive": book.motive,
+        "motive": book.motive, "risk_model": book.pd_model,
+        **({"reports_payments": "simulated (not available in the CRS sandbox)"} if book.reports_payments else {}),
     }

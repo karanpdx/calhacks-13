@@ -57,7 +57,9 @@ def test_passport_never_contains_personal_data():
 def test_no_file_newcomer_gets_an_identity_based_offer():
     r = run("P04", max_apr=20)
     assert r["passport"]["no_file"] and r["passport"]["identity"] == "strong"
-    assert r["deal"]["lender"] == "newstart"
+    offers = {e["actor"] for e in r["events"] if e["kind"] == "message" and e["data"]["type"] == "OFFER"}
+    assert {"newstart", "harbor"} <= offers                 # two identity-based lenders now compete for her
+    assert r["deal"]["lender"] == "harbor"                  # the newcomer specialist prices her identity lower
 
 
 def test_subprime_walks_away_when_nothing_fits_mandate():

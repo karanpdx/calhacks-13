@@ -53,7 +53,8 @@ def test_prime_deal_shows_total_paid_and_simulated_next_steps():
 def test_negotiated_deal_shows_savings_and_what_was_traded():
     d = view("P03")["deal"]
     assert d["lender"] == "Campus Credit Union"
-    assert d["saved"] and d["saved"]["amount"] > 0 and "Campus Credit Union" in d["saved"]["sentence"]
+    # the "best first offer" is the cheapest per dollar, which is now Harbor's smaller, shorter loan
+    assert d["saved"] and d["saved"]["amount"] > 0 and "best first offer" in d["saved"]["sentence"]
     assert any("autopay" in t for t in d["traded"])
 
 
@@ -80,11 +81,20 @@ def test_path_to_approval_reruns_lender_rules():
 
 
 def test_single_bureau_collection_explains_how_to_dispute():
-    nd = view("P17", mandate=Mandate(min_amount=5000))["no_deal"]   # needs the full $5,000: NewStart's $3,000 won't do
+    # Lenders that reconcile the bureaus (Campus CU, Harbor, Ladder) now treat this one-bureau collection as unconfirmed
+    # and lend to her; with only the worst-bureau lenders it still costs her the deal, and the screen says how to fix it.
+    from exchange.borrower import RuleBorrower
+    from exchange.lenders import RuleLender
+    ex = Exchange("P17", Mandate(min_amount=5000), SampleSource(),   # needs the full $5,000: NewStart's $3,000 won't do
+                  [RuleLender(i) for i in ("prime_bank", "newstart", "second_chance")], RuleBorrower(), today=AS_OF,
+                  watchdog=True)
+    ex.run()
+    nd = person.build(ex)["no_deal"]
     b = nd["bureau_dispute"]
     assert b and b["bureau"] == "Experian" and "NATIONAL RECOVERY 1" in b["issue"]
     assert "annualcreditreport.com" in b["how_to_dispute"]
-    assert any("Experian" in w["change"] for w in nd["what_would_change"])
+    # (no "fix the Experian item" path here: the lender that path used to flip, Campus CU, now lends without it, and
+    # Prime Bank still declines on the other bureau disagreements)
 
 
 def test_stolen_identity_is_blocked_with_both_paths():
