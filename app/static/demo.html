@@ -57,6 +57,9 @@
   .tname { font-weight:700; font-size:16px; } .tsub { font-size:13px; color:var(--mute); }
   .big { font-size:30px; font-weight:800; letter-spacing:-.02em; margin-left:auto; }
   .say { font-size:14px; font-style:italic; }
+  /* the market has up to seven lenders: compact tiles so they all fit on a laptop screen */
+  #L { gap:8px; } #L .tile { padding:7px 14px; } #L .ico { width:34px; height:34px; border-radius:10px; }
+  #L .tname { font-size:15px; } #L .big { font-size:23px; } #L .tile .stamp { font-size:13px; top:-9px; }
   #hub { align-self:center; display:flex; flex-direction:column; align-items:center; gap:5px; }
   #hub .shield { width:76px; height:76px; border-radius:22px; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; transition:background .5s; }
   #hub.bad .shield { background:var(--red); } #hub.good .shield { background:var(--green); }
