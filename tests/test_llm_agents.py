@@ -9,6 +9,7 @@ from agent.scorecard import AS_OF  # noqa: E402
 from agent.sources import SampleSource  # noqa: E402
 from exchange.borrower import RuleBorrower  # noqa: E402
 from exchange.llm_agents import ClaudeBorrower, ClaudeLender, untrusted  # noqa: E402
+from exchange import finance  # noqa: E402
 from exchange.messages import Mandate, Message, Terms, ACCEPT, COUNTER, DECLINE, OFFER  # noqa: E402
 from exchange.referee import Exchange  # noqa: E402
 from exchange.scenarios import build, InjectingLender  # noqa: E402
@@ -161,10 +162,13 @@ def test_lender_offering_the_same_terms_declines_instead():
 
 
 def test_fee_waived_only_with_autopay():
-    lender, pp = lender_with_offer("second_chance", "P18", {"decision": OFFER, "apr": 25.0, "waive_fee": True,
-                                                             "text": "Fee's gone."})
-    assert lender.respond_to_counter(counter_for(lender, 25.0, fee=0), pp, {}).terms.fee == lender.quote.fee
-    assert lender.respond_to_counter(counter_for(lender, 24.0, autopay=True, fee=0), pp, {}).terms.fee == 0
+    lender, pp = lender_with_offer("second_chance", "P18", {"decision": OFFER, "apr": 1.0, "waive_fee": True,
+                                                             "text": "Fee's gone."})   # clamped to its floor
+    assert lender.respond_to_counter(counter_for(lender, 1.0, fee=0), pp, {}).terms.fee == lender.quote.fee
+    before = lender.current
+    m = lender.respond_to_counter(counter_for(lender, 1.0, autopay=True, fee=0), pp, {})
+    assert m.terms.fee == 0 and m.terms.apr >= lender.floor(True, fee=0)   # the lost fee is priced into the rate
+    assert finance.cost_per_dollar(m.terms) <= finance.cost_per_dollar(before)   # and the borrower still comes out ahead
 
 
 def test_lender_falls_back_to_rules_on_error():

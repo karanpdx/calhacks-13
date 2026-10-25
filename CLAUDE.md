@@ -22,8 +22,10 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
 2. **Free text is untrusted.** `Message.text` is shown and logged but the referee never acts on it. Only structured
    fields (`type`, `terms`, `offer_id`, `ask`) change state. One exception: only the rule-based injection detector
    (`exchange/watchdog.py`, deterministic regex) may trigger exclusion; Claude flags never change state.
-3. **Lender pricing comes from `exchange/lenders.py` policies (computed from CRS data).** A Claude-powered lender may
-   negotiate only inside its policy's range: override `respond_to_counter`, never `policy`.
+3. **Lender pricing comes from each lender's books** (`exchange/pricing.py` + `BOOKS` in `exchange/lenders.py`):
+   risk-based floor and opening computed from the passport. A Claude-powered lender negotiates only inside them:
+   override `respond_to_counter`, never `policy`/`BOOKS`; its terms go through `within_books` (never below `floor_for`).
+   Lenders never see rivals' names or offers, only a referee-verified anonymous quote the borrower cited.
 4. **Lenders see the passport, never the raw CRS file.** Don't add personal fields to `exchange/passport.py`.
 5. **Sandbox test identities only.** Never put real names/SSNs anywhere. Never commit `CRS_USER`/`CRS_PASS`, `.env`,
    or the Postman collection (`calhacks13-*.json`, it has the login).
@@ -38,10 +40,15 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
   - `messages.py`: protocol: `Terms`, `Mandate`, `Message` (INTENT/OFFER/COUNTER/ACCEPT/DECLINE/WITHDRAW), signing
   - `passport.py`: what lenders see
   - `referee.py`: `Exchange`: gate -> passport -> market loop -> settlement -> disclosure; `events` = audit log.
+    Sealed market: a COUNTER may `cite` a rival offer id; the referee checks it (else BAD_CITE), strips it, and
+    passes the lender only `market = {round, max_rounds, verified_quote}`. `lender_books` revealed after close.
     `watchdog=True`: flags + exclusion rule (lender out after TERMS_WORSENED, BAD_SIGNATURE or a rule-based injection flag)
   - `watchdog.py`: rule-based detectors (injection, sales pressure (flag-only), text vs terms, personal data, borrower drift, bureau disagreement)
     + `ClaudeReview` (advisory, runs after close, falls back to rule results on any error)
-  - `lenders.py`: 4 policies (Prime Bank, Campus CU, NewStart Fintech, Second Chance) + `RuleLender` stand-in agent
+  - `pricing.py`: lender economics: `Book` (cost of funds, LGD, capital x ROE, margins, volume target, risk bucket),
+    log-odds scorecard PD, break-even build-up, floor/opening, time-dependent concession curve, `private_view`
+  - `lenders.py`: 4 lenders (Prime Bank, Campus CU, NewStart Fintech, Second Chance): eligibility `POLICIES` +
+    private `BOOKS` + `RuleLender` stand-in agent (concedes by round and motive, answers verified quotes, 36% cap)
   - `borrower.py`: `RuleBorrower` stand-in agent (+ `GullibleBorrower` for the injection scenario)
   - `scenarios.py`: `normal`, `bait_switch` (worse terms + forged acceptance), `injection` (hidden instructions),
     `data_grab` (lender asks for SSN/DOB, undeclared fee), `drift` (borrower takes a costlier offer, leaks max APR)
@@ -64,7 +71,7 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
 ## Commands
 ```
 pip install -r requirements.txt
-pytest                                        # 125 offline tests
+pytest                                        # 135 offline tests
 python -m exchange.demo P01                   # one market session in the terminal
 python -m exchange.demo P01 --scenario injection
 python -m exchange.demo P03 --max-apr 16 --json
@@ -77,7 +84,9 @@ uvicorn app.main:app --reload                 # http://127.0.0.1:8000
 - Borrower: subclass `RuleBorrower`; implement `decide(rnd, offers, mandate, passport) -> list[Message]`.
   `offers` = `{offer_id: {"lender", "terms", "text", ...}}` (live only). Never reveal `mandate.max_apr` in messages.
 - Lender: subclass `RuleLender`; override `respond_to_counter(counter, passport, market) -> Message | list | None`.
-  `self.quote` holds the policy range (`floor_apr`, `autopay_discount`, ...). Stay at or above the floor.
+  `market` = `{"round", "max_rounds", "verified_quote": {apr, amount, term_months, autopay, fee, monthly_payment} | None}`
+  (anonymous). Use `self.floor_for(terms)`, `self.opening_for(terms)`, `self.book` (motives) and pass any terms
+  through `self.within_books(...)`. Offers are binding: a worse same-term offer is TERMS_WORSENED.
 - Build agents with the Anthropic SDK (`ANTHROPIC_API_KEY`; model via `CLAUDE_MODEL`, default `claude-sonnet-5-5`).
   Ask the model for structured JSON, parse it into `Message`/`Terms`, and fall back to the rule-based parent on any
   error so the demo never breaks.

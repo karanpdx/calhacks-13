@@ -32,6 +32,7 @@ VERDICT_TEXT = {
     "WRONG_ROLE": "Blocked: that move isn't allowed for its role (only lenders make offers; only your agent accepts).",
     "SESSION_CLOSED": "Blocked: the session was already over.",
     "UNKNOWN_TYPE": "Blocked: not a recognised kind of message.",
+    "BAD_CITE": "Blocked: it pointed to a competing offer that doesn't exist or came from the same lender.",
 }
 ALLOWED_TEXT = {OFFER: f"Allowed: valid terms, under the {APR_CAP:g}% cap",
                 ACCEPT: "Allowed: matches the offer exactly and fits your limits"}

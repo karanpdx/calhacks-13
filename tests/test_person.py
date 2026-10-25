@@ -75,12 +75,12 @@ def test_no_deal_gives_reasons_and_a_path_to_approval():
 
 
 def test_path_to_approval_reruns_lender_rules():
-    nd = view("P06")["no_deal"]   # 580 score: NewStart's rules take 600+
+    nd = view("P06", mandate=Mandate(max_apr=20))["no_deal"]   # 580 score: NewStart's rules take 600+
     assert any(w["lender"] == "NewStart Fintech" and "600" in w["change"] for w in nd["what_would_change"])
 
 
 def test_single_bureau_collection_explains_how_to_dispute():
-    nd = view("P17")["no_deal"]
+    nd = view("P17", mandate=Mandate(min_amount=5000))["no_deal"]   # needs the full $5,000: NewStart's $3,000 won't do
     b = nd["bureau_dispute"]
     assert b and b["bureau"] == "Experian" and "NATIONAL RECOVERY 1" in b["issue"]
     assert "annualcreditreport.com" in b["how_to_dispute"]

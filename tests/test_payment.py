@@ -54,14 +54,19 @@ def test_positional_construction_still_works():
 
 # ------------------------------------------------------------------ a market session
 
-def test_payment_limit_steers_the_borrower_away_from_an_offer_that_fits_the_apr():
+def test_payment_limit_makes_the_agent_negotiate_a_longer_loan():
     r = run("P03", max_payment=150)  # max_apr stays at the default 18%
     campus = [Terms(**e["data"]["terms"]) for e in r["events"]
               if e["kind"] == "message" and e["actor"] == "campus_cu" and e["data"]["type"] == OFFER]
-    # every Campus CU offer is inside the APR limit (and cheaper per dollar), but more than $150 a month
-    assert campus and all(t.apr <= 18 and pay(t) > 150 for t in campus)
+    # Campus CU opens at 36 months: inside the APR limit, but more than $150 a month
+    assert campus and campus[0].term_months == 36 and pay(campus[0]) > 150
+    # the agent asks for a longer loan instead of settling for less money; the lender prices the restructure
+    asked = [e for e in r["events"] if e["kind"] == "message" and e["data"]["type"] == "COUNTER"
+             and e["data"]["to"] == "campus_cu"]
+    assert asked and asked[0]["data"]["terms"]["term_months"] == 48
     deal = Terms(**r["deal"]["terms"])
-    assert r["deal"]["lender"] == "newstart" and pay(deal) <= 150 and not r["blocked"]
+    assert r["deal"]["lender"] == "campus_cu" and deal.term_months == 48 and deal.amount == 5000
+    assert pay(deal) <= 150 and not r["blocked"]
 
 
 def test_without_the_payment_limit_the_same_person_gets_the_bigger_loan():

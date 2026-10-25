@@ -2,6 +2,9 @@
 
 Important decisions, newest first. Format and rules: [PROCESS.md](PROCESS.md).
 
+## 2026-10-24: Negotiation engine: lender books and a sealed market
+Lenders price from their own books (risk-based break-even, floor, private volume/risk motives) and never see rivals; the referee passes only a verified anonymous quote the borrower cites. Why: real negotiation with no fixed "2 points off" rule and no room to collude. Gave up: parameters are illustrative, not calibrated.
+
 ## 2026-10-24: Decision logging process
 Every finished feature gets a 2-line entry, written from git, PRs, the `inbox/` drop and the session, so decisions from all teammates are captured. Why: the reasoning behind choices gets lost, and judges and teammates need to see it. Gave up: some extra writing per feature.
 
