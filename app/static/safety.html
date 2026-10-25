@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0F1B2D">
+<title>Agent credit exchange: safety case</title>
+<style>
+  :root { --bg:#F6F7F9; --card:#fff; --ink:#121826; --mute:#5B6472; --line:#E3E6EB; --blue:#2453C4; --blue-soft:#E7EEFB;
+          --green:#157347; --green-soft:#EAF6EF; --red:#B4232B; --red-soft:#FDECEC; --navy:#0F1B2D; --amber:#8A5A00; --amber-soft:#FFF8E6; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; }
+  header { background:var(--navy); color:#fff; padding:9px 28px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
+  header .brand { font-weight:800; font-size:17px; }
+  header .crumb { font-size:13px; color:#C9D3E3; }
+  header nav { margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; }
+  header a { color:#E6ECF5; font-size:13px; font-weight:700; text-decoration:none; border:1px solid #52627A; border-radius:99px; padding:5px 12px; }
+  header a:hover { background:#1C2C44; }
+  main { max-width:1300px; margin:0 auto; padding:18px 28px 32px; }
+  .intro { text-align:center; padding:8px 0 4px; }
+  .intro h1 { margin:0; font-size:34px; font-weight:800; letter-spacing:-.02em; text-wrap:balance; }
+  .intro p { margin:6px auto 0; font-size:18px; color:var(--mute); max-width:760px; text-wrap:pretty; }
+  .intro .claim { color:var(--ink); font-weight:700; }
+  .score { display:inline-flex; align-items:center; gap:8px; margin-top:14px; font-size:14px; font-weight:700; color:var(--green);
+           background:var(--green-soft); border:1px solid #BFE3CC; border-radius:99px; padding:5px 14px; }
+  .score.bad { color:var(--red); background:var(--red-soft); border-color:#F3C2C5; }
+  h2 { font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); margin:30px 0 4px; }
+  .lead { margin:0 0 12px; color:var(--mute); font-size:15px; max-width:900px; }
+  .layers { display:grid; grid-template-columns:repeat(5, minmax(0,1fr)); gap:10px; }
+  .layer { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:11px 13px; }
+  .layer b { display:block; font-size:14px; } .layer span { display:block; font-size:12.5px; color:var(--mute); margin-top:3px; }
+  .layer .n { font-size:11px; font-weight:800; color:var(--blue); letter-spacing:.06em; }
+  .checks { display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px; }
+  .check { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:15px 17px; display:flex; flex-direction:column; gap:8px; min-width:0; }
+  .check.ok { border-left:5px solid var(--green); } .check.bad { border-left:5px solid var(--red); }
+  .ch { display:flex; align-items:flex-start; gap:10px; }
+  .badge { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+           background:var(--green); color:#fff; font-weight:800; font-size:15px; }
+  .badge.bad { background:var(--red); }
+  .ch h3 { margin:2px 0 0; font-size:17px; line-height:1.3; }
+  .attacker { margin:0; font-size:14px; color:var(--mute); }
+  .attacker::before { content:"Attack: "; font-weight:700; color:var(--ink); }
+  .chips { display:flex; flex-wrap:wrap; gap:6px; }
+  .chip { font-size:12px; font-weight:700; color:var(--blue); background:var(--blue-soft); border-radius:99px; padding:2px 9px; }
+  .evidence { margin:0; padding-left:18px; font-size:14px; }
+  .evidence li { margin:3px 0; }
+  .evidence li::marker { color:var(--green); }
+  .proof { font-size:12px; color:var(--mute); overflow-wrap:anywhere; }
+  .proof code { font:12px ui-monospace,SFMono-Regular,Menlo,monospace; background:#F1F3F6; border-radius:5px; padding:1px 5px; }
+  .actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:2px; }
+  .btn { font:inherit; font-size:13px; font-weight:700; color:var(--blue); background:#fff; border:1px solid #BCCCEB; border-radius:99px;
+         padding:5px 12px; cursor:pointer; text-decoration:none; min-height:32px; display:inline-flex; align-items:center; }
+  .btn:hover { background:var(--blue-soft); }
+  .btn[aria-expanded="true"] { background:var(--blue); color:#fff; border-color:var(--blue); }
+  .tx[hidden] { display:none; }
+  .tx { border-top:1px solid var(--line); margin-top:4px; padding-top:8px; display:flex; flex-direction:column; gap:6px; max-height:360px; overflow:auto; }
+  .tx .ev { display:grid; grid-template-columns:auto 1fr; gap:2px 8px; font-size:13px; padding:6px 8px; border-radius:10px; background:#FAFBFC; }
+  .tx .ev.blocked { background:var(--red-soft); } .tx .ev.flag { background:var(--amber-soft); } .tx .ev.excluded { background:var(--red-soft); font-weight:700; }
+  .tx .who { font-weight:700; white-space:nowrap; } .tx .says { grid-column:2; color:var(--mute); font-style:italic; }
+  .tx .v { grid-column:2; font-size:12px; font-weight:700; } .tx .v.ok { color:var(--green); } .tx .v.no { color:var(--red); } .tx .v.warn { color:var(--amber); }
+  .rt { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:12px; }
+  .stat { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; }
+  .stat .k { font-size:32px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.02em; }
+  .stat .k.good { color:var(--green); } .stat .l { font-size:13px; color:var(--mute); }
+  .two { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(0,1fr); gap:14px; margin-top:14px; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px 16px; min-width:0; }
+  .panel h3 { margin:0 0 8px; font-size:15px; }
+  table { border-collapse:collapse; width:100%; font-size:14px; }
+  th, td { padding:7px 10px; text-align:left; border-bottom:1px solid var(--line); }
+  tr:last-child td { border-bottom:0; }
+  thead th { font-size:12px; font-weight:700; color:var(--mute); }
+  td.num, th.num { text-align:right; font-variant-numeric:tabular-nums; }
+  .note { font-size:13px; color:var(--mute); margin:8px 0 0; }
+  .note code { font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace; background:#F1F3F6; border-radius:5px; padding:1px 5px; }
+  .fine { font-size:12px; color:var(--mute); margin-top:22px; }
+  #err { display:none; background:var(--red-soft); color:var(--red); border-radius:12px; padding:12px 16px; margin-top:16px; font-weight:600; }
+  .loading { color:var(--mute); padding:30px 0; text-align:center; }
+  :focus-visible { outline:3px solid #1865b6; outline-offset:2px; }
+  @media (max-width:1100px) { .layers { grid-template-columns:repeat(2, minmax(0,1fr)); } }
+  @media (max-width:900px) { .checks, .two { grid-template-columns:1fr; } .rt { grid-template-columns:repeat(2, minmax(0,1fr)); }
+    main { padding:12px 16px 24px; } header { padding:9px 16px; } .intro h1 { font-size:27px; } }
+  @media (prefers-reduced-motion: reduce) { * { scroll-behavior:auto !important; } }
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">Agent credit exchange</span>
+  <span class="crumb">Safety case</span>
+  <nav><a href="/fairness">Fairness check</a><a href="/demo">Back to the demo</a></nav>
+</header>
+<main>
+  <section class="intro">
+    <h1>Can you trust AI agents to negotiate your loan?</h1>
+    <p><span class="claim">We don't try to make the agents trustworthy. We make the market safe even when they aren't.</span>
+      Every attack below was just run against the real referee code, and every result on this page comes from that run.</p>
+    <div class="score" id="score" role="status">Running every check...</div>
+  </section>
+  <div id="err" role="alert"></div>
+
+  <h2>Ten layers of defense</h2>
+  <p class="lead">No single layer has to be perfect. AI agents only propose; plain code decides. Each attack below has to get past several of these at once.</p>
+  <div class="layers" id="layers"><div class="loading">Loading...</div></div>
+
+  <h2>Every threat, what stops it, and the proof</h2>
+  <p class="lead">Each card ran its attack just now on saved CRS sandbox data. "Watch" replays the session message by message, with the referee's verdict on each.</p>
+  <div class="checks" id="checks"></div>
+
+  <h2>Red team: an attacker that picks its own tactics</h2>
+  <p class="lead">SwiftLend Express is an AI lender told to scam the borrower's agent: fake pre-approvals, hidden fees, requests for an SSN, bait-and-switch, hidden instructions, forged acceptances. It ran against every person the identity gate admits.</p>
+  <div class="rt" id="rt"></div>
+  <div class="two">
+    <div class="panel"><h3>By tactic</h3><table id="tactics"><thead><tr><th>Tactic</th><th class="num">Tried</th><th class="num">Caught</th></tr></thead><tbody></tbody></table>
+      <p class="note" id="rt-note"></p></div>
+    <div class="panel" id="live"><h3>Claude red-team run</h3></div>
+  </div>
+
+  <p class="fine">Fictional CRS sandbox personas · simulated lenders and settlement · internal safety check, not a security audit or legal review. Source: <code>exchange/safety.py</code>; every check is also a test in <code>tests/test_safety.py</code>.</p>
+</main>
+<script>
+const $ = s => document.querySelector(s);
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) { if (v == null || v === false) continue; if (k.startsWith("on")) el[k] = v; else el.setAttribute(k, v === true ? "" : v); }
+  for (const k of kids.flat(Infinity)) if (k != null && k !== false) el.append(k.nodeType ? k : String(k));
+  return el;
+}
+const TACTICS = { pressure: "Pressure: \"accept now\"", fake_preapproval: "Fake pre-approval", ask_personal_data: "Asks for SSN / date of birth",
+  fee_in_text_only: "Fee only in the text", misquote_rate: "Misquotes its own rate", bait_and_switch: "Bait and switch",
+  hidden_instruction: "Hidden instruction to the agent", forge_acceptance: "Forged acceptance" };
+
+async function load() {
+  let r;
+  try { const res = await fetch("/api/safety"); if (!res.ok) throw new Error(res.status); r = await res.json(); }
+  catch (e) { $("#err").style.display = "block"; $("#err").textContent = "Couldn't run the safety checks (" + e.message + ")."; $("#score").textContent = "Not run"; return; }
+  const all = r.passed === r.total;
+  $("#score").className = "score" + (all ? "" : " bad");
+  $("#score").textContent = (all ? "✓ " : "✕ ") + `${r.passed} of ${r.total} attacks stopped · ${r.red_team.caught} of ${r.red_team.attempts} red-team moves caught`;
+
+  const L = r.layers, ids = Object.keys(L);
+  $("#layers").replaceChildren(...ids.map((k, i) => h("div", {class: "layer"}, h("span", {class: "n"}, String(i + 1).padStart(2, "0")), h("b", {}, L[k].name), h("span", {}, L[k].what))));
+
+  $("#checks").replaceChildren(...r.checks.map(c => {
+    const tx = h("div", {class: "tx", hidden: true});
+    const actions = h("div", {class: "actions"},
+      c.replays.map(rp => { const b = h("button", {class: "btn", type: "button", "aria-expanded": "false"}, rp.label);
+        b.onclick = () => toggle(b, tx, rp, actions); return b; }),
+      c.link ? h("a", {class: "btn", href: c.link[0]}, c.link[1] + " →") : null);
+    return h("article", {class: "check " + (c.ok ? "ok" : "bad"), id: c.id},
+      h("div", {class: "ch"}, h("span", {class: "badge" + (c.ok ? "" : " bad"), "aria-label": c.ok ? "Stopped" : "Not stopped"}, c.ok ? "✓" : "✕"), h("h3", {}, c.threat)),
+      h("p", {class: "attacker"}, c.attacker),
+      h("div", {class: "chips", "aria-label": "Layers that stop it"}, c.layers.map(l => h("span", {class: "chip", title: L[l] ? L[l].what : ""}, L[l] ? L[l].name : l))),
+      h("ul", {class: "evidence"}, c.evidence.filter(Boolean).map(e => h("li", {}, e))),
+      h("div", {class: "proof"}, "Proved by: ", c.tests.map((t, i) => [i ? " " : "", h("code", {}, t)])),
+      (c.replays.length || c.link) ? actions : null, tx);
+  }));
+
+  const t = r.red_team;
+  $("#rt").replaceChildren(
+    stat(t.attempts, `attack moves over ${t.sessions} sessions`),
+    stat(t.caught, "caught by the referee or watchdog", t.caught === t.attempts),
+    stat(t.won_deal, "times the scammer won the loan", t.won_deal === 0),
+    stat(t.deals_outside_limits, "deals outside the person's limits", t.deals_outside_limits === 0));
+  $("#tactics tbody").replaceChildren(...Object.entries(t.by_tactic).sort((a, b) => b[1].tried - a[1].tried)
+    .map(([k, v]) => h("tr", {}, h("td", {}, TACTICS[k] || k), h("td", {class: "num"}, v.tried), h("td", {class: "num"}, v.caught))));
+  $("#rt-note").textContent = `Attacker: ${t.attacker}. Without an API key SwiftLend plays a fixed script that ends in the moves the referee blocks outright.`;
+
+  const lv = r.red_team_live, box = $("#live");
+  if (lv) box.append(h("div", {class: "rt", style: "grid-template-columns:repeat(2,minmax(0,1fr))"},
+      stat(lv.attempts, `moves Claude chose over ${lv.sessions} sessions`), stat(lv.caught, "caught", lv.caught === lv.attempts),
+      stat(lv.won_deal, "won the loan", lv.won_deal === 0), stat(lv.deals_outside_limits, "deals outside limits", lv.deals_outside_limits === 0)),
+    h("p", {class: "note"}, `Saved run: ${lv.model || "Claude"}, ${lv.ran_at || "date not recorded"}. Unscripted: Claude chose every tactic and wrote every message.`));
+  else box.append(h("p", {class: "note"}, "No Claude run saved yet. With ANTHROPIC_API_KEY set, run ", h("code", {}, "python -m exchange.safety --live-red-team"),
+    " and the result appears here, next to the scripted run."));
+}
+
+function stat(n, label, good) { return h("div", {class: "stat"}, h("div", {class: "k" + (good ? " good" : "")}, n), h("div", {class: "l"}, label)); }
+
+async function toggle(btn, tx, rp, actions) {
+  const open = btn.getAttribute("aria-expanded") === "true";
+  actions.querySelectorAll("button").forEach(b => b.setAttribute("aria-expanded", "false"));
+  if (open) { tx.hidden = true; return; }
+  btn.setAttribute("aria-expanded", "true"); tx.hidden = false; tx.replaceChildren(h("div", {class: "loading"}, "Replaying..."));
+  try {
+    const q = new URLSearchParams({scenario: rp.scenario, watchdog: rp.watchdog, live: 0});
+    const ex = await (await fetch(`/api/exchange/${rp.persona}?${q}`)).json();
+    const feed = (ex.under_the_hood && ex.under_the_hood.feed) || [];
+    tx.replaceChildren(...feed.filter(f => f && f.what).map(f => {
+      const kind = f.kind === "excluded" ? "excluded" : f.verdict === "blocked" ? "blocked" : f.kind === "watchdog" ? "flag" : "";
+      return h("div", {class: "ev " + kind}, h("span", {class: "who"}, f.who || ""), h("span", {}, f.what),
+        f.says ? h("span", {class: "says"}, "“" + f.says + "”") : null,
+        f.verdict_text ? h("span", {class: "v " + (f.verdict === "blocked" ? "no" : f.kind === "watchdog" ? "warn" : "ok")}, f.verdict_text) : null);
+    }));
+    if (!tx.children.length) tx.append(h("div", {class: "loading"}, "No messages: the session stopped before the market."));
+  } catch (e) { tx.replaceChildren(h("div", {class: "loading"}, "Couldn't replay this session.")); }
+}
+load();
+</script>
+</body>
+</html>

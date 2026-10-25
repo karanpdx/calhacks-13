@@ -2,6 +2,9 @@
 
 Important decisions, newest first. Format and rules: [PROCESS.md](PROCESS.md).
 
+## 2026-10-25: Safety case page runs every attack live instead of describing defenses
+`/safety` maps 11 threats to 10 layers, and each card's evidence comes from running that attack against the referee on page load (one also with the watchdog off, to show the layers are independent). Why: claims can't drift from the code, and judges see proof, not promises. Gave up: the scoreboard uses the scripted attacker unless a saved Claude run exists.
+
 ## 2026-10-25: Integrate human approval with borrower language and accessibility
 Preserve both approval and EN/ES across batch/stream/decision responses, require explicit chat consent in either language, and detach a finished stream's callback before holding its session. Why: resolving only the text conflicts would lose features and streamed decisions crashed against a closed event loop; held sessions remain in memory and engine approval rules are unchanged.
 

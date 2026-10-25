@@ -403,6 +403,26 @@ def fairness_report():
     proxy-field and consistency tests and the thin-file disparity report. Saved samples only. Internal check, not a
     legal fair-lending review."""
     return {"notice": NOTICE, **fairness.report()}
+
+
+# ---------------------------------------------------------------- safety case (offline samples, runs every check)
+from exchange import safety  # noqa: E402
+_SAFETY = {}
+
+
+@app.get("/api/safety")
+def safety_report(fresh: int = 0):
+    """Every threat we defend against, the layers that stop it, and evidence from running each attack against the
+    referee (saved samples, rule-based agents), plus the red-team scoreboard and any saved Claude red-team run.
+    Cached per process; `fresh=1` reruns it (under a second)."""
+    if fresh or "r" not in _SAFETY:
+        _SAFETY["r"] = safety.report()
+    return {"notice": NOTICE, **_SAFETY["r"]}
+
+
+@app.get("/safety")
+def safety_page():
+    return FileResponse(os.path.join(STATIC, "safety.html"))
 @app.get("/lender")
 def lender_page():
     """Lender operations dashboard prototype for monitoring and exception triage."""

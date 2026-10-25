@@ -63,6 +63,10 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
   - `adversary.py`: red team: `ScammerLender` (SwiftLend Express), a Claude agent told to scam the borrower's
     agent, picking tactics from a fixed menu each move (fixed script without a key); `report(ex)` = each attempt
     with the referee verdict and watchdog flags (the API's `red_team` field). Scenario `red_team`
+  - `safety.py`: safety case: `CHECKS` run each attack (injection with and without the watchdog, bait and switch,
+    forgery, data grab, collusion/fake citation, approval, drift, stolen identity, rate cap, model outage, fairness)
+    against the real referee and report evidence; `red_team()` scoreboard (script offline);
+    `python -m exchange.safety --live-red-team` saves a Claude run to `docs/evidence/red_team_live.json`
   - `borrower.py`: `RuleBorrower` stand-in agent (+ `GullibleBorrower` for the injection scenario)
   - `scenarios.py`: `normal`, `bait_switch` (worse terms + forged acceptance), `injection` (hidden instructions),
     `data_grab` (lender asks for SSN/DOB, undeclared fee), `drift` (borrower takes a costlier offer, leaks max APR)
@@ -81,6 +85,8 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
   `approval=1` on either exchange endpoint: the agent's ACCEPT is only a recommendation (`awaiting_approval` +
   `session_id`); nothing settles until `POST /api/session/{id}/approve {"offer_id"}` or `/decline` (sessions in memory)
 - `app/static/index.html`: screening view
+- `app/static/safety.html` (`/safety`, `/api/safety`): ten defense layers, every threat with live evidence and a
+  replayable transcript, red-team scoreboard
 - `app/static/fairness.html` (`/fairness`): the fairness matrix, test results and disparity table; linked from the demo footer
 - `app/static/demo.html`: `/phone` is the sole borrower experience: agent chat, limits, shopping, results, explanations, EN/ES and narration (`approval=1`: the person accepts the loan). `/demo` retains scenes 1-4, Everyone / Borrower / Lender views and phone pairing (`/api/pair`).
 - `app/static/lender.html`, `lender.css`, `lender.js`: separate lender monitoring and exception workspace. The retired borrower dashboard and old exchange page redirect to `/phone`.
