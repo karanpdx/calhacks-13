@@ -11,6 +11,10 @@
 """
 import argparse, json, sys
 
+from agent import envfile
+
+envfile.load()
+
 from agent.sources import SampleSource, LiveSource
 from .messages import Mandate
 from .referee import Exchange
