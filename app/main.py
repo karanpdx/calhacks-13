@@ -12,7 +12,7 @@ import re
 from functools import lru_cache
 from typing import Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Body, FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
@@ -272,6 +272,45 @@ def exchange_page():
 @app.get("/demo")
 def demo_page():
     return FileResponse(os.path.join(STATIC, "demo.html"))
+
+
+@app.get("/phone")
+def phone_page():
+    """The borrower app alone, full screen, for a real phone on the same network (same file as /demo)."""
+    return FileResponse(os.path.join(STATIC, "demo.html"))
+
+
+# ---------------------------------------------------------------- phone pairing (demo only)
+# The phone posts the session it just ran; a laptop on /demo?follow=1 polls and replays the same session, so both
+# screens show the same numbers. In memory, last session only, no auth: a demo convenience on a trusted network.
+_PAIR = {"seq": 0}
+
+
+@app.post("/api/pair")
+def pair_push(body: dict = Body(...)):
+    seq = _PAIR.get("seq", 0) + 1
+    _PAIR.clear()
+    _PAIR.update(body, seq=seq)
+    return {"seq": seq}
+
+
+@app.get("/api/pair")
+def pair_latest(after: int = 0):
+    return _PAIR if _PAIR.get("seq", 0) > after else {"seq": _PAIR.get("seq", 0)}
+
+
+@app.get("/api/pair/info")
+def pair_info():
+    """This machine's address on the local network, so the laptop can tell people which URL to open on the phone."""
+    import socket
+    ip = "127.0.0.1"
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.connect(("10.255.255.255", 1))  # no packet is sent; this just picks the outbound interface
+            ip = s.getsockname()[0]
+    except OSError:
+        pass
+    return {"ip": ip}
 
 
 app.mount("/static", StaticFiles(directory=STATIC), name="static")
