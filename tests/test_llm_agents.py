@@ -141,7 +141,7 @@ def test_lender_is_clamped_to_its_floor():
     lender, pp = lender_with_offer("campus_cu", "P03", {"decision": OFFER, "apr": 1.0, "waive_fee": False,
                                                          "text": "Sure, 1%!"})
     m = lender.respond_to_counter(counter_for(lender, 1.0, autopay=True), pp, {"best_competing_apr": None})
-    floor = lender.quote.floor_apr - lender.quote.autopay_discount
+    floor = round(lender.quote.floor_apr - lender.quote.autopay_discount, 2)   # e.g. 8.21 - 0.65 is 7.5600000000000005
     assert m.type == OFFER and m.terms.apr == floor
     assert "1%" not in m.text and str(floor) in m.text  # text matches the clamped terms, not the model's claim
 

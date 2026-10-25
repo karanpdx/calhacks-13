@@ -41,7 +41,24 @@ def credit(body):
                                  or t.get("accountType") == "Collection"],
         "alerts": [a.get("responseAlertMessageText") for a in body.get("responseAlertMessages", [])],
         "applicant": body.get("requestData") or {},
+        # payment patterns, most recent month first: "C" = paid as agreed, "1".."9" = 30+ days late .. charged off
+        "on_time_months": max((_on_time_run(t.get("paymentPatternData"), t.get("monthsReviewedCount")) for t in trades
+                               if t.get("currentRatingType") not in ("ChargeOff", "Collection")), default=0),
+        "late_months": sum(sum(ch.isdigit() for ch in (t.get("paymentPatternData") or "")) for t in trades),
+        "bankruptcy_records": [{"type": r.get("publicRecordType"), "disposition": r.get("dispositionType"),
+                                "filed": r.get("filedDate"), "resolved": r.get("dispositionDate") or r.get("reportedDate")}
+                               for r in body.get("publicRecords") or []
+                               if "bankruptcy" in (r.get("publicRecordType") or "").lower()],
     }
+
+
+def _on_time_run(pattern, months_reviewed=None):
+    """Months paid as agreed in a row, counting back from the most recent month. Capped at the months the bureau
+    reviewed: sandbox patterns can run longer than the account has existed."""
+    pattern = pattern or ""
+    run = len(pattern) - len(pattern.lstrip("C"))
+    reviewed = _int(months_reviewed, None)
+    return min(run, reviewed) if reviewed is not None else run
 
 
 def fraud_finder(body, today=None):
@@ -70,6 +87,7 @@ def fraud_finder(body, today=None):
         "phone_prepaid": bool(phone.get("prepaid")),
         "phone_owner_matches": owner.get("last_name_match") == "match" and owner.get("first_name_match") == "match",
         "address_deliverable": postal.get("deliverability") == "deliverable",
+        "address_name_matches": all(postal.get(k) == "match" for k in ("first_name_match", "last_name_match", "street_match")),
     }
 
 

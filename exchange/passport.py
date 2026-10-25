@@ -73,6 +73,8 @@ def build(report, bureaus, today=None):
     identity_score = max(0, 100 - sum(IDENTITY_PENALTY.get(f["severity"], 0) for f in counted))
 
     disagreements = [f["text"] for f in report["findings"] if f["axis"] == "consistency"]
+    ff = (report.get("signals") or {}).get("fraud_finder") or {}
+    lates = max((c.get("lates_30", 0) + c.get("lates_60", 0) + c.get("lates_90", 0) for c in hits.values()), default=0)
     p = {
         "score_band": _band(min(scores.values())) if scores else None,   # lowest bureau, banded
         "score_low": min(scores.values()) if scores else None,
@@ -80,7 +82,7 @@ def build(report, bureaus, today=None):
         "bureaus_with_file": len(hits),
         "file_age_years": _years_since(oldest, today),
         "accounts": max((c.get("tradelines", 0) for c in hits.values()), default=0),
-        "late_payments": max((c.get("lates_30", 0) + c.get("lates_60", 0) + c.get("lates_90", 0) for c in hits.values()), default=0),
+        "late_payments": lates,
         "serious_lates_90d": worst("lates_90"),
         "collections": worst("collections"),
         "chargeoffs": worst("chargeoffs"),
@@ -96,6 +98,16 @@ def build(report, bureaus, today=None):
         "frozen_somewhere": "FROZEN" in codes or any(
             "FROZEN" in (a or "").upper() or "FREEZE" in (a or "").upper() for c in bureaus.values() for a in c.get("alerts", [])),
         "bureau_disagreements": disagreements,
+        # Positive evidence: what a thin file has going for it, not just the absence of negatives.
+        "months_on_time": max((c.get("on_time_months", 0) for c in hits.values()), default=0),
+        "oldest_account_years": _years_since(oldest, today),
+        "never_late": (lates == 0 and worst("chargeoffs") == 0 and worst("late_months") == 0) if hits else None,
+        # The sandbox has no address or phone history, so "stable" is approximated from FraudFinder: the name is tied
+        # to this street and it's deliverable; the phone is the applicant's own, postpaid and not VoIP.
+        "address_stable": (ff.get("address_name_matches") is True and ff.get("address_deliverable") is True)
+                          if ff.get("available") else None,
+        "phone_stable": (ff.get("phone_owner_matches") is True and not ff.get("phone_prepaid")
+                         and ff.get("phone_type") not in (None, "voip")) if ff.get("available") else None,
         "withheld": WITHHELD,
     }
     return p

@@ -57,3 +57,51 @@ def test_identity_signals_are_booleans_only():
 def test_existing_identity_field_unchanged():
     assert passport("P04")["identity"] == "strong" and passport("P05")["identity"] == "ok"
     assert passport("P16")["identity"] == "ok"
+
+
+# ---------------------------------------------------------------- positive evidence
+import copy  # noqa: E402
+
+from exchange import pricing as P  # noqa: E402
+from exchange.lenders import BOOKS  # noqa: E402
+
+POSITIVE = ("months_on_time", "oldest_account_years", "never_late", "address_stable", "phone_stable")
+
+
+def test_positive_evidence_fields():
+    q = passport("P03")   # student, 8-month-old file, never late
+    assert (q["months_on_time"], q["oldest_account_years"], q["never_late"]) == (8, 0.7, True)
+    assert q["address_stable"] and q["phone_stable"]
+    q = passport("P04")   # no file: nothing to be on time with, but identity evidence still counts
+    assert (q["months_on_time"], q["oldest_account_years"], q["never_late"]) == (0, None, None)
+    assert q["address_stable"] and q["phone_stable"]
+    for p in ("P06", "P18"):   # old charge-offs: not "never late", even with no late counts in the summary
+        assert passport(p)["never_late"] is False, p
+
+
+def test_on_time_run_is_capped_at_months_reviewed():
+    assert S._on_time_run("CCCCCCCCCCCCC", "8") == 8      # sandbox pattern longer than the account's life
+    assert S._on_time_run("CC1CCC", None) == 2
+    assert S._on_time_run("9CCC", "40") == 0
+
+
+def test_clean_thin_file_costs_less_than_thin_file_with_lates():
+    clean = passport("P03")
+    late = copy.deepcopy(clean)
+    late.update(late_payments=2, never_late=False)
+    assert P.pd_annual(clean)[0] < P.pd_annual(late)[0]
+    assert "never late on any account" in P.pd_annual(clean)[1]
+    cu = BOOKS["campus_cu"]
+    assert P.floor(cu, clean, 5000, 36) < P.floor(cu, late, 5000, 36)
+
+
+def test_positive_evidence_lowers_no_file_risk():
+    q = passport("P04")
+    bare = {**q, "address_stable": False, "phone_stable": False}
+    assert P.pd_annual(q)[0] < P.pd_annual(bare)[0]
+
+
+def test_full_scored_file_is_not_rewarded_twice():
+    q = passport("P01")   # 12 accounts, score 790: the score already reflects the payment history
+    stripped = {**q, **{k: None for k in POSITIVE}}
+    assert P.pd_annual(q) == P.pd_annual(stripped)

@@ -77,13 +77,41 @@ BASE_SCORE = 700
 PDO = 50               # points to double the odds
 
 
+# Positive evidence (odds multipliers, applied only where the score says little: thin, no-score and no-file
+# passports; a full scored file already reflects its payment history, so rewarding it again would double count).
+NEVER_LATE_ODDS = 1.15      # no late month, charge-off or late count on any account
+ON_TIME_ODDS = 1.10         # 12+ months in a row paid as agreed on some account
+ON_TIME_MONTHS = 12
+STABLE_ODDS = 1.05          # each of: address tied to the name, phone the applicant's own (approximations, see passport)
+
+
+def positive_evidence(p):
+    """[(reason, odds multiplier)] for what a thin or missing file has going for it."""
+    if not (p.get("no_file") or p.get("no_score") or p.get("thin_file")):
+        return []
+    out = []
+    if p.get("never_late"):
+        out.append(("never late on any account", NEVER_LATE_ODDS))
+    if (p.get("months_on_time") or 0) >= ON_TIME_MONTHS:
+        out.append((f"{p['months_on_time']} months in a row paid on time", ON_TIME_ODDS))
+    if p.get("address_stable"):
+        out.append(("address tied to the applicant", STABLE_ODDS))
+    if p.get("phone_stable"):
+        out.append(("phone is the applicant's own", STABLE_ODDS))
+    return out
+
+
 def pd_annual(p):
     """Annual probability of default from the passport. Returns (pd, list of what moved it)."""
     why = []
     if p.get("no_file"):
         pd = {"strong": 0.06, "ok": 0.09}.get(p.get("identity"), 0.15)
         why.append(f"no credit file: {pd:.0%} prior from identity strength alone")
-        return pd, why
+        odds = (1 - pd) / pd
+        for text, f in positive_evidence(p):
+            odds *= f
+            why.append(text)
+        return 1 / (1 + odds), why
     if p.get("no_score") or p.get("score_low") is None:
         pd = 0.05 if (p.get("file_age_years") or 0) >= 10 else 0.08
         why.append(f"file but no score: {pd:.0%} prior from file age")
@@ -111,6 +139,9 @@ def pd_annual(p):
         adj.append(("long, seasoned file", 1 / 1.2))
     for text, f in adj:
         odds /= f
+        why.append(text)
+    for text, f in positive_evidence(p):
+        odds *= f
         why.append(text)
     pd = 1 / (1 + odds)
     return min(0.40, max(0.003, pd)), why
