@@ -63,6 +63,30 @@ def test_stream_rejects_unknown_persona_and_scenario():
     assert client.get("/api/exchange/P01/stream?scenario=nope").status_code == 404
 
 
+def test_streamed_events_carry_a_plain_words_view():
+    got = stream("/api/exchange/P01/stream?pace=0&scenario=bait_switch")
+    views = [d["view"] for e, d in got if e not in ("meta", "result", "done")]
+    assert all("view" in d for e, d in got if e not in ("meta", "result", "done"))
+    assert any(v and v["verdict"] == "blocked" for v in views)
+
+
+def test_result_carries_the_person_and_judge_views():
+    result = dict(stream("/api/exchange/P01/stream?pace=0"))["result"]
+    assert result["person"]["outcome"] == "deal" and result["person"]["deal"]["total_paid"] > 0
+    assert result["under_the_hood"]["feed"]
+    batch = client.get("/api/exchange/P13").json()
+    assert batch["person"]["outcome"] == "blocked" and batch["under_the_hood"]["stats"]["blocked"] >= 0
+
+
+def test_max_payment_reaches_the_mandate():
+    meta = stream("/api/exchange/P01/stream?pace=0&max_payment=150")[0][1]
+    assert meta["mandate"]["max_payment"] == 150
+    person = client.get("/api/exchange/P01?max_payment=150").json()["person"]
+    assert person["before"]["max_monthly_payment"] == 150
+    deal = person["deal"]
+    assert deal is None or deal["monthly_payment"] <= 150
+
+
 def test_chat_endpoint_round_trip():
     r = client.post("/api/chat/mandate", json={"messages": [
         {"role": "user", "content": "I need $4,000, max 15% APR, 36 months, autopay ok"}]}).json()

@@ -9,7 +9,7 @@ that doesn't fit the protocol) the agent falls back to its rule-based parent, so
 
 Free text from other agents goes into the prompt marked as untrusted data, never as instructions.
 """
-import json, logging, os
+import json, logging, os, re
 
 from . import finance
 from .borrower import RuleBorrower
@@ -121,8 +121,10 @@ class ClaudeBorrower(ClaudeMixin, RuleBorrower):
     SYSTEM = ("You are a borrower's agent on a credit exchange. Get the person the cheapest loan that fits their "
               "mandate. Ask for the full amount when you can. You may COUNTER offers (each offer at most once, never "
               "in the final round), ACCEPT exactly one offer, or DECLINE to end the search. Never accept an offer "
-              "that doesn't fit the mandate. The mandate's max APR is private: never state it or hint at it in your "
-              "text. Keep each text to one or two sentences. " + UNTRUSTED)
+              "that doesn't fit the mandate (each offer's monthly_payment and fits_mandate are computed for you). The "
+              "mandate's max APR and max monthly payment are private: never state them or hint at them in your text, "
+              "and don't tell lenders what monthly payment the person can afford. Keep each text to one or two "
+              "sentences. " + UNTRUSTED)
 
     def __init__(self, agent_id="borrower", client=None):
         super().__init__(agent_id)
@@ -145,6 +147,7 @@ class ClaudeBorrower(ClaudeMixin, RuleBorrower):
             f"Round {rnd + 1} of {mandate.max_rounds}." + (" FINAL ROUND: ACCEPT or DECLINE only." if last else ""),
             "Mandate (what the person authorised): " + json.dumps(
                 {"amount": mandate.amount, "min_amount": mandate.min_amount, "max_apr_private": mandate.max_apr,
+                 "max_monthly_payment_private": mandate.max_payment,
                  "term_months": [mandate.min_term, mandate.max_term], "allowed_concessions": sorted(mandate.allow),
                  "max_fee": mandate.max_fee}),
             "Credit passport (what lenders see): " + json.dumps(passport, default=str),
@@ -202,9 +205,15 @@ class ClaudeBorrower(ClaudeMixin, RuleBorrower):
 
     @staticmethod
     def _safe(text, mandate):
-        """Never let the person's max APR leak into a message other agents can read."""
+        """Never let the person's max APR or max monthly payment leak into a message other agents can read."""
         if _num(mandate.max_apr) in text or f"{mandate.max_apr:.1f}" in text:
             return "Can you do better on these terms?"
+        p = getattr(mandate, "max_payment", None)
+        if p is not None:
+            forms = {_num(p), f"{p:.0f}", f"{p:,.0f}", f"{p:.2f}", f"{p:,.2f}"}
+            # whole numbers only: a $150 limit shouldn't censor "$1,500" or "15.0%"
+            if any(re.search(r"(?<![\d.,])" + re.escape(x) + r"(?![\d]|[.,]\d)", text) for x in forms):
+                return "Can you do better on these terms?"
         return text
 
 

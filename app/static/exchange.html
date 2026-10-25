@@ -1,0 +1,1279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Credit Agent Exchange</title>
+<meta name="description" content="Your AI agent shops lenders for you inside limits you set. A code referee checks every message. Sandbox demo with fictional people and simulated lenders.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  color-scheme: light dark;
+  --bg: #f3f4f2;
+  --surface: #ffffff;
+  --surface-2: #eceeeb;
+  --line: #d3d8d2;
+  --text: #14181b;
+  --muted: #4c545a;
+  --accent: #0a6b58;
+  --accent-ink: #ffffff;
+  --accent-soft: #dff0ea;
+  --good: #146c36;
+  --good-soft: #e3f2e8;
+  --bad: #b3261e;
+  --bad-soft: #fbe8e6;
+  --warn: #7f4d00;
+  --warn-soft: #faefd8;
+  --focus: #1d5bd0;
+  --radius: 10px;
+  --font: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1012;
+    --surface: #15191c;
+    --surface-2: #1c2125;
+    --line: #2d3439;
+    --text: #ebeff0;
+    --muted: #a4adb3;
+    --accent: #55d3b4;
+    --accent-ink: #052019;
+    --accent-soft: #10302a;
+    --good: #5fd68e;
+    --good-soft: #11301e;
+    --bad: #ff8b7c;
+    --bad-soft: #3a1613;
+    --warn: #f0c14f;
+    --warn-soft: #33290f;
+    --focus: #8cb6ff;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 17px/1.5 var(--font);
+}
+h1, h2, h3, h4 { line-height: 1.2; margin: 0; }
+p { margin: 0; }
+ul, ol { margin: 0; padding: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+[tabindex="-1"]:focus { outline: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.num { font-family: var(--mono); font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.muted { color: var(--muted); }
+.small { font-size: 0.875rem; }
+[hidden] { display: none !important; }
+
+/* ---------- header ---------- */
+.top {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 10px 16px; background: var(--surface); border-bottom: 1px solid var(--line);
+}
+.brand { font-weight: 700; font-size: 1.05rem; margin-right: auto; display: flex; align-items: center; gap: 10px; }
+.brand-mark { width: 26px; height: 26px; border-radius: 7px; background: var(--accent); display: grid; place-items: center; }
+.brand-mark svg { width: 16px; height: 16px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 0.8rem; padding: 3px 9px; border-radius: 999px;
+  background: var(--warn-soft); color: var(--warn); border: 1px solid transparent; white-space: nowrap;
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 10px 18px; border-radius: var(--radius);
+  border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 700;
+}
+.btn:hover { background: var(--surface-2); }
+.btn-primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.btn-primary:hover { background: var(--accent); filter: brightness(1.08); }
+.btn-quiet { border-color: transparent; background: transparent; color: var(--accent); padding-inline: 8px; }
+.btn-quiet:hover { background: var(--accent-soft); }
+.btn-block { width: 100%; }
+.btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+
+/* ---------- layout ---------- */
+.shell {
+  max-width: 1320px; margin: 0 auto; padding: 16px;
+  display: grid; gap: 20px; grid-template-columns: minmax(0, 1fr);
+}
+.person { width: 100%; max-width: 460px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+@media (min-width: 1024px) {
+  .shell { grid-template-columns: 440px minmax(0, 1fr); align-items: start; }
+  .person { margin: 0; }
+  body.hood-collapsed .shell { grid-template-columns: minmax(0, 460px); justify-content: center; }
+  body.hood-collapsed .hood { display: none; }
+  .hood { position: sticky; top: 76px; max-height: calc(100vh - 92px); }
+  .hood-close, .scrim { display: none !important; }
+}
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; overflow-wrap: anywhere; min-width: 0; }
+.panel + .panel { margin-top: 0; }
+.section-title { font-size: 0.8rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+
+/* ---------- persona ---------- */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-weight: 700; }
+select, textarea, input[type=text] {
+  min-height: 44px; border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--surface); padding: 9px 12px; width: 100%;
+}
+select { appearance: auto; }
+
+/* ---------- chat ---------- */
+.chat { display: flex; flex-direction: column; gap: 12px; }
+.chat-log { list-style: none; display: flex; flex-direction: column; gap: 10px; max-height: 46vh; min-height: 120px; overflow-y: auto; padding: 2px; }
+.bubble { max-width: 86%; padding: 10px 14px; border-radius: 16px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bubble.agent { align-self: flex-start; background: var(--surface-2); border-bottom-left-radius: 4px; }
+.bubble.user { align-self: flex-end; background: var(--accent); color: var(--accent-ink); border-bottom-right-radius: 4px; }
+.bubble .who { display: block; font-size: 0.75rem; font-weight: 700; opacity: 0.8; margin-bottom: 2px; }
+.typing { align-self: flex-start; color: var(--muted); font-size: 0.9rem; padding: 4px 6px; }
+.chat-form { display: flex; gap: 8px; align-items: flex-end; }
+.chat-form textarea { resize: none; min-height: 48px; max-height: 140px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 0.8rem; padding: 3px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--text); }
+.skip { border-top: 1px solid var(--line); padding-top: 12px; }
+.skip summary { cursor: pointer; font-weight: 700; color: var(--accent); min-height: 32px; display: flex; align-items: center; }
+.presets { display: grid; gap: 8px; margin-top: 10px; }
+.preset { text-align: left; justify-content: flex-start; font-weight: 400; }
+.preset .num { font-weight: 700; }
+
+/* ---------- confirm ---------- */
+.confirm { border: 2px solid var(--accent); }
+.confirm h2 { font-size: 1.25rem; margin-bottom: 12px; }
+.facts { list-style: none; display: grid; gap: 10px; margin-bottom: 14px; }
+.facts li { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+.facts li span:first-child { color: var(--muted); }
+.facts .main { font-size: 1.15rem; }
+.promise { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 8px; }
+.promise svg { flex: none; width: 20px; height: 20px; margin-top: 2px; color: var(--good); }
+details.adv { margin: 12px 0 16px; }
+details.adv summary { cursor: pointer; color: var(--accent); font-weight: 700; min-height: 32px; display: flex; align-items: center; }
+details.adv .facts { margin-top: 8px; }
+.explain { font-size: 0.9rem; color: var(--muted); margin-top: 4px; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; }
+.row > .btn { flex: 1 1 140px; }
+
+/* ---------- progress ---------- */
+.steps { list-style: none; display: grid; gap: 4px; }
+.step { display: grid; grid-template-columns: 32px 1fr; gap: 12px; padding: 10px 0; }
+.dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; color: var(--muted); font-size: 0.85rem; font-family: var(--mono); }
+.step.active .dot { border-color: var(--accent); color: var(--accent); }
+.step.done .dot { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.step.stopped .dot { background: var(--bad); border-color: var(--bad); color: var(--surface); }
+.dot svg { width: 16px; height: 16px; }
+.step-name { font-weight: 700; }
+.step:not(.active):not(.done):not(.stopped) .step-name { color: var(--muted); }
+.step-line { color: var(--muted); font-size: 0.95rem; }
+.live-best { margin-top: 12px; padding: 12px 14px; border-radius: var(--radius); background: var(--surface-2); display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.spinner { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--accent); border-right-color: transparent; animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- results ---------- */
+.result { display: flex; flex-direction: column; gap: 16px; }
+.lead { padding: 14px 16px; border-radius: var(--radius); background: var(--good-soft); color: var(--text); border-left: 4px solid var(--good); font-weight: 700; }
+.hero h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+.big { font-family: var(--mono); font-weight: 700; font-size: clamp(2.6rem, 11vw, 3.4rem); line-height: 1; letter-spacing: -0.03em; }
+.big-sub { color: var(--muted); margin-top: 6px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 16px; }
+.stat { background: var(--surface-2); border-radius: var(--radius); padding: 10px 12px; }
+.stat .label { font-size: 0.8rem; color: var(--muted); }
+.stat .val { font-family: var(--mono); font-weight: 700; font-size: 1.1rem; }
+.stat .hint { font-size: 0.75rem; color: var(--muted); }
+.lender-line { margin-top: 14px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.sim { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.03em; padding: 2px 7px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); vertical-align: middle; white-space: nowrap; }
+.list { list-style: none; display: grid; gap: 10px; }
+.list li { display: flex; gap: 10px; align-items: flex-start; }
+.list li > svg { flex: none; width: 18px; height: 18px; margin-top: 3px; color: var(--accent); }
+.note { border-left: 4px solid var(--warn); background: var(--warn-soft); padding: 12px 14px; border-radius: 0 var(--radius) var(--radius) 0; }
+.note.high { border-color: var(--bad); background: var(--bad-soft); }
+.note p + p { margin-top: 4px; }
+.change { border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 14px; }
+.change .who { font-size: 0.85rem; color: var(--good); font-weight: 700; margin-top: 4px; }
+.dispute dl { display: grid; gap: 8px; margin: 10px 0 0; }
+.dispute dt { font-weight: 700; font-size: 0.9rem; }
+.dispute dd { margin: 0; color: var(--text); }
+.blocked-card h2 { font-size: 1.3rem; margin-bottom: 14px; }
+.guide { border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; }
+.guide + .guide { margin-top: 10px; }
+.guide h3 { font-size: 1rem; margin-bottom: 6px; }
+.done-box { border: 2px solid var(--accent); }
+h2.title { font-size: 1.3rem; margin-bottom: 6px; }
+
+/* ---------- under the hood ---------- */
+.hood { display: flex; flex-direction: column; gap: 14px; overflow: hidden; }
+.hood-inner { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding-right: 2px; }
+.hood-head { display: flex; align-items: center; gap: 10px; }
+.hood-head h2 { font-size: 1.15rem; margin-right: auto; }
+.controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(120px, 170px) auto; gap: 10px; align-items: end; }
+@media (max-width: 600px) { .controls { grid-template-columns: 1fr 1fr; } .controls > .btn { grid-column: 1 / -1; } }
+.controls .wide { grid-column: 1 / -1; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.counter { background: var(--surface-2); border-radius: var(--radius); padding: 10px; }
+.counter .n { font-family: var(--mono); font-weight: 700; font-size: 1.5rem; line-height: 1.1; }
+.counter .l { font-size: 0.78rem; color: var(--muted); }
+.counter.bad .n { color: var(--bad); }
+.counter.warn .n { color: var(--warn); }
+.banner { border: 2px solid var(--bad); background: var(--bad-soft); border-radius: var(--radius); padding: 12px 14px; display: flex; gap: 10px; align-items: flex-start; }
+.banner svg { flex: none; width: 22px; height: 22px; color: var(--bad); margin-top: 1px; }
+.banner strong { display: block; }
+.feed { list-style: none; display: flex; flex-direction: column; gap: 8px; max-height: 56vh; overflow-y: auto; padding: 2px; }
+.item { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.item .mark { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); color: var(--muted); }
+.item .mark svg { width: 15px; height: 15px; }
+.item.v-allowed .mark { background: var(--good-soft); color: var(--good); }
+.item.v-blocked { border-color: var(--bad); }
+.item.v-blocked .mark { background: var(--bad); color: var(--surface); }
+.item.r-watchdog .mark { background: var(--warn-soft); color: var(--warn); }
+.item .who { font-weight: 700; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.item .role { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.item .what { overflow-wrap: anywhere; }
+.item .verdict { font-size: 0.9rem; margin-top: 2px; }
+.item.v-allowed .verdict { color: var(--good); }
+.item.v-blocked .verdict { color: var(--bad); font-weight: 700; }
+.item.r-watchdog .verdict { color: var(--muted); }
+.sev { font-size: 0.72rem; font-weight: 700; padding: 1px 7px; border-radius: 999px; background: var(--warn-soft); color: var(--warn); text-transform: uppercase; letter-spacing: 0.04em; }
+.sev.high { background: var(--bad-soft); color: var(--bad); }
+.says { margin: 6px 0 0; padding: 6px 10px; border-left: 3px solid var(--line); background: var(--surface-2); border-radius: 0 6px 6px 0; font-style: italic; overflow-wrap: anywhere; font-size: 0.92rem; }
+.says .tag { display: block; font-style: normal; font-size: 0.72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.crs-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+.crs-tag { font-size: 0.72rem; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.flash { animation: flash 1.4s ease-out 1; }
+@keyframes flash {
+  0% { background: var(--bad-soft); box-shadow: 0 0 0 4px var(--bad); }
+  60% { background: var(--bad-soft); box-shadow: 0 0 0 2px var(--bad); }
+  100% { background: var(--surface); box-shadow: 0 0 0 0 transparent; }
+}
+table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+th, td { text-align: left; vertical-align: top; padding: 8px 6px; border-bottom: 1px solid var(--line); }
+th { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); }
+.simlist { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+.empty { color: var(--muted); font-size: 0.92rem; }
+.source-line { font-size: 0.82rem; color: var(--muted); }
+
+/* drawer (below desktop) */
+@media (max-width: 1023.98px) {
+  .hood {
+    position: fixed; z-index: 40; left: 0; right: 0; bottom: 0; top: 8vh;
+    border-radius: 16px 16px 0 0; transform: translateY(102%); transition: transform 0.25s ease;
+    visibility: hidden;
+  }
+  body.hood-open .hood { transform: none; visibility: visible; }
+  .scrim { position: fixed; inset: 0; z-index: 30; background: rgba(0,0,0,0.45); }
+  body:not(.hood-open) .scrim { display: none; }
+  body.hood-open { overflow: hidden; }
+  .feed { max-height: none; }
+}
+.pill .short { display: none; }
+@media (max-width: 600px) {
+  .top { position: static; gap: 8px; }
+  .pill .long { display: none; }
+  .pill .short { display: inline; }
+  #hood-toggle { width: 100%; order: 3; }
+}
+@media (max-width: 420px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid3 { gap: 6px; }
+  .stat { padding: 8px; }
+  .stat .val { font-size: 1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .flash { outline: 3px solid var(--bad); outline-offset: 1px; }
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="var(--accent-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg></span>
+    <span id="app-name">Credit Agent Exchange</span>
+  </div>
+  <span class="pill"><span class="long">Demo: fictional people, simulated lenders</span><span class="short">Sandbox demo</span></span>
+  <button class="btn" id="hood-toggle" type="button" aria-controls="hood" aria-expanded="false">How your deal was made</button>
+</header>
+
+<div class="scrim" id="scrim"></div>
+
+<main class="shell">
+  <!-- ======================= person view ======================= -->
+  <div class="person" id="person">
+
+    <section class="panel" aria-labelledby="persona-label">
+      <div class="field">
+        <label id="persona-label" for="persona">Try it as</label>
+        <select id="persona"><option value="P01">Loading people...</option></select>
+        <p class="small muted">These are fictional test people from the CRS sandbox, not real people.</p>
+      </div>
+    </section>
+
+    <!-- start: chat + skip -->
+    <section class="panel chat" id="screen-start" aria-labelledby="chat-title">
+      <h1 id="chat-title" class="section-title">Your loan agent</h1>
+      <ol class="chat-log" id="chat-log" aria-live="polite" aria-label="Conversation with your agent"></ol>
+      <div class="chips" id="chips" aria-label="What your agent understood so far"></div>
+      <form class="chat-form" id="chat-form" autocomplete="off">
+        <label for="chat-input" class="sr-only">Message your agent</label>
+        <textarea id="chat-input" rows="1" placeholder="Message your agent"></textarea>
+        <button class="btn btn-primary" id="chat-send" type="submit">Send</button>
+      </form>
+      <details class="skip" id="skip">
+        <summary>Skip the chat (demo shortcuts)</summary>
+        <div class="presets" id="presets"></div>
+      </details>
+    </section>
+
+    <!-- confirm -->
+    <section class="panel confirm" id="screen-confirm" hidden aria-labelledby="confirm-title" tabindex="-1"></section>
+
+    <!-- running -->
+    <section class="panel" id="screen-running" hidden aria-labelledby="run-title" tabindex="-1">
+      <h2 id="run-title" class="title">Your agent is shopping for you</h2>
+      <p class="muted small" style="margin-bottom:10px">You can watch. Nothing is final until you say yes.</p>
+      <ol class="steps" id="steps" aria-live="polite"></ol>
+      <div class="live-best" id="live-best" hidden></div>
+    </section>
+
+    <!-- result -->
+    <div id="screen-result" class="result" hidden tabindex="-1"></div>
+  </div>
+
+  <!-- ======================= under the hood ======================= -->
+  <aside class="panel hood" id="hood" aria-labelledby="hood-title">
+    <div class="hood-head">
+      <h2 id="hood-title" tabindex="-1">Under the hood</h2>
+      <button class="btn btn-quiet hood-close" id="hood-close" type="button">Close</button>
+    </div>
+    <div class="hood-inner">
+      <p class="small muted">Every message between agents goes through a referee made of plain code, not AI. It checks each one before anyone can act on it. A watchdog adds warnings.</p>
+
+      <div class="controls">
+        <div class="field">
+          <label for="scenario">Scenario</label>
+          <select id="scenario"></select>
+        </div>
+        <div class="field">
+          <label for="pace">Speed</label>
+          <select id="pace">
+            <option value="1.2">Slow</option>
+            <option value="0.6" selected>Normal</option>
+            <option value="0.15">Fast</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="rerun" type="button">Run market</button>
+        <p class="wide small muted" id="scenario-desc"></p>
+      </div>
+
+      <div class="stats" id="stats" aria-label="Session counters"></div>
+      <div id="banners" role="status" aria-live="polite"></div>
+
+      <section aria-labelledby="feed-title">
+        <h3 id="feed-title" class="section-title">Live feed</h3>
+        <ol class="feed" id="feed"></ol>
+        <p class="empty" id="feed-empty">Start a market to watch every message get checked.</p>
+      </section>
+
+      <section aria-labelledby="crs-title">
+        <h3 id="crs-title" class="section-title">CRS data behind each decision</h3>
+        <div id="crs"><p class="empty">Shows up once the checks run.</p></div>
+      </section>
+
+      <section aria-labelledby="simlist-title">
+        <h3 id="simlist-title" class="section-title">Simulated in this demo</h3>
+        <ul class="simlist" id="simlist"></ul>
+      </section>
+
+      <p class="source-line" id="source-line"></p>
+    </div>
+  </aside>
+</main>
+
+<script>
+"use strict";
+(function () {
+  // ------------------------------------------------------------------ constants
+  var PRESETS = [
+    { label: ["$5,000", " · up to ", "$180", "/month · ", "36", " months"],
+      m: { amount: 5000, min_amount: 3000, max_apr: 18, min_term: 36, max_term: 36, allow: ["autopay"], max_fee: 0, max_payment: 180 } },
+    { label: ["$2,000", " · up to ", "$100", "/month · ", "12 to 24", " months"],
+      m: { amount: 2000, min_amount: 1000, max_apr: 24, min_term: 12, max_term: 24, allow: ["autopay"], max_fee: 0, max_payment: 100 } },
+    { label: ["$10,000", " · up to ", "$300", "/month · ", "24 to 48", " months"],
+      m: { amount: 10000, min_amount: 6000, max_apr: 15, min_term: 24, max_term: 48, allow: ["autopay"], max_fee: 0, max_payment: 300 } }
+  ];
+  var LENDERS = { prime_bank: "Prime Bank", campus_cu: "Campus Credit Union", newstart: "NewStart Fintech",
+                  second_chance: "Second Chance Lending", quickcash: "QuickCash Now", borrower: "Your agent",
+                  referee: "Referee", watchdog: "Watchdog", bureaus: "Credit bureaus" };
+  var SCENARIO_NAMES = { normal: "Normal market", bait_switch: "Bait and switch", injection: "Hidden instructions",
+                         data_grab: "Asks for personal data", drift: "Agent drifts from your interest", claude: "Claude-powered agents" };
+  var SCENARIO_FALLBACK = { normal: "Four lenders, honest agents.", bait_switch: "", injection: "", data_grab: "", drift: "", claude: "" };
+  var CRS = {
+    fraudfinder: ["AtData FraudFinder", "Spots fake or stolen identities from email, phone and IP signals"],
+    idv: ["TransUnion identity verification", "Checks that the SSN, name and date of birth belong together"],
+    reverse: ["Reverse phone and email lookup", "Checks the phone and email belong to the applicant"],
+    tu: ["TransUnion credit report", "Score, accounts and payment history for the passport"],
+    efx: ["Equifax credit report", "Second bureau: catches items one bureau misses"],
+    exp: ["Experian credit report", "Third bureau: catches items one bureau misses"]
+  };
+  var PERSONA_HINT = { APPROVE: "strong credit", REVIEW: "needs a closer look", NO_FILE: "no credit file yet",
+                       DECLINE: "likely turned down", THIN: "short credit history" };
+  var SIM_FALLBACK = ["Lenders and their agents", "Hard credit check when you accept", "Sending the money",
+                      "Reporting to the credit bureaus", "Extra identity questions (KBA / one-time code)"];
+  var STEPS = [
+    { name: "Checking your details", idle: "Making sure it's really you." },
+    { name: "Shopping", idle: "Sending lenders a summary, never your name." },
+    { name: "Negotiating", idle: "Asking for a better price." },
+    { name: "Done", idle: "Your results, in plain words." }
+  ];
+  var ICON = {
+    check: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>',
+    x: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>',
+    flag: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14V2.5M4 3h7.5l-1.5 3 1.5 3H4"/></svg>',
+    dot: '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="3" fill="currentColor"/></svg>',
+    shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6l8-3z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>',
+    stop: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>',
+    arrow: '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>'
+  };
+
+  // ------------------------------------------------------------------ state
+  var S = {
+    persona: null, personas: [], chat: [], chatBusy: false, mandate: null, chatSource: null,
+    scenario: "normal", scenarios: {}, pace: 0.6, es: null, run: null
+  };
+
+  // ------------------------------------------------------------------ helpers
+  function $(id) { return document.getElementById(id); }
+  function h(tag, attrs) {
+    var el = document.createElement(tag), k, v;
+    if (attrs) for (k in attrs) {
+      v = attrs[k];
+      if (v == null || v === false) continue;
+      if (k === "class") el.className = v;
+      else if (k === "text") el.textContent = v;
+      else if (k === "html") el.innerHTML = v; // only ever used with ICON constants, never server text
+      else if (k.slice(0, 2) === "on") el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? "" : v);
+    }
+    function add(list) {
+      for (var j = 0; j < list.length; j++) {
+        var c = list[j];
+        if (c == null || c === false) continue;
+        if (Array.isArray(c)) add(c);
+        else el.append(c.nodeType ? c : String(c));
+      }
+    }
+    add(Array.prototype.slice.call(arguments, 2));
+    return el;
+  }
+  function icon(name) {
+    var t = document.createElement("template");
+    t.innerHTML = ICON[name];
+    var s = t.content.firstChild;
+    s.setAttribute("aria-hidden", "true");
+    s.setAttribute("focusable", "false");
+    return s;
+  }
+  function isNum(n) { return n !== null && n !== "" && n !== undefined && isFinite(Number(n)); }
+  function money(n) {
+    if (!isNum(n)) return "";
+    n = Number(n);
+    var cents = Math.abs(n - Math.round(n)) > 0.004;
+    return "$" + n.toLocaleString("en-US", { minimumFractionDigits: cents ? 2 : 0, maximumFractionDigits: cents ? 2 : 0 });
+  }
+  function pct(n) { return isNum(n) ? (Math.round(Number(n) * 100) / 100) + "%" : ""; }
+  function num(text) { return h("span", { class: "num" }, text); }
+  function pmt(amount, apr, n) {
+    amount = Number(amount); apr = Number(apr); n = Number(n);
+    if (!n) return null;
+    var r = apr / 1200;
+    return r === 0 ? amount / n : amount * r / (1 - Math.pow(1 + r, -n));
+  }
+  function years(m) { m = Number(m); return m && m % 12 === 0 ? " (" + (m / 12) + (m === 12 ? " year)" : " years)") : ""; }
+  function termText(min, max) {
+    if (!isNum(min) && !isNum(max)) return "";
+    if (!isNum(min)) min = max; if (!isNum(max)) max = min;
+    return Number(min) === Number(max) ? min + " months" + years(min) : min + " to " + max + " months";
+  }
+  function arr(x) { return Array.isArray(x) ? x : []; }
+  function obj(x) { return x && typeof x === "object" && !Array.isArray(x) ? x : null; }
+  function str(x) { return typeof x === "string" && x.trim() ? x : null; }
+  function lenderName(id) {
+    if (!id) return "";
+    if (LENDERS[id]) return LENDERS[id];
+    return String(id).replace(/_/g, " ").replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+  }
+  function api(path, opts) {
+    return fetch(path, opts).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    });
+  }
+  function show(id, on) { $(id).hidden = !on; }
+  function focusEl(el) { if (el) { try { el.focus({ preventScroll: false }); } catch (e) { el.focus(); } } }
+
+  // ------------------------------------------------------------------ hood toggle / drawer
+  var desktop = window.matchMedia("(min-width: 1024px)");
+  function hoodVisible() {
+    return desktop.matches ? !document.body.classList.contains("hood-collapsed") : document.body.classList.contains("hood-open");
+  }
+  function syncHood() {
+    var vis = hoodVisible();
+    $("hood-toggle").setAttribute("aria-expanded", String(vis));
+    $("hood").inert = !vis;
+    $("hood-toggle").textContent = desktop.matches && vis ? "Hide how your deal was made" : "How your deal was made";
+  }
+  function setHood(open, moveFocus) {
+    if (desktop.matches) document.body.classList.toggle("hood-collapsed", !open);
+    else document.body.classList.toggle("hood-open", open);
+    syncHood();
+    if (open && moveFocus && !desktop.matches) focusEl($("hood-title"));
+    if (!open && moveFocus && !desktop.matches) focusEl($("hood-toggle"));
+  }
+  $("hood-toggle").addEventListener("click", function () { setHood(!hoodVisible(), true); });
+  $("hood-close").addEventListener("click", function () { setHood(false, true); });
+  $("scrim").addEventListener("click", function () { setHood(false, true); });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && !desktop.matches && hoodVisible()) setHood(false, true);
+  });
+  (desktop.addEventListener ? desktop.addEventListener.bind(desktop, "change") : desktop.addListener.bind(desktop))(syncHood);
+
+  // ------------------------------------------------------------------ personas + scenarios
+  function initPersonas() {
+    var params = new URLSearchParams(location.search);
+    api("/api/personas").then(function (d) {
+      S.personas = arr(d && d.personas);
+      var sel = $("persona");
+      sel.innerHTML = "";
+      S.personas.forEach(function (p) {
+        if (!p || !p.id) return;
+        var hint = PERSONA_HINT[p.crs_expected];
+        sel.append(h("option", { value: p.id }, (p.name || p.id) + (hint ? " · " + hint : "")));
+      });
+      var want = params.get("persona");
+      S.persona = (want && S.personas.some(function (p) { return p.id === want; })) ? want : (S.personas[0] && S.personas[0].id) || "P01";
+      sel.value = S.persona;
+      sourceLine();
+    }).catch(function () {
+      $("persona").innerHTML = "";
+      $("persona").append(h("option", { value: "P01" }, "Sandbox person 1"));
+      S.persona = "P01";
+    });
+    $("persona").addEventListener("change", function () {
+      S.persona = this.value;
+      sourceLine();
+      if (S.run) { stopStream(); backToStart(); }
+    });
+  }
+  function initScenarios() {
+    var params = new URLSearchParams(location.search);
+    function fill(map) {
+      S.scenarios = map;
+      var sel = $("scenario");
+      sel.innerHTML = "";
+      Object.keys(map).forEach(function (k) {
+        sel.append(h("option", { value: k }, SCENARIO_NAMES[k] || lenderName(k)));
+      });
+      var want = params.get("scenario");
+      if (want && map.hasOwnProperty(want)) S.scenario = want;
+      sel.value = S.scenario;
+      descScenario();
+    }
+    api("/api/exchange/scenarios").then(function (d) {
+      var m = obj(d && d.scenarios);
+      fill(m && Object.keys(m).length ? m : SCENARIO_FALLBACK);
+    }).catch(function () { fill(SCENARIO_FALLBACK); });
+    $("scenario").addEventListener("change", function () { S.scenario = this.value; descScenario(); });
+    $("pace").addEventListener("change", function () { S.pace = Number(this.value) || 0.6; });
+    $("rerun").addEventListener("click", function () {
+      if (!S.mandate) S.mandate = Object.assign({}, PRESETS[0].m);
+      startMarket();
+    });
+  }
+  function descScenario() { $("scenario-desc").textContent = str(S.scenarios[S.scenario]) || ""; }
+  function sourceLine(extra) {
+    var p = S.personas.filter(function (x) { return x.id === S.persona; })[0];
+    var bits = [];
+    if (p) bits.push("Person: " + (p.name || p.id) + " (" + p.id + (p.crs_expected ? ", CRS expects " + p.crs_expected : "") + ")");
+    if (S.chatSource) bits.push("Chat intake: " + (S.chatSource === "claude" ? "Claude" : "rule-based parser"));
+    if (extra) bits.push(extra);
+    $("source-line").textContent = bits.join(" · ");
+  }
+
+  // ------------------------------------------------------------------ chat
+  function renderChat() {
+    var log = $("chat-log");
+    log.innerHTML = "";
+    S.chat.forEach(function (m) {
+      log.append(h("li", { class: "bubble " + (m.role === "user" ? "user" : "agent") },
+        h("span", { class: "who" }, m.role === "user" ? "You" : "Your agent"), m.content));
+    });
+    if (S.chatBusy) log.append(h("li", { class: "typing" }, "Your agent is typing..."));
+    log.scrollTop = log.scrollHeight;
+  }
+  function renderChips(fields) {
+    var c = $("chips"), f = obj(fields) || {}, out = [];
+    c.innerHTML = "";
+    if (isNum(f.amount)) out.push(money(f.amount));
+    var tt = termText(f.min_term, f.max_term);
+    if (tt) out.push(tt);
+    var pay = isNum(f.max_payment) ? f.max_payment : isNum(f.payment) ? f.payment : null;
+    if (pay != null) out.push("up to " + money(pay) + " a month");
+    if (isNum(f.max_apr)) out.push("rate up to " + pct(f.max_apr));
+    if (!out.length) return;
+    c.append(h("span", { class: "small muted" }, "Got it:"));
+    out.forEach(function (t) { c.append(h("span", { class: "chip" }, t)); });
+  }
+  function chatTurn() {
+    S.chatBusy = true; renderChat();
+    $("chat-send").disabled = true;
+    api("/api/chat/mandate", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: S.chat.map(function (m) { return { role: m.role, content: m.content }; }) })
+    }).then(function (d) {
+      S.chatBusy = false;
+      S.chatSource = str(d && d.source) || S.chatSource;
+      sourceLine();
+      var reply = str(d && d.reply);
+      if (reply) S.chat.push({ role: "agent", content: reply });
+      renderChat();
+      renderChips(d && d.fields);
+      if (d && d.ready && obj(d.mandate)) {
+        S.mandate = d.mandate;
+        renderConfirm();
+      }
+    }).catch(function () {
+      S.chatBusy = false;
+      S.chat.push({ role: "agent", content: "Sorry, I couldn't reach the exchange just now. Try again, or use a shortcut below." });
+      renderChat();
+    }).then(function () {
+      $("chat-send").disabled = false;
+    });
+  }
+  $("chat-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var t = $("chat-input").value.trim();
+    if (!t || S.chatBusy) return;
+    if (t.length > 2000) t = t.slice(0, 2000);
+    S.chat.push({ role: "user", content: t });
+    $("chat-input").value = "";
+    autosize();
+    show("screen-confirm", false);
+    chatTurn();
+  });
+  function autosize() { var ta = $("chat-input"); ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 140) + "px"; }
+  $("chat-input").addEventListener("input", autosize);
+  $("chat-input").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("chat-form").requestSubmit ? $("chat-form").requestSubmit() : $("chat-send").click(); }
+  });
+
+  function initPresets() {
+    var box = $("presets");
+    PRESETS.forEach(function (p) {
+      var label = p.label.map(function (part, i) { return i % 2 === 0 ? num(part) : part; });
+      box.append(h("button", { class: "btn preset", type: "button", onclick: function () {
+        S.mandate = Object.assign({}, p.m);
+        renderConfirm();
+      } }, label));
+    });
+  }
+
+  // ------------------------------------------------------------------ confirm card
+  function renderConfirm() {
+    var m = S.mandate || {}, box = $("screen-confirm");
+    var allow = Array.isArray(m.allow) ? m.allow : m.autopay ? ["autopay"] : [];
+    box.innerHTML = "";
+    var facts = h("ul", { class: "facts" });
+    if (isNum(m.amount)) facts.append(h("li", null, h("span", null, "You want"),
+      h("span", null, num(money(m.amount)), isNum(m.min_amount) && Number(m.min_amount) < Number(m.amount)
+        ? h("span", { class: "small muted" }, " (at least ", num(money(m.min_amount)), ")") : null)));
+    var tt = termText(m.min_term, m.max_term);
+    if (tt) facts.append(h("li", null, h("span", null, "Paid back over"), h("strong", null, tt)));
+    if (isNum(m.max_payment)) facts.append(h("li", { class: "main" }, h("span", null, "Monthly payment no more than"),
+      h("strong", null, num(money(m.max_payment)))));
+    var adv = h("ul", { class: "facts" });
+    if (isNum(m.max_apr)) adv.append(h("li", null, h("div", null, h("span", null, "Highest yearly rate (APR)"),
+      h("p", { class: "explain" }, "APR is what borrowing costs per year. Lower is cheaper.")), num(pct(m.max_apr))));
+    if (isNum(m.max_fee)) adv.append(h("li", null, h("span", null, "Highest one-time fee"), num(money(m.max_fee))));
+    adv.append(h("li", null, h("div", null, h("span", null, "Automatic payments"),
+      h("p", { class: "explain" }, "Lenders often cut the rate if payments come out automatically.")),
+      h("span", null, allow.indexOf("autopay") >= 0 ? "OK to use" : "Not allowed")));
+    box.append(
+      h("h2", { id: "confirm-title" }, "Before you start"),
+      facts,
+      h("p", { class: "promise" }, icon("shield"), h("span", null, "Checking won't affect your credit score.")),
+      h("p", { class: "promise" }, icon("shield"), h("span", null, "Lenders see a summary, never your name, SSN or address.")),
+      h("p", { class: "promise" }, icon("shield"), h("span", null, "Your agent can't agree to anything outside these limits.")),
+      h("details", { class: "adv" }, h("summary", null, "Advanced"), adv),
+      h("div", { class: "row" },
+        h("button", { class: "btn btn-primary", type: "button", onclick: function () { startMarket(); } }, "Start shopping"),
+        h("button", { class: "btn", type: "button", onclick: function () { show("screen-confirm", false); focusEl($("chat-input")); } }, "Change something"))
+    );
+    show("screen-confirm", true);
+    box.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    focusEl(box);
+  }
+
+  // ------------------------------------------------------------------ market run
+  function streamUrl() {
+    var m = S.mandate || {}, p = new URLSearchParams();
+    p.set("scenario", S.scenario || "normal");
+    p.set("pace", String(S.pace));
+    ["amount", "min_amount", "max_apr", "min_term", "max_term", "max_fee", "max_payment"].forEach(function (k) {
+      if (isNum(m[k])) p.set(k, String(m[k]));
+    });
+    var auto = Array.isArray(m.allow) ? m.allow.indexOf("autopay") >= 0 : (m.autopay == null ? true : !!m.autopay);
+    p.set("autopay", auto ? "1" : "0");
+    return "/api/exchange/" + encodeURIComponent(S.persona || "P01") + "/stream?" + p.toString();
+  }
+  function stopStream() { if (S.es) { try { S.es.close(); } catch (e) {} S.es = null; } }
+
+  function startMarket() {
+    stopStream();
+    S.run = { events: [], offers: {}, offerLenders: {}, excluded: {}, step: 0, status: ["active", "", "", ""],
+              lines: STEPS.map(function (s) { return s.idle; }), sawView: false, derivedFeed: false, gate: null,
+              meta: null, result: null, finished: false, stats: { messages_checked: 0, blocked: 0, flags: 0, excluded: 0 } };
+    show("screen-start", false); show("screen-confirm", false); show("screen-result", false);
+    show("screen-running", true);
+    $("live-best").hidden = true;
+    renderSteps();
+    focusEl($("screen-running"));
+    // reset hood
+    $("feed").innerHTML = ""; $("feed-empty").hidden = false; $("banners").innerHTML = "";
+    $("crs").innerHTML = ""; $("crs").append(h("p", { class: "empty" }, "Shows up once the checks run."));
+    renderStats(); renderSimulated(null);
+
+    var es;
+    try { es = new EventSource(streamUrl()); } catch (e) { return runError(); }
+    S.es = es;
+    var run = S.run;
+    var kinds = ["meta", "gate", "blocked", "passport", "message", "watchdog", "excluded", "settlement", "disclosure", "no_deal", "result", "done"];
+    kinds.forEach(function (k) {
+      es.addEventListener(k, function (ev) {
+        if (S.run !== run) return;
+        var data = null;
+        try { data = ev.data ? JSON.parse(ev.data) : null; } catch (e) { data = null; }
+        onEvent(k, data);
+      });
+    });
+    // "error" is both the server's named event (has data) and the browser's connection error (no data)
+    es.addEventListener("error", function (ev) {
+      if (S.run !== run) return;
+      if (ev && typeof ev.data === "string" && ev.data) { run.serverError = true; return; }
+      if (!run.finished) { stopStream(); runError(); }
+    });
+  }
+
+  function onEvent(kind, d) {
+    var run = S.run;
+    if (kind === "meta") { run.meta = d; if (d && str(d.live_note)) sourceLine(d.live_note); return; }
+    if (kind === "done") { run.finished = true; stopStream(); if (!run.result) runError(); return; }
+    if (kind === "result") { run.result = d || {}; run.finished = true; renderResult(); return; }
+    if (!d) return;
+    run.events.push(d);
+    trackProgress(kind, d);
+    trackStats(kind, d);
+    var view = obj(d.view);
+    var item = view ? view : deriveItem(kind, d);
+    if (view) run.sawView = true; else run.derivedFeed = true;
+    if (item) addFeedItem(item, true);
+    if (kind === "excluded") addBanner(view && str(view.who) ? view.who : lenderName(d.data && d.data.agent), (view && str(view.verdict_text)) || (d.data && d.data.note));
+    if (kind === "gate" && d.data && arr(d.data.crs_products).length && !run.result) renderCrs(null, d.data.crs_products);
+  }
+
+  function runError() {
+    S.run && (S.run.finished = true);
+    show("screen-running", false);
+    var box = $("screen-result");
+    box.innerHTML = "";
+    box.append(h("section", { class: "panel" },
+      h("h2", { class: "title" }, "The market stopped early"),
+      h("p", { class: "muted", style: "margin-bottom:14px" }, "Nothing was agreed and nothing was sent to a lender. Your credit score wasn't touched."),
+      h("div", { class: "row" },
+        h("button", { class: "btn btn-primary", type: "button", onclick: function () { startMarket(); } }, "Try again"),
+        h("button", { class: "btn", type: "button", onclick: backToStart }, "Change my limits"))));
+    show("screen-result", true);
+    focusEl(box);
+  }
+
+  // ------------------------------------------------------------------ progress (person side)
+  function setStep(i, line) {
+    var run = S.run;
+    for (var j = 0; j < 4; j++) {
+      if (j < i && run.status[j] !== "stopped") run.status[j] = "done";
+      if (j === i) run.status[j] = "active";
+    }
+    run.step = Math.max(run.step, i);
+    if (line) run.lines[i] = line;
+  }
+  function trackProgress(kind, e) {
+    var run = S.run, d = e.data || {};
+    if (kind === "gate") {
+      run.gate = d;
+      if (d.admitted === false) run.lines[0] = "Something didn't match. Stopping to protect you.";
+      else { run.lines[0] = "Your identity checks out."; setStep(1, "Sending lenders a summary. No name, no SSN, no address."); }
+    } else if (kind === "blocked") {
+      run.status[0] = "stopped"; run.lines[0] = "Stopped to protect you.";
+      setStep(3, "");
+      run.status[3] = "done";
+    } else if (kind === "passport") {
+      setStep(1, "Sending lenders a summary. No name, no SSN, no address.");
+    } else if (kind === "message") {
+      var t = d.type, ok = !e.verdict || e.verdict.ok !== false;
+      if (t === "OFFER" && ok && d.terms) {
+        run.offerLenders[e.actor] = true;
+        if (!run.excluded[e.actor]) run.offers[e.actor] = d.terms;
+        var n = Object.keys(run.offerLenders).length;
+        if (run.step <= 1) setStep(1, n + (n === 1 ? " lender has" : " lenders have") + " made an offer.");
+      } else if (t === "COUNTER" && ok) {
+        setStep(2, "Your agent is asking lenders for a lower price.");
+      } else if (t === "ACCEPT" && ok) {
+        setStep(2, "Your agent found a deal inside your limits.");
+      }
+    } else if (kind === "excluded") {
+      var who = d.agent; run.excluded[who] = true; delete run.offers[who];
+      run.lines[Math.max(run.step, 1)] = lenderName(who) + " broke the rules and was removed. You're protected.";
+    } else if (kind === "settlement" || kind === "disclosure") {
+      setStep(3, "Found you a deal."); run.status[3] = "done";
+    } else if (kind === "no_deal") {
+      setStep(3, "No offer fit your limits. Here's what would help."); run.status[3] = "done";
+    }
+    renderSteps();
+    renderLiveBest();
+  }
+  function renderSteps() {
+    var run = S.run, ol = $("steps");
+    ol.innerHTML = "";
+    STEPS.forEach(function (s, i) {
+      var st = run.status[i] || "";
+      var mark = st === "done" ? icon("check") : st === "stopped" ? icon("x") : st === "active" ? h("span", { class: "spinner", "aria-hidden": "true" }) : String(i + 1);
+      ol.append(h("li", { class: "step " + st, "aria-current": st === "active" ? "step" : null },
+        h("span", { class: "dot" }, mark),
+        h("div", null,
+          h("p", { class: "step-name" }, s.name, h("span", { class: "sr-only" }, st === "done" ? " (done)" : st === "active" ? " (in progress)" : st === "stopped" ? " (stopped)" : "")),
+          (st || i === 0) ? h("p", { class: "step-line" }, run.lines[i]) : null)));
+    });
+  }
+  function renderLiveBest() {
+    var run = S.run, m = S.mandate || {}, best = null, box = $("live-best");
+    Object.keys(run.offers).forEach(function (k) {
+      var t = run.offers[k];
+      if (!t || (isNum(m.amount) && Number(t.amount) !== Number(m.amount))) return;
+      var p = pmt(t.amount, t.apr, t.term_months);
+      if (p != null && (best == null || p < best.p)) best = { p: p, t: t };
+    });
+    if (!best || run.status[3] === "done") { box.hidden = true; return; }
+    box.innerHTML = "";
+    box.append(h("span", { class: "muted" }, "Best so far for " + money(m.amount)),
+      h("strong", null, num(money(Math.round(best.p * 100) / 100)), " a month"));
+    box.hidden = false;
+  }
+
+  // ------------------------------------------------------------------ results (person side)
+  function derivePerson(r, run) {
+    var ev = function (k) { return run.events.filter(function (e) { return e.kind === k; }); };
+    var disc = (ev("disclosure")[0] || {}).data || {};
+    var nod = (ev("no_deal")[0] || {}).data || null;
+    var settle = (ev("settlement")[0] || {}).data || {};
+    var blockedEv = ev("blocked")[0];
+    var notes = arr(disc.watchdog_notes).concat(nod ? arr(nod.watchdog_notes) : []);
+    var bureauRx = /(Experian|Equifax|TransUnion|bureau)/i;
+    var p = { outcome: "no_deal", deal: null, no_deal: null, blocked: null, protection: [], helped: [] };
+    if (r.admitted === false || blockedEv) {
+      p.outcome = "blocked";
+      p.blocked = { headline: "We paused this application to protect you.",
+        if_you: "Nothing was opened or approved. Contact the credit bureaus to confirm your identity, then try again.",
+        if_not: "Someone may be using your details. You can place a free fraud alert or credit freeze with the credit bureaus.",
+        reasons: [] };
+      return p;
+    }
+    var deal = obj(r.deal);
+    if (deal && obj(deal.terms)) {
+      var t = deal.terms;
+      var mp = isNum(disc.monthly_payment) ? Number(disc.monthly_payment) : pmt(t.amount, t.apr, t.term_months);
+      var lines = arr(disc.summary);
+      var savedLine = lines.filter(function (l) { return /saves/i.test(l); })[0];
+      var tradeLine = lines.filter(function (l) { return /^To get this, your agent /.test(l); })[0];
+      var traded = tradeLine ? tradeLine.replace(/^To get this, your agent /, "").replace(/\.$/, "").split(/, (?![^(]*\))/).map(function (s) {
+        return s.charAt(0).toUpperCase() + s.slice(1) + ".";
+      }) : [];
+      var savedAmt = null;
+      if (isNum(disc.baseline_monthly_payment) && isNum(mp)) savedAmt = Math.round((Number(disc.baseline_monthly_payment) - mp) * Number(t.term_months) * 100) / 100;
+      var name = deal.lender_name || lenderName(deal.lender);
+      p.outcome = "deal";
+      p.deal = {
+        lender: name, monthly_payment: mp, apr: t.apr, term_months: t.term_months, amount: t.amount, fee: t.fee || 0,
+        total_paid: isNum(disc.total_interest_and_fees) ? Number(t.amount) + Number(disc.total_interest_and_fees) : (mp * t.term_months + Number(t.fee || 0)),
+        saved: savedLine ? { amount: savedAmt, sentence: "Your agent talked the price down. " + savedLine.replace(/^Negotiated down/, "It started").replace(/: saves/, " and this saves you") } : null,
+        traded: traded,
+        on_accept: arr(settle.steps).map(function (s) { return { text: plainStep(s), simulated: true }; }),
+        headline: name + " will lend you " + money(t.amount) + "."
+      };
+      p.protection = notes.map(function (n) { return { sentence: n.note, meaning: n.suggestion || "", severity: n.severity }; });
+    } else {
+      var reasons = nod ? arr(nod.lender_reasons).slice(0, 3) : [];
+      if (!reasons.length && nod && nod.reason) reasons = [nod.reason];
+      var bureauNote = notes.filter(function (n) { return bureauRx.test(n.note || "") && n.suggestion; })[0];
+      p.no_deal = { reasons: reasons, what_would_change: [],
+        bureau_dispute: bureauNote ? { bureau: (bureauNote.note.match(/Experian|Equifax|TransUnion/) || ["A credit bureau"])[0],
+          issue: bureauNote.note, how_to_dispute: bureauNote.suggestion,
+          why_may_be_wrong: (notes.filter(function (n) { return n !== bureauNote && /cost you/i.test(n.note || ""); })[0] || {}).note || "" } : null };
+      var seen = {};
+      p.protection = notes.filter(function (n) { if (n === bureauNote || seen[n.note]) return false; seen[n.note] = 1; return !bureauRx.test(n.note || ""); })
+        .map(function (n) { return { sentence: n.note, meaning: n.suggestion || "", severity: n.severity }; });
+    }
+    var pp = obj(r.passport) || {};
+    if (pp.identity === "strong") p.helped.push(pp.thin_file || pp.no_file || Number(pp.file_age_years) < 2 ? "Your identity checked out at every step. That helps lenders trust a short history." : "Your identity checked out at every step.");
+    if (pp.late_payments === 0 && Number(pp.accounts) > 0) p.helped.push("No late payments on your file.");
+    if (Number(pp.file_age_years) >= 2) p.helped.push("You've had credit for " + Math.round(pp.file_age_years) + " years.");
+    if (pp.collections === 0 && pp.chargeoffs === 0 && Number(pp.accounts) > 0) p.helped.push("No collections or charge-offs.");
+    if (pp.no_file) p.helped.push("Some lenders here look at identity, not just history, so they can still offer to you.");
+    return p;
+  }
+  function plainStep(s) {
+    s = String(s || "");
+    if (/hard credit inquiry/i.test(s)) return "The lender does a full credit check (a \"hard check\"). Your score may dip a few points for a while.";
+    if (/^funding/i.test(s)) return "The money is sent to you.";
+    if (/reported to all three bureaus/i.test(s)) return "Your new loan shows up on your credit reports. Paying on time builds your history.";
+    if (/full credit file/i.test(s)) return "The lender gets your full credit file, because you said yes.";
+    if (/identity verification/i.test(s)) return "You answer a few extra identity questions first.";
+    return s.replace(/:\s*simulated.*$/i, "");
+  }
+
+  function renderResult() {
+    var run = S.run, r = run.result || {};
+    var d = derivePerson(r, run), given = obj(r.person) || {};
+    var p = Object.assign({}, d, given);
+    ["deal", "no_deal", "blocked"].forEach(function (k) {
+      if (obj(given[k])) p[k] = Object.assign({}, d[k] || {}, given[k]);
+    });
+    if (!str(p.outcome)) p.outcome = d.outcome;
+    // final step state
+    for (var i = 0; i < 4; i++) if (run.status[i] !== "stopped") run.status[i] = "done";
+    renderSteps();
+    renderHoodFinal(r.under_the_hood);
+
+    var box = $("screen-result");
+    box.innerHTML = "";
+    if (p.outcome === "blocked") box.append(blockedView(p.blocked || d.blocked || {}));
+    else if (p.outcome === "deal" && obj(p.deal)) box.append(dealView(p));
+    else box.append(noDealView(p));
+    show("screen-running", false);
+    show("screen-result", true);
+    focusEl(box);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function listOf(items, ico) {
+    return h("ul", { class: "list" }, items.map(function (t) { return h("li", null, icon(ico || "check"), h("span", null, t)); }));
+  }
+  function helpedSection(p) {
+    var items = arr(p.helped).filter(str);
+    if (!items.length) return null;
+    return h("section", { class: "panel", "aria-labelledby": "helped-t" },
+      h("h3", { id: "helped-t", class: "section-title" }, "What's working for you"), listOf(items, "check"));
+  }
+  function protectionSection(p) {
+    var items = arr(p.protection).filter(function (x) { return obj(x) && str(x.sentence); });
+    if (!items.length) return null;
+    return h("section", { class: "panel", "aria-labelledby": "prot-t" },
+      h("h3", { id: "prot-t", class: "section-title" }, "We looked out for you"),
+      h("div", { style: "display:grid;gap:10px" }, items.map(function (x) {
+        return h("div", { class: "note" + (x.severity === "high" ? " high" : "") },
+          h("p", null, h("strong", null, x.sentence)), str(x.meaning) ? h("p", null, x.meaning) : null);
+      })));
+  }
+  function startOverRow() {
+    return h("div", { class: "row" },
+      h("button", { class: "btn", type: "button", onclick: backToStart }, "Change my limits"),
+      h("button", { class: "btn btn-quiet", type: "button", onclick: resetAll }, "Start over"));
+  }
+
+  function dealView(p) {
+    var D = p.deal, frag = document.createDocumentFragment();
+    var saved = obj(D.saved);
+    if (saved && str(saved.sentence)) frag.append(h("p", { class: "lead", role: "status" }, saved.sentence));
+    var hero = h("section", { class: "panel hero", "aria-labelledby": "deal-t" },
+      h("h2", { id: "deal-t" }, str(D.headline) || ((D.lender || "A lender") + " will lend you " + money(D.amount) + ".")),
+      h("p", { class: "big" }, money(isNum(D.monthly_payment) ? Math.round(D.monthly_payment * 100) / 100 : null)),
+      h("p", { class: "big-sub" }, "a month", isNum(D.term_months) ? ", for " + D.term_months + " months" + years(D.term_months) : ""),
+      h("div", { class: "grid3" },
+        isNum(D.apr) ? h("div", { class: "stat" }, h("div", { class: "label" }, "Yearly rate (APR)"), h("div", { class: "val" }, pct(D.apr)), h("div", { class: "hint" }, "Lower is cheaper")) : null,
+        isNum(D.total_paid) ? h("div", { class: "stat" }, h("div", { class: "label" }, "Total you'll pay"), h("div", { class: "val" }, money(Math.round(D.total_paid))), h("div", { class: "hint" }, "Over the whole loan")) : null,
+        isNum(D.amount) ? h("div", { class: "stat" }, h("div", { class: "label" }, "You get"), h("div", { class: "val" }, money(D.amount)), h("div", { class: "hint" }, isNum(D.fee) && Number(D.fee) > 0 ? money(D.fee) + " fee" : "No fee")) : null),
+      h("p", { class: "lender-line" }, h("span", { class: "muted" }, "Lender:"), h("strong", null, D.lender || ""), h("span", { class: "sim" }, "Simulated lender")));
+    frag.append(hero);
+
+    var traded = arr(D.traded).filter(str);
+    frag.append(h("section", { class: "panel", "aria-labelledby": "trade-t" },
+      h("h3", { id: "trade-t", class: "section-title" }, "What your agent traded"),
+      traded.length ? listOf(traded, "arrow") : h("p", { class: "muted" }, "Nothing. You got the terms you asked for.")));
+
+    var prot = protectionSection(p); if (prot) frag.append(prot);
+    var help = helpedSection(p); if (help) frag.append(help);
+
+    var acc = arr(D.on_accept).filter(function (x) { return obj(x) && str(x.text) || str(x); });
+    var accBox = h("section", { class: "panel", "aria-labelledby": "acc-t" },
+      h("h3", { id: "acc-t", class: "section-title" }, "What happens when you accept"),
+      acc.length ? h("ul", { class: "list" }, acc.map(function (x) {
+        var text = str(x) || x.text, sim = str(x) ? true : x.simulated !== false;
+        return h("li", null, icon("dot"), h("span", null, text, " ", sim ? h("span", { class: "sim" }, "Simulated") : null));
+      })) : h("p", { class: "muted" }, "The lender runs a full credit check and sends the money. ", h("span", { class: "sim" }, "Simulated")));
+    frag.append(accBox);
+
+    var decide = h("section", { class: "panel done-box", id: "decide" },
+      h("p", { style: "margin-bottom:12px" }, "Want this loan?"),
+      h("div", { class: "row" },
+        h("button", { class: "btn btn-primary", type: "button", onclick: function () { decided(true, D); } }, "Accept"),
+        h("button", { class: "btn", type: "button", onclick: function () { decided(false, D); } }, "Decline")));
+    frag.append(decide);
+    frag.append(startOverRow());
+    return frag;
+  }
+  function decided(yes, D) {
+    var box = $("decide");
+    box.innerHTML = "";
+    box.setAttribute("tabindex", "-1");
+    if (yes) box.append(h("h3", { class: "title" }, "Accepted ", h("span", { class: "sim" }, "Simulated")),
+      h("p", null, "This is a sandbox demo, so no money moves and nothing is reported. In a real exchange, " + (D.lender || "the lender") + " would now run its full credit check and send the money."));
+    else box.append(h("h3", { class: "title" }, "Declined"),
+      h("p", null, "No problem. Nothing was signed, and your credit score hasn't changed."));
+    focusEl(box);
+  }
+
+  function noDealView(p) {
+    var N = obj(p.no_deal) || {}, frag = document.createDocumentFragment();
+    var reasons = arr(N.reasons).filter(str).slice(0, 3);
+    frag.append(h("section", { class: "panel", "aria-labelledby": "nd-t" },
+      h("h2", { id: "nd-t", class: "title" }, "No deal this time. Here's what would change that."),
+      h("p", { class: "muted", style: "margin-bottom:12px" }, "Your agent didn't take anything outside your limits, and checking didn't affect your credit score."),
+      reasons.length ? h("div", null, h("h3", { class: "section-title" }, "Why"), listOf(reasons, "dot")) : null));
+
+    var changes = arr(N.what_would_change).filter(obj);
+    if (changes.length) frag.append(h("section", { class: "panel", "aria-labelledby": "chg-t" },
+      h("h3", { id: "chg-t", class: "section-title" }, "What would change it"),
+      h("div", { style: "display:grid;gap:10px" }, changes.map(function (c) {
+        return h("div", { class: "change" },
+          h("p", null, h("strong", null, str(c.change) || ""), str(c.sentence) && str(c.change) ? ": " : "", str(c.sentence) || ""),
+          str(c.lender) ? h("p", { class: "who" }, "Would say yes: " + c.lender) : null);
+      }))));
+
+    var B = obj(N.bureau_dispute);
+    if (B) {
+      var dl = h("dl");
+      if (str(B.issue)) dl.append(h("dt", null, "What we found"), h("dd", null, B.issue));
+      if (str(B.why_may_be_wrong)) dl.append(h("dt", null, "Why it may be wrong"), h("dd", null, B.why_may_be_wrong));
+      if (str(B.how_to_dispute)) dl.append(h("dt", null, "How to fix it"), h("dd", null, B.how_to_dispute));
+      frag.append(h("section", { class: "panel dispute", "aria-labelledby": "bd-t" },
+        h("h3", { id: "bd-t", class: "section-title" }, "A credit bureau may have an error"),
+        h("p", null, h("strong", null, (str(B.bureau) || "One bureau") + " shows something the others don't.")), dl));
+    }
+    var prot = protectionSection(p); if (prot) frag.append(prot);
+    var help = helpedSection(p); if (help) frag.append(help);
+    frag.append(h("div", { class: "row" },
+      h("button", { class: "btn btn-primary", type: "button", onclick: backToStart }, "Try different limits"),
+      h("button", { class: "btn btn-quiet", type: "button", onclick: resetAll }, "Start over")));
+    return frag;
+  }
+
+  function blockedView(B) {
+    return h("section", { class: "panel blocked-card", "aria-labelledby": "bl-t" },
+      h("h2", { id: "bl-t" }, str(B.headline) || "We paused this application to protect you."),
+      h("div", { class: "guide" }, h("h3", null, "If this is you"), h("p", null, str(B.if_you) || "Nothing was opened. Confirm your identity with the credit bureaus, then try again.")),
+      h("div", { class: "guide" }, h("h3", null, "If this isn't you"), h("p", null, str(B.if_not) || "Someone may be using your details. Place a free fraud alert or credit freeze with the credit bureaus.")),
+      h("div", { class: "row", style: "margin-top:14px" }, h("button", { class: "btn btn-quiet", type: "button", onclick: resetAll }, "Start over")));
+  }
+
+  function backToStart() {
+    stopStream();
+    show("screen-running", false); show("screen-result", false);
+    show("screen-start", true);
+    if (S.mandate) renderConfirm(); else focusEl($("chat-input"));
+  }
+  function resetAll() {
+    stopStream();
+    S.chat = []; S.mandate = null; S.run = null;
+    $("chips").innerHTML = "";
+    show("screen-running", false); show("screen-result", false); show("screen-confirm", false);
+    show("screen-start", true);
+    renderChat();
+    chatTurn();
+    focusEl($("chat-input"));
+  }
+
+  // ------------------------------------------------------------------ under the hood
+  function trackStats(kind, e) {
+    var s = S.run.stats;
+    if (kind === "message") s.messages_checked++;
+    if ((e.verdict && e.verdict.ok === false) || kind === "blocked") s.blocked++;
+    if (kind === "watchdog") s.flags++;
+    if (kind === "excluded") s.excluded++;
+    renderStats();
+  }
+  function renderStats(override) {
+    var s = Object.assign({}, S.run ? S.run.stats : { messages_checked: 0, blocked: 0, flags: 0, excluded: 0 }, obj(override) || {});
+    var box = $("stats");
+    box.innerHTML = "";
+    [["messages_checked", "Messages checked", ""], ["blocked", "Blocked", "bad"], ["flags", "Watchdog flags", "warn"], ["excluded", "Lenders removed", "bad"]]
+      .forEach(function (c) {
+        var n = isNum(s[c[0]]) ? Number(s[c[0]]) : 0;
+        box.append(h("div", { class: "counter" + (n > 0 && c[2] ? " " + c[2] : "") }, h("div", { class: "n" }, String(n)), h("div", { class: "l" }, c[1])));
+      });
+  }
+  function addBanner(who, text) {
+    var full = str(text) && /was removed/i.test(text); // backend banners already say it in one sentence
+    $("banners").append(h("div", { class: "banner" }, icon("stop"),
+      h("div", null, full ? h("strong", null, text)
+        : [h("strong", null, (who || "A lender") + " was removed from this session"), str(text) ? h("span", null, text) : null])));
+  }
+
+  var CODE_TEXT = { TERMS_WORSENED: "worse terms than its own standing offer (no bait-and-switch)",
+    BAD_SIGNATURE: "forged: signed with someone else's key", OVER_CAP: "over the 36% rate cap",
+    OUTSIDE_MANDATE: "outside the person's limits", EXCLUDED: "this lender was already removed",
+    WRONG_ROLE: "sent by the wrong kind of agent", MISMATCH: "doesn't match the offer it claims to accept" };
+  function termsText(t) {
+    if (!t) return "";
+    var s = money(t.amount) + " at " + pct(t.apr) + " for " + t.term_months + " months";
+    if (Number(t.fee) > 0) s += ", " + money(t.fee) + " fee";
+    if (t.autopay) s += ", with autopay";
+    return s;
+  }
+  function deriveItem(kind, e) {
+    var d = e.data || {}, v = e.verdict;
+    var base = { id: e.seq, kind: kind, who: lenderName(e.actor), role: "referee", what: "", verdict: null, verdict_text: "", says: null,
+                 severity: null, simulated: false, crs: [] };
+    if (kind === "gate") {
+      base.what = d.admitted === false ? "Stopped this application before any lender saw it" : "Checked identity and credit: fraud check, identity check, all three bureaus";
+      base.verdict = d.admitted === false ? "blocked" : "allowed";
+      base.verdict_text = str(d.headline) || "";
+      base.crs = arr(d.crs_products).map(function (c) { return CRS[c] ? CRS[c][0] : c; });
+      return base;
+    }
+    if (kind === "blocked") { base.what = "No offers, no credit decision"; base.verdict = "blocked"; base.verdict_text = str(d.reason) || "Identity can't be trusted."; return base; }
+    if (kind === "passport") {
+      var w = arr(d.passport && d.passport.withheld);
+      base.what = "Built the summary lenders see";
+      base.verdict_text = w.length ? "Withheld from lenders: " + w.join(", ") + "." : (str(d.note) || "");
+      return base;
+    }
+    if (kind === "message") {
+      var who = lenderName(e.actor), to = lenderName(d.to);
+      base.role = e.actor === "borrower" ? "borrower" : "lender";
+      base.simulated = base.role === "lender";
+      var t = d.terms;
+      base.what = d.type === "INTENT" ? "Asked lenders for " + (d.ask ? money(d.ask.amount) + (arr(d.ask.term_range).length === 2 ? " over " + d.ask.term_range[0] + " to " + d.ask.term_range[1] + " months" : "") : "a loan")
+        : d.type === "OFFER" ? "Offered " + termsText(t)
+        : d.type === "COUNTER" ? "Asked " + to + " for " + pct(t && t.apr) + (t && t.autopay ? " with autopay" : "")
+        : d.type === "ACCEPT" ? "Accepted " + (to ? to + "'s offer: " : "") + termsText(t)
+        : d.type === "DECLINE" ? "Said no"
+        : d.type === "WITHDRAW" ? "Withdrew an offer" : (d.type || "Message");
+      if (v) {
+        base.verdict = v.ok === false ? "blocked" : "allowed";
+        base.verdict_text = v.ok === false ? "Blocked: " + (CODE_TEXT[v.code] || str(v.reason) || "broke a rule") : "Allowed: passed every check";
+        if (v.code === "BAD_SIGNATURE") who = "Someone posing as " + (who === "Your agent" ? "your agent" : who);
+      }
+      base.says = str(d.text);
+      base.who = who;
+      return base;
+    }
+    if (kind === "watchdog") {
+      base.who = "Watchdog"; base.role = "watchdog"; base.what = str(d.note) || "Flagged a message";
+      base.verdict_text = str(d.why) || ""; base.severity = d.severity || null; base.says = str(d.saw);
+      return base;
+    }
+    if (kind === "excluded") {
+      base.what = lenderName(d.agent) + " removed from this session"; base.verdict = "blocked";
+      base.verdict_text = str(d.note) || "Its offers are withdrawn.";
+      return base;
+    }
+    if (kind === "settlement") { base.what = "Settled the deal"; base.verdict_text = "Hard check, funding and bureau reporting."; base.simulated = true; return base; }
+    if (kind === "disclosure") { base.what = "Wrote the plain-English summary for the person"; return base; }
+    if (kind === "no_deal") { base.what = "No deal: no offer fit the person's limits"; base.verdict_text = arr(d.lender_reasons).join(" "); return base; }
+    return null;
+  }
+  function addFeedItem(it, animate) {
+    var feed = $("feed");
+    $("feed-empty").hidden = true;
+    var role = ["lender", "borrower", "referee", "watchdog"].indexOf(it.role) >= 0 ? it.role : "referee";
+    var verdict = it.verdict === "allowed" || it.verdict === "blocked" ? it.verdict : null;
+    var mark = verdict === "allowed" ? "check" : verdict === "blocked" ? "x" : role === "watchdog" ? "flag" : "dot";
+    var sr = verdict === "allowed" ? "Allowed. " : verdict === "blocked" ? "Blocked. " : role === "watchdog" ? "Warning. " : "";
+    if (str(it.verdict_text) && /^(allowed|blocked)/i.test(it.verdict_text)) sr = "";
+    var near = feed.scrollHeight - feed.scrollTop - feed.clientHeight < 80;
+    var li = h("li", { class: "item r-" + role + (verdict ? " v-" + verdict : "") },
+      h("span", { class: "mark", "aria-hidden": "true", html: ICON[mark] }),
+      h("div", { class: "body" },
+        h("div", { class: "who" }, str(it.who) || "", h("span", { class: "role" }, role === "borrower" ? "your agent" : role),
+          it.severity && role === "watchdog" ? h("span", { class: "sev" + (it.severity === "high" ? " high" : "") }, it.severity) : null,
+          it.simulated ? h("span", { class: "sim" }, "Simulated") : null),
+        str(it.what) ? h("div", { class: "what" }, it.what) : null,
+        str(it.verdict_text) ? h("div", { class: "verdict" }, h("span", { class: "sr-only" }, sr), it.verdict_text) : (sr ? h("span", { class: "sr-only" }, sr) : null),
+        str(it.says) ? h("blockquote", { class: "says" }, h("span", { class: "tag" }, "Agent's own words · untrusted, never acted on"), "“" + it.says + "”") : null,
+        arr(it.crs).length ? h("div", { class: "crs-tags" }, h("span", { class: "sr-only" }, "CRS data used: "), arr(it.crs).map(function (c) { return h("span", { class: "crs-tag" }, String(c)); })) : null));
+    if (animate && verdict === "blocked") li.classList.add("flash");
+    feed.append(li);
+    if (near || !animate) feed.scrollTop = feed.scrollHeight;
+  }
+  function renderCrs(rows, codes) {
+    var box = $("crs");
+    box.innerHTML = "";
+    var list = arr(rows).filter(obj);
+    if (!list.length) list = arr(codes).map(function (c) { return { product: CRS[c] ? CRS[c][0] : c, used_for: CRS[c] ? CRS[c][1] : "", drove: [] }; });
+    if (!list.length) { box.append(h("p", { class: "empty" }, "No CRS checks ran in this session.")); return; }
+    box.append(h("table", null,
+      h("thead", null, h("tr", null, h("th", { scope: "col" }, "CRS product"), h("th", { scope: "col" }, "Used for"), h("th", { scope: "col" }, "Drove"))),
+      h("tbody", null, list.map(function (r) {
+        var drove = arr(r.drove).filter(str);
+        return h("tr", null, h("td", null, h("strong", null, str(r.product) || "")), h("td", null, str(r.used_for) || ""),
+          h("td", null, drove.length ? drove.join("; ") : h("span", { class: "muted" }, "")));
+      }))));
+  }
+  function renderSimulated(list) {
+    var box = $("simlist"), items = arr(list).filter(str);
+    if (!items.length) items = SIM_FALLBACK;
+    box.innerHTML = "";
+    items.forEach(function (t) { box.append(h("li", null, h("span", { class: "sim" }, t))); });
+  }
+  function renderHoodFinal(u) {
+    u = obj(u) || {};
+    var run = S.run;
+    if (obj(u.stats)) renderStats(u.stats);
+    if (Array.isArray(u.exclusions) && u.exclusions.length) {
+      $("banners").innerHTML = "";
+      u.exclusions.forEach(function (x) { if (obj(x)) addBanner(str(x.lender) || lenderName(x.lender), x.banner); });
+    }
+    if (Array.isArray(u.feed) && u.feed.length && !run.sawView) {
+      $("feed").innerHTML = "";
+      u.feed.forEach(function (it) { if (obj(it)) addFeedItem(it, false); });
+    }
+    if (Array.isArray(u.crs_products) && u.crs_products.length) renderCrs(u.crs_products);
+    else if (run.gate) renderCrs(null, run.gate.crs_products);
+    renderSimulated(u.simulated);
+    var src = run.gate && run.gate.source;
+    sourceLine([src ? (src === "samples" ? "Data: saved CRS sandbox responses" : "Data: live CRS sandbox") : null,
+                run.meta && str(run.meta.live_note)].filter(Boolean).join(" · "));
+  }
+
+  // ------------------------------------------------------------------ boot
+  function boot() {
+    var params = new URLSearchParams(location.search);
+    document.body.classList.toggle("hood-collapsed", params.get("hood") === "0");
+    syncHood();
+    renderStats(); renderSimulated(null);
+    initPresets(); initPersonas(); initScenarios();
+    chatTurn();
+    // demo links: ?persona=P13&scenario=injection&preset=0&pace=0.6&run=1 starts the market straight away
+    if (isNum(params.get("pace"))) S.pace = Math.min(3, Math.max(0, Number(params.get("pace"))));
+    if (params.get("run") === "1") {
+      S.persona = params.get("persona") || "P01";
+      S.scenario = params.get("scenario") || "normal";
+      S.mandate = Object.assign({}, (PRESETS[Number(params.get("preset"))] || PRESETS[0]).m);
+      startMarket();
+    }
+  }
+  boot();
+})();
+</script>
+</body>
+</html>

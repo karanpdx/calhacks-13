@@ -46,19 +46,25 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
   - `scenarios.py`: `normal`, `bait_switch` (worse terms + forged acceptance), `injection` (hidden instructions),
     `data_grab` (lender asks for SSN/DOB, undeclared fee), `drift` (borrower takes a costlier offer, leaks max APR)
   - `finance.py`: payment / total cost math
+  - `person.py`: `build(ex)` -> the borrower's plain-English screen (before, deal, protection, no deal + path to
+    approval + bureau dispute, blocked, what helped)
+  - `hood.py`: `describe(event)` / `build(ex)` -> the judges' "under the hood" panel (plain-words verdicts,
+    exclusion banners, which CRS product drove each decision, what's simulated)
   - `intake.py`: `MandateChat`: the person chats with their agent; Claude (or a regex fallback) fills the mandate
     fields, code clamps them and builds a `Mandate` once amount, max APR and term are known
 - `app/main.py`: FastAPI: `/api/personas`, `/api/decide/{P}`, `/api/scorecard`,
   `/api/exchange/{P}?scenario=...&watchdog=1&review=0` (watchdog on by default; `review=1` = Claude pass),
   `/api/exchange/{P}/stream?...&pace=0.6` (same session as server-sent events, one per referee event, then
   `result` and `done`), `POST /api/chat/mandate {"messages": [{"role": "user"|"agent", "content"}]}`
-- `app/static/index.html`: current UI (screening view)
+- `app/static/index.html`: screening view
+- `app/static/exchange.html`: borrower app: chat -> limits (monthly payment first) -> live market -> deal / no deal /
+  blocked, plus the "How your deal was made" judge panel. http://127.0.0.1:8000/static/exchange.html
 - `docs/crs-brief.md`: what CRS wants / what the sandbox has
 
 ## Commands
 ```
 pip install -r requirements.txt
-pytest                                        # 73 offline tests
+pytest                                        # 125 offline tests
 python -m exchange.demo P01                   # one market session in the terminal
 python -m exchange.demo P01 --scenario injection
 python -m exchange.demo P03 --max-apr 16 --json

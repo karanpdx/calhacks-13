@@ -2,6 +2,7 @@
 
   python -m exchange.demo P01
   python -m exchange.demo P03 --amount 3000 --max-apr 16
+  python -m exchange.demo P03 --max-payment 150   # limit by monthly payment instead of APR
   python -m exchange.demo P01 --scenario injection
   python -m exchange.demo P13                     # fraud: blocked at the gate
   python -m exchange.demo P17 --watchdog          # flag-only watchdog: bureau disagreement + what to do
@@ -71,12 +72,14 @@ def main(argv=None):
     ap.add_argument("--amount", type=float)
     ap.add_argument("--min-amount", type=float)
     ap.add_argument("--max-apr", type=float)
+    ap.add_argument("--max-payment", type=float, help="most the person can pay each month, in dollars")
     ap.add_argument("--live", action="store_true")
     ap.add_argument("--json", action="store_true")
     ap.add_argument("--watchdog", action="store_true", help="flag-only watchdog + referee exclusion rule")
     ap.add_argument("--review", action="store_true", help="add the advisory Claude review pass (implies --watchdog)")
     a = ap.parse_args(argv)
-    r = run(a.persona, a.scenario, a.live, a.watchdog, a.review, amount=a.amount, min_amount=a.min_amount, max_apr=a.max_apr)
+    r = run(a.persona, a.scenario, a.live, a.watchdog, a.review, amount=a.amount, min_amount=a.min_amount, max_apr=a.max_apr,
+            max_payment=a.max_payment)
     if a.json:
         json.dump(r, sys.stdout, indent=2, default=str)
         print()
