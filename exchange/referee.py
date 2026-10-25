@@ -51,7 +51,7 @@ class CachedSource:
 
 class Exchange:
     def __init__(self, persona, mandate=None, source=None, lenders=None, borrower=None, today=None, watchdog=False,
-                 review=None):
+                 review=None, listener=None):
         self.persona = persona
         self.mandate = mandate or Mandate()
         self.source = CachedSource(source or SampleSource())
@@ -68,6 +68,7 @@ class Exchange:
         self.watchdog = Watchdog() if watchdog else None
         self.review = review   # optional ClaudeReview: advisory flags after the session closes
         self.excluded = {}     # lender id -> reason
+        self.listener = listener  # optional callable(event), called as each event is logged (the live SSE stream)
 
     # ---------------------------------------------------------------- bookkeeping
     def register(self, agent):
@@ -80,6 +81,8 @@ class Exchange:
         if verdict:
             e["verdict"] = {"ok": verdict.ok, "code": verdict.code, "reason": verdict.reason}
         self.events.append(e)
+        if self.listener:
+            self.listener(e)
         if self.watchdog and kind != "watchdog":
             self.flag_all(self.watchdog.review(e, self))
         return e
@@ -124,6 +127,8 @@ class Exchange:
         """`by` = the agent whose key signed this (the real sender, even if `m.sender` is forged)."""
         by = by or m.sender
         v = self._check(m, by)
+        if v.ok and m.type == OFFER:
+            m.offer_id = f"o{len(self.offers) + 1}"  # assigned before logging, so a streamed event already carries it
         e = self.emit("message", m.sender, m.to_dict(), v)
         if v.ok:
             self._apply(m, e)
@@ -210,10 +215,8 @@ class Exchange:
             prev = self._live_offer_of(m.sender)
             if prev:
                 self.offers[prev]["status"] = "superseded"
-            m.offer_id = f"o{len(self.offers) + 1}"
             self.offers[m.offer_id] = {"lender": m.sender, "terms": m.terms, "text": m.text, "status": "live",
                                        "round": self.round}
-            e["data"]["offer_id"] = m.offer_id
         elif m.type == WITHDRAW:
             self.offers[m.offer_id]["status"] = "withdrawn"
         elif m.type == ACCEPT:
