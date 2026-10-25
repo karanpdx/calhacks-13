@@ -15,19 +15,23 @@ from .lenders import POLICIES
 
 SEVERITIES = ("low", "medium", "high")   # plus "info" for notes that aren't findings (never shown to the person)
 
+# Aimed at another agent's instructions: a rule-based hit here gets a lender excluded (see referee.EXCLUDING_DETECTORS)
 INJECTION = [re.compile(p, re.I) for p in (
     r"\bignore\b[^.]{0,40}\b(instructions?|mandate|limits?|rules)\b",
-    r"\bdisregard\b[^.]{0,40}",
+    r"\b(disregard|override)\b[^.]{0,30}\b(your|the person's|its)\b[^.]{0,20}\b(instructions?|mandate|limits?|rules)\b",
     r"\bsystem (note|prompt|message|instruction)s?\b",
+)]
+# Ordinary sales pressure: honest lenders say these too, so they're flag-only ("pressure"), never grounds to exclude
+PRESSURE = [re.compile(p, re.I) for p in (
     r"\bpre-?approved\b",
     r"\baccept\b[^.]{0,30}\b(immediately|right now|now)\b",
-    r"\boverride\b[^.]{0,30}",
 )]
 PERSONAL = re.compile(r"\b(ssn|social security(?: number)?|date of birth|dob|birth ?date|"
                       r"bank (?:login|password|credentials|username)|online banking (?:login|password))\b", re.I)
 SAME_DEAL = re.compile(r"\b(same (?:deal|terms|offer|rate)|unchanged|nothing(?: has)? changed|no changes?)\b", re.I)
-FEE_WORD = re.compile(r"\b(fees?|processing|origination|service charges?|closing costs?)\b", re.I)
-NO_FEE = re.compile(r"(fee waived|waived? (?:the |your )?fee|no fees?|without (?:a|any) fee|fee-free|\$0 fee)", re.I)
+FEE_WORD = re.compile(r"\b(fees?|service charges?|closing costs?)\b", re.I)
+NO_FEE = re.compile(r"(fee waived|waived? (?:the |your )?fee|(?:no|zero) (?:\w+ )?fees?|without (?:a|any) (?:\w+ )?fee|"
+                    r"fee-free|\$0 (?:\w+ )?fee)", re.I)
 PERCENT = re.compile(r"(\d+(?:\.\d+)?)\s*(?:%|percent)", re.I)
 LIMIT_WORD = re.compile(r"\b(limit|max(?:imum)?|cap|ceiling|budget|up to|no more than|at most|highest)\b", re.I)
 
@@ -110,6 +114,15 @@ class Watchdog:
                              f"{who} sent a message with hidden instructions (\"{m.group(0)}\")"
                              + (", so the exchange removed it from your session." if role == "lender" else "."),
                              e["seq"])]
+        for p in PRESSURE:
+            m = p.search(text)
+            if m and role == "lender":
+                a = e["actor"]
+                return [flag("pressure", "medium", a, _snippet(text, m),
+                             "Pressure language in free text. Not an attack on its own, but agents must decide on "
+                             "terms, not urgency or claims of pre-approval.",
+                             f"{_name(a)} used pressure language (\"{m.group(0)}\"). Nothing is pre-approved and "
+                             "there's no deadline unless the terms say so.", e["seq"])]
         return []
 
     def personal_data(self, e):
@@ -250,7 +263,7 @@ REVIEW_SCHEMA = {
         "type": "object",
         "properties": {"severity": {"type": "string", "enum": list(SEVERITIES)},
                        "agent": {"type": "string"},
-                       "ref": {"type": ["integer", "null"]},
+                       "ref": {"anyOf": [{"type": "integer"}, {"type": "null"}]},
                        "saw": {"type": "string"},
                        "why": {"type": "string"},
                        "note": {"type": "string"}},

@@ -39,7 +39,7 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
   - `passport.py`: what lenders see
   - `referee.py`: `Exchange`: gate -> passport -> market loop -> settlement -> disclosure; `events` = audit log.
     `watchdog=True`: flags + exclusion rule (lender out after TERMS_WORSENED, BAD_SIGNATURE or a rule-based injection flag)
-  - `watchdog.py`: rule-based detectors (injection, text vs terms, personal data, borrower drift, bureau disagreement)
+  - `watchdog.py`: rule-based detectors (injection, sales pressure (flag-only), text vs terms, personal data, borrower drift, bureau disagreement)
     + `ClaudeReview` (advisory, runs after close, falls back to rule results on any error)
   - `lenders.py`: 4 policies (Prime Bank, Campus CU, NewStart Fintech, Second Chance) + `RuleLender` stand-in agent
   - `borrower.py`: `RuleBorrower` stand-in agent (+ `GullibleBorrower` for the injection scenario)
@@ -54,7 +54,7 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
 ## Commands
 ```
 pip install -r requirements.txt
-pytest                                        # 36 offline tests
+pytest                                        # 38 offline tests
 python -m exchange.demo P01                   # one market session in the terminal
 python -m exchange.demo P01 --scenario injection
 python -m exchange.demo P03 --max-apr 16 --json

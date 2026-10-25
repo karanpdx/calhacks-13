@@ -30,7 +30,8 @@ API: `GET /api/exchange/{P01..P20}?scenario=normal&amount=5000&min_amount=3000&m
 ## Watchdog (`watchdog.py`)
 Reviews every event and adds `watchdog` events: `{detector, severity, agent, saw, why, note, suggestion?, ref, source}`.
 It only flags. Rule-based detectors:
-- `injection`: instructions hidden in message text ("ignore your mandate", "system note", "pre-approved", "accept immediately")
+- `injection`: instructions hidden in message text ("ignore your mandate", "system note", "disregard your instructions")
+- `pressure`: sales pressure ("pre-approved", "accept now"); flag-only, never grounds to exclude
 - `text_vs_terms`: "same deal" while terms got worse; a fee mentioned that the terms don't include; a quoted APR that isn't the offer's
 - `personal_data`: a lender asking for SSN, date of birth or bank login
 - `borrower_drift`: accepting while a cheaper live offer also fits the mandate; trying to accept outside it; revealing the max APR

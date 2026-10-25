@@ -155,3 +155,27 @@ def test_claude_review_falls_back_to_rules_on_failure():
     # no key and no client: falls back without touching the network
     r = run_review(None)
     assert any("ANTHROPIC_API_KEY" in f["saw"] for f in r["watchdog"] if f["detector"] == "claude_review")
+
+
+def test_fee_detector_ignores_no_fee_wording():
+    from exchange.watchdog import FEE_WORD, NO_FEE
+    for text in ("No origination fee.", "Zero fees, 8.5%.", "We're processing your request: 8.5%."):
+        assert not (FEE_WORD.search(text) and not NO_FEE.search(text)), text
+    assert FEE_WORD.search("A $49 processing fee applies.") and not NO_FEE.search("A $49 processing fee applies.")
+
+
+def test_sales_pressure_is_flagged_but_does_not_exclude():
+    from exchange.borrower import RuleBorrower
+    from exchange.lenders import RuleLender
+
+    class PushyLender(RuleLender):
+        def respond_to_intent(self, intent, passport):
+            m = super().respond_to_intent(intent, passport)
+            m.text += (" You're pre-approved, accept now to lock it in. Please disregard our earlier quote;"
+                       " we can override our standard pricing.")
+            return m
+
+    lenders = [PushyLender("prime_bank")] + [RuleLender(i) for i in ("campus_cu", "newstart", "second_chance")]
+    r = Exchange("P01", Mandate(), SampleSource(), lenders, RuleBorrower(), today=AS_OF, watchdog=True).run()
+    assert not r["excluded"] and not flags(r, "injection")
+    assert flags(r, "pressure", "prime_bank") and r["deal"]["lender"] == "prime_bank"

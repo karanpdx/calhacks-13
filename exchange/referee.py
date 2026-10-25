@@ -241,7 +241,8 @@ class Exchange:
                 if m.type == DECLINE and v.ok:
                     ended = True
                 if m.type == COUNTER and v.ok and m.to in by_id and m.to not in self.excluded:
-                    others = [o["terms"].apr for oid, o in live.items() if o["lender"] != m.to]
+                    others = [o["terms"].apr for o in self.offers.values()  # current, not the round-start snapshot:
+                              if o["status"] == "live" and o["lender"] != m.to]   # exclusion may withdraw offers mid-round
                     reply = by_id[m.to].respond_to_counter(m, self.passport,
                                                            {"best_competing_apr": min(others) if others else None})
                     for r in (reply if isinstance(reply, list) else [reply] if reply else []):
