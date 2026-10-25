@@ -10,7 +10,7 @@ Each phase starts only when the gate above it is met.
 
 ## Where we are
 
-The original milestone recorded a working agent-to-agent credit marketplace on `main` with 55 offline tests passing. As of the Oct 24 product review, an exchange web page, mandate chat and event streaming are present; the earlier test count and live readiness were not reverified. AI agents negotiate loans for a person, and a referee made of plain code decides what is allowed. CRS announced this kind of exchange on Oct 19 as a waitlist page; ours is a working version built on their sandbox.
+A working agent-to-agent credit marketplace runs end to end on `main` (236 offline tests, verified Oct 25 03:50) and on the live CRS sandbox. A person chats with their agent in English or Spanish; the agent shops seven simulated lenders who price from their own books and never see each other; a referee made of plain code checks every message; the person approves the exact offer before anything is signed. `/safety` runs every attack against the referee live, `/fairness` audits every lender, and `/lender` shows each lender's side with no personal data. CRS announced this kind of exchange on Oct 19 as a waitlist page; ours is a working version built on their sandbox.
 
 **How one session works**
 
@@ -38,7 +38,7 @@ The original milestone recorded a working agent-to-agent credit marketplace on `
 | Borrower agent chat | `app/static/demo.html` at `/phone` | Sole borrower interface; separate dashboard and legacy exchange page removed. Mandate chat and event streaming APIs remain available. |
 | Live CRS sandbox run | `--live` | **Not yet verified** |
 
-**Results on the sample personas:** P01 prime: Prime Bank opens at 11.22% and ends at 10.17%. P03 (22, thin file): the credit union beats Prime's quote, 10.59% to 8.69%, and restructures to 48 months when she sets a $150 monthly limit. P04 (recent immigrant, no file) gets only an identity-based offer, which fits a 20% limit. P05 (subprime) walks away because nothing fits. P13 is blocked as fraud. P17's single-bureau collection is explained with how to dispute it.
+**Results on the sample personas (default limits: $5,000, 18%):** P01 prime: Prime Bank opens at 11.22% and ends at 10.17%. P03 (22, thin file): Campus Credit Union, 9.83% to 8.0%. P04 (recent immigrant, no file): Harbor Newcomer Lending prices on identity strength, $3,000 at 13.15% (no deal before the specialist lenders). P17: bureau reconciliation ignores a collection only Experian reports, so Campus Credit Union lends at 6.04% (was NewStart, $3,000 at 16.49%). P20 (retiree, no score): Campus Credit Union, 7.95%. P05 (subprime) walks away because nothing fits. P13 is blocked as fraud before any lender sees anything.
 
 **How lenders negotiate now** (replaces fixed "open, then drop 2 points" rules)
 
@@ -94,7 +94,7 @@ Lead with one sentence judges can repeat: *CRS announced an agent-to-agent credi
 | Originality | First working version of the exchange CRS announced, plus a safety layer for agents |
 | Usefulness | Better rates through competition; protection from manipulation and fraud |
 | CRS at the core | Gate, passport and every lender's pricing come from CRS data across 5 products |
-| It really works | Live end-to-end demo; 135 tests; 19/20 match with CRS expected decisions |
+| It really works | Live end-to-end demo on the CRS sandbox; 236 offline tests; 19/20 match with CRS expected decisions; 11 of 11 attacks stopped on `/safety` |
 | Responsible | Lenders never see personal data; referee is code; consent and simulation labeled |
 
 **Prizes this targets:** Best Overall CRS Hack, Best Financial AI Agent, Best Identity / Fraud Innovation, Most Unexpected Use of CRS; Anthropic; Most Technically Complex.
