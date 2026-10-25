@@ -103,6 +103,42 @@ def scorecard():
             "rows": [{k: r[k] for k in ("persona", "name", "expected", "decision", "code", "match", "reason")} for r in rows]}
 
 
+# ---------------------------------------------------------------- agent credit exchange
+from exchange.messages import Mandate  # noqa: E402
+from exchange.referee import Exchange  # noqa: E402
+from exchange.scenarios import build as build_scenario, SCENARIOS  # noqa: E402
+
+
+@app.get("/api/exchange/scenarios")
+def exchange_scenarios():
+    return {"scenarios": SCENARIOS}
+
+
+@app.get("/api/exchange/{persona}")
+def exchange(persona: str, scenario: str = "normal", amount: float = 5000, min_amount: float = 3000,
+             max_apr: float = 18.0, min_term: int = 12, max_term: int = 48, autopay: int = 1, max_fee: float = 0,
+             live: int = 0):
+    """Run one market session. Returns the full event log (gate, passport, every message with the referee's verdict,
+    settlement, disclosure). The UI can replay `events` in order to animate the negotiation."""
+    _row(persona)
+    if scenario not in SCENARIOS:
+        raise HTTPException(404, f"unknown scenario {scenario!r}; use one of {sorted(SCENARIOS)}")
+    lenders, borrower = build_scenario(scenario)
+    mandate = Mandate(amount, min(min_amount, amount), max_apr, min_term, max_term,
+                      {"autopay"} if autopay else set(), max_fee)
+    note, source = None, SampleSource()
+    if live:
+        if os.environ.get("CRS_USER") and os.environ.get("CRS_PASS"):
+            try:
+                source = LiveSource()
+            except Exception as e:
+                note = f"Live CRS login failed ({type(e).__name__}); showing saved samples instead."
+        else:
+            note = "Live mode needs CRS_USER and CRS_PASS in the environment; showing saved samples instead."
+    r = Exchange(persona, mandate, source, lenders, borrower, today=SC.AS_OF if source.name == "samples" else None).run()
+    return {"notice": NOTICE, "scenario": scenario, "live_note": note, **r}
+
+
 @app.get("/")
 def index():
     return FileResponse(os.path.join(STATIC, "index.html"))
