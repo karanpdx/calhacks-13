@@ -341,6 +341,8 @@ def report():
 
 if __name__ == "__main__":
     import argparse
+    from agent import envfile
+    envfile.load()
     ap = argparse.ArgumentParser(description="Safety case report, or a live Claude red-team run.")
     ap.add_argument("--live-red-team", action="store_true", help="run SwiftLend on Claude (needs ANTHROPIC_API_KEY)")
     a = ap.parse_args()

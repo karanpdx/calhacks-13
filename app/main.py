@@ -20,7 +20,10 @@ from fastapi.responses import FileResponse, StreamingResponse, Response, Redirec
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from agent import scorecard as SC
+from agent import envfile
+
+envfile.load()   # .env (git-ignored) -> environment, before anything reads a key; skipped under pytest
+from agent import scorecard as SC  # noqa: E402
 from agent.explain import explain
 from agent.screen import screen
 from agent.sources import FallbackSource, LiveSource, SampleSource
@@ -28,6 +31,9 @@ from agent.sources import FallbackSource, LiveSource, SampleSource
 STATIC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 NOTICE = "Data is from the CRS sandbox: fictional test personas, not real people."
 log = logging.getLogger(__name__)
+_cfg = envfile.status()
+print(f"[exchange] Claude: {'on' if _cfg['claude'] else 'off (rules)'} · live CRS: "
+      f"{'credentials set' if _cfg['crs_live'] else 'off (saved data)'}", flush=True)
 
 app = FastAPI(title="Credit-file trust agent", description=NOTICE)
 
