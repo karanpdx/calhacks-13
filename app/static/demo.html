@@ -174,6 +174,7 @@
   .chat-h .dot { width:8px; height:8px; border-radius:50%; background:#30D158; }
   .msgs { flex:1; min-height:0; overflow-y:auto; padding:96px 10px 6px; display:flex; flex-direction:column; gap:3px; scrollbar-width:none; }
   .msgs::-webkit-scrollbar { display:none; }
+  .msgs > * { flex-shrink:0; }  /* bubbles and cards keep their full height; the conversation scrolls instead */
   .sysnote { align-self:center; text-align:center; font-size:12px; color:var(--c-sub); margin:4px 0 8px; }
   .sysnote button { font:inherit; color:var(--c-chip); background:none; border:0; padding:0; cursor:pointer; }
   .msg { max-width:78%; padding:7px 12px; border-radius:18px; font-size:15px; line-height:1.3; word-wrap:break-word; white-space:pre-wrap; }
@@ -203,9 +204,31 @@
   /* on a real phone: iOS-size text, and dark mode when the iPhone is in dark mode */
   body[data-mode="phone"] .msg { font-size:17px; padding:8px 13px; }
   body[data-mode="phone"] .composer input { font-size:17px; }
+  body[data-mode="phone"] .detail .msg { font-size:14px; padding:5px 10px; }
   @media (prefers-color-scheme: dark) {
     body[data-mode="phone"] .chat { --c-bg:#000; --c-them:#26252A; --c-them-fg:#fff; --c-fg:#fff; --c-sub:#8D8D93; --c-pill:rgba(44,44,46,.72);
       --c-pill-fg:#fff; --c-line:#3A3A3C; --c-field:#000; --c-card:#1C1C1E; --c-chip:#409CFF; --c-fade:0,0,0; }
+  }
+  /* cards the agent posts in the chat while it shops (progress, offers, deal); rows open details when tapped */
+  .chat { --c-alert:#FFF0EF; --c-alert-fg:#8E1C14; --c-ok:#34C759; }
+  .ccard { align-self:stretch; background:var(--c-card); border-radius:18px; overflow:hidden; margin:6px 0 4px; }
+  .ccard .hd { padding:10px 14px 6px; font-size:12px; font-weight:700; color:var(--c-sub); text-transform:uppercase; letter-spacing:.04em; }
+  .ccard .crow { display:flex; align-items:center; gap:10px; padding:10px 14px; border-top:.5px solid var(--c-line); font-size:15px; }
+  .ccard .crow .k { flex:1; } .ccard .crow.off { opacity:.45; } .ccard .crow.dead { color:var(--c-sub); }
+  .ccard .crow b.red { color:#FF453A; }
+  .ccard.deal { border:2px solid var(--c-ok); padding-bottom:4px; }
+  .ccard.deal .body { padding:2px 14px 10px; display:flex; flex-direction:column; gap:3px; }
+  .ccard.deal .pay { font-size:34px; font-weight:800; letter-spacing:-.02em; }
+  .ccard.deal .saved { color:var(--c-ok); font-weight:700; }
+  .msg.alertmsg { background:var(--c-alert); color:var(--c-alert-fg); border:1px solid #FF453A; }
+  .chat .tap:active { background:rgba(127,127,127,.15); }
+  .chat .tap .chev { color:var(--c-sub); }
+  .chat .detail { background:transparent; border-top:.5px solid var(--c-line); color:var(--c-fg); }
+  .chat .detail.card { background:var(--c-card); border:0; border-radius:14px; }
+  .chat .detail .dnote, .chat .dh { color:var(--c-sub); }
+  .chat .msg.alertmsg.tap { position:relative; padding-right:30px; } .chat .msg.alertmsg .chev { position:absolute; right:8px; top:9px; margin:0; color:#FF453A; }
+  @media (prefers-color-scheme: dark) {
+    body[data-mode="phone"] .chat { --c-alert:#3A1513; --c-alert-fg:#FFB4AE; --c-ok:#30D158; }
   }
   /* while the chat is open on the phone, the app's own top bar steps aside: the header pills do its job */
   body[data-mode="phone"].chatting header { display:none; }
@@ -779,6 +802,7 @@ function chatView() {
   CHAT.push({role: "agent", content: hello}); bubble("agent", hello); setChips(CHIPS.start);
   async function submit(text) {
     text = text.trim(); if (!text) return;
+    if (text === "Start a new request") return chatView();
     input.value = ""; send.disabled = true; chips.replaceChildren();
     CHAT.push({role: "user", content: text}); bubble("user", text);
     const typing = h("div", {class: "msg them typing"}, h("i"), h("i"), h("i")); put(typing); scroll();
@@ -816,9 +840,120 @@ function chatView() {
       go.disabled = true; go.textContent = "Starting...";
       try { await loadExchange(); } catch (err) { go.textContent = "Couldn't reach the exchange"; return; }
       shareWithLaptop();
-      phoneRun();
+      go.remove(); edit.remove();
+      const id = ++run; speed = 1;
+      try { await shopInChat(); } catch (e) { if (e !== STOP) throw e; }
+      finally { if (id === run) speed = 1; }
     };
   }
+
+  // ---- after Start shopping, the agent reports in the chat: a live progress card, an offers card, the blocked
+  // offer, short negotiation updates and a deal card. Every card row and alert opens details when tapped.
+  async function shopInChat() {
+    input.disabled = true; send.disabled = true; input.placeholder = "Your agent is shopping...";
+    $("#log").replaceChildren();
+    const say = async (text, cls = "") => {  // the agent "types" for a beat, then posts
+      const typing = h("div", {class: "msg them typing"}, h("i"), h("i"), h("i")); put(typing); scroll();
+      await wait(650); typing.remove();
+      const b = h("div", {class: "msg them " + cls}, text); put(b); appear(b).catch(() => {}); scroll(); return b;
+    };
+    const card = (title, rows = []) => { const c = h("div", {class: "ccard"}, h("div", {class: "hd"}, title), ...rows); put(c); appear(c).catch(() => {}); scroll(); return c; };
+    const STEPS = ["Checking your details", "Shopping", "Negotiating", "Done"], DETAILS = [detailChecks, detailShopping, detailNegotiation, detailDone];
+    const rows = STEPS.map(s => h("div", {class: "crow off"}, h("span", {class: "st"}, h("span", {class: "wait"})), h("span", {class: "k"}, s)));
+    const step = (i, state) => { const r = rows[i]; r.classList.toggle("off", state === "wait");
+      r.firstChild.replaceChildren(state === "run" ? h("span", {class: "spin"}) : state === "ok" ? h("span", {class: "done"}, icon("check", 20))
+        : state === "fail" ? h("span", {class: "fail"}, icon("x", 20)) : h("span", {class: "wait"}));
+      if (state === "ok" || state === "fail") tappable(r, DETAILS[i]); };
+    const finish = () => { input.disabled = false; send.disabled = false; input.placeholder = "iMessage"; setChips(["Start a new request"]); };
+    const gate = D.ex.events.find(e => e.kind === "gate").data;
+
+    // 1. identity and credit
+    await say("On it! First I'm checking your identity and credit with CRS. It's a soft pull, so your score isn't affected.");
+    card(`Shopping for ${money(M.amount)}`, rows);
+    step(0, "run");
+    logAdd("Agent → CRS", `Checked identity and credit: ${gate.crs_products.length} CRS checks (AtData fraud risk, TransUnion identity, phone owner, 3 credit bureaus).`, "", "id");
+    await wait(2000);
+    if (!D.ex.admitted) {
+      step(0, "fail");
+      tappable(await say("I couldn't verify your identity, so I stopped here. No lender has seen your application.", "alertmsg"), detailChecks);
+      logAdd("Referee", "Stopped at the gate: identity checks failed. No lender sees anything.", "bad", "shield");
+      return finish();
+    }
+    step(0, "ok");
+    const s = scoreOf(D.P);
+    logAdd("CRS", s == null ? "Identity verified. No credit score on file." : `Identity verified. Credit score ${s}.`, "good", "check");
+    await say(`You're verified${s == null ? "" : ` (credit score ${s})`}. Now I'm asking ${D.lenderIds.length} lenders. They only see a summary: your name, SSN and address stay hidden.`);
+
+    // 2. offers
+    step(1, "run");
+    logAdd("Agent → lenders", `Sent a credit passport to ${D.lenderIds.length} lenders. Name, SSN and address stay hidden.`, "", "hidden");
+    const offers = card("Offers");
+    for (const e of replies(0)) {
+      const d = e.data, off = d.type === "OFFER", inj = off && isInjected(d);
+      await wait(800);
+      const row = h("div", {class: "crow" + (off ? "" : " dead")}, icon("bank", 16), h("span", {class: "k"}, LENDERS[d.sender] || d.sender),
+        off ? h("b", {class: inj ? "red" : ""}, pct(d.terms.apr), inj ? [" ", icon("warn", 14)] : null) : h("b", {}, "declined"));
+      offers.append(tappable(row, () => detailOffer(d))); appear(row).catch(() => {}); scroll();
+      logAdd(LENDERS[d.sender] || d.sender, off ? `Offered ${pct(d.terms.apr)} for ${d.terms.term_months} months${inj ? ", with a hidden instruction in the text" : ""}.` : "Declined.", inj ? "bad" : "", "bank");
+    }
+    const atk = attackMsg();
+    if (atk) {
+      await wait(900);
+      logAdd("Agent", `Tried to accept ${pct(atk.data.terms.apr)} from ${LENDERS[atk.data.to]}: it obeyed the hidden instruction.`, "bad", "robot");
+      const br = breach(atk.data.terms);
+      const warn = await say(`Heads up: ${LENDERS[atk.data.to]} hid an instruction in its offer to trick me into accepting ${pct(atk.data.terms.apr)}. `
+        + `I fell for it, but the exchange's referee blocked it because ${br.offer} is over your ${br.limit} limit. Nothing was signed.`, "alertmsg");
+      tappable(warn, () => detailBlocked(atk)); shake(warn);
+      logAdd("Referee", `Blocked: ${br.offer} is over the ${br.limit} limit (${atk.verdict.code}).`, "bad", "shield");
+      await wait(1200);
+    }
+    step(1, "ok");
+
+    // 3. negotiation: one short update per lender reply
+    step(2, "run");
+    const lid = focusLender(), after = (atk || {round: 0}).round, name = LENDERS[lid] || lid;
+    const open = D.msgs.find(e => e.round === 0 && e.data.sender === lid && e.data.type === "OFFER");
+    if (open) await say(`${name} has the best real offer at ${pct(open.data.terms.apr)}. Let me see if they'll go lower.`);
+    let asked = null;
+    for (const e of D.msgs.filter(x => x.round > after && (x.data.sender === lid || x.data.to === lid))) {
+      const d = e.data;
+      if (d.sender === "borrower" && d.type === "COUNTER") {
+        asked = d; logAdd(`Agent → ${name}`, `Asked for ${pct(d.terms.apr)}${d.terms.autopay ? " with autopay" : ""}.`, "", "chat"); continue;
+      }
+      if (d.type === "OFFER") {
+        logAdd(name, `Agreed to ${pct(d.terms.apr)}.`, "", "bank");
+        await wait(500);
+        await say(`I asked for ${asked ? pct(asked.terms.apr) : "less"}${asked && asked.terms.autopay ? " with autopay" : ""}. They came down to ${pct(d.terms.apr)} (${money(monthly(d.terms.amount, d.terms.apr, d.terms.term_months), 2)}/month).`);
+      } else if (d.type === "DECLINE" && d.sender === lid) {
+        await say(`${name} won't go any lower.`);
+      }
+    }
+    step(2, "ok");
+
+    // 4. result
+    const deal = D.ex.deal, dis = D.ex.events.find(x => x.kind === "disclosure");
+    if (!deal) {
+      step(3, "fail");
+      tappable(await say("No offer fit your limits, so I walked away instead of breaking your rules. "
+        + (M.max_payment ? "A higher monthly limit or a longer loan might get you an offer." : `Raising your highest rate above ${M.max_apr}% might get you an offer.`), "alertmsg"), detailDone);
+      logAdd("Agent", "Walked away: nothing fit the limits.", "", "robot");
+      return finish();
+    }
+    step(3, "ok");
+    const t = deal.terms, saved = dis && dis.data.summary.join(" ").match(/saves \$([\d,.]+)/), traded = dis ? dis.data.summary.slice(1).filter(x => !/saves/.test(x)) : [];
+    logAdd(`Agent → ${deal.lender_name}`, `Accepted ${pct(t.apr)}: inside every limit.`, "good", "check");
+    await say("Done! I accepted the best offer that fits all your limits:");
+    const dc = h("div", {class: "ccard deal"}, h("div", {class: "hd"}, `${deal.lender_name} · simulated lender`),
+      h("div", {class: "body"}, h("div", {class: "pay"}, money(dis ? dis.data.monthly_payment : monthly(t.amount, t.apr, t.term_months)), h("span", {style: "font-size:15px;font-weight:600"}, " / month")),
+        h("div", {}, `${money(t.amount)} at ${pct(t.apr)} for ${t.term_months} months`),
+        saved ? h("div", {class: "saved"}, `Saved $${saved[1]} vs the best first offer`) : null,
+        traded.map(x => h("div", {class: "dnote", style: "color:var(--c-sub)"}, x))));
+    const more = h("div", {class: "crow"}, h("span", {class: "k", style: "color:var(--c-chip);font-weight:600"}, "See the full breakdown"));
+    dc.append(tappable(more, detailDone));
+    put(dc); appear(dc).catch(() => {}); pop(dc); scroll();
+    finish();
+  }
+
   send.onclick = () => submit(input.value);
   input.onkeydown = e => { if (e.key === "Enter") submit(input.value); };
   // like iMessage: tapping send or a quick reply keeps the keyboard up instead of closing it
@@ -884,7 +1019,8 @@ function tappable(el, build) {
   let box = null;
   const toggle = () => {
     if (box) { box.remove(); box = null; el.setAttribute("aria-expanded", "false"); return; }
-    box = h("div", {class: "detail" + (el.parentElement.classList.contains("ios-group") ? "" : " card")}, build());
+    const inList = el.parentElement.classList.contains("ios-group") || el.parentElement.classList.contains("ccard");
+    box = h("div", {class: "detail" + (inList ? "" : " card")}, build());
     el.after(box); el.setAttribute("aria-expanded", "true");
     box.animate([{opacity: 0, transform: "translateY(-4px)"}, {opacity: 1, transform: "none"}], {duration: 220});
   };
