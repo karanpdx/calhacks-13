@@ -85,6 +85,14 @@ Every number a lender quotes comes from its own private **books**, not a fixed r
   "unconfirmed"; reconciled counts are what two bureaus agree on. Books with `reconciled=True` (Campus CU, Harbor,
   Ladder) price on that view; Prime Bank, NewStart and Second Chance keep the worst-bureau view.
 
+## Fairness check (`fairness.py`, `/fairness`)
+Internal check, not a legal fair-lending review. Every persona through every market lender (offer/decline, APR range at
+default terms, reason code); a blindness test that swaps each applicant's name, address, city, state, ZIP, date of
+birth, phone and email across every CRS product and requires identical decisions and prices; a scan that no passport
+field is or stands in for a protected attribute (file age is flagged as age-correlated); twins with the same credit
+files and a different identity; and approval rate / median opening APR for thin- and no-file applicants vs others.
+The sandbox has no protected-class data, so the disparity table compares file thickness, a credit factor.
+
 ## Current results on the samples (rule-based agents, default mandate: $5,000, 18% max, autopay ok)
 | Persona | Outcome |
 |---|---|

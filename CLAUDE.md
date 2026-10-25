@@ -55,6 +55,9 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
     Ladder Credit Builder): eligibility `POLICIES` (each decline a `Quote.code`) + private `BOOKS` + `RuleLender`
     stand-in agent (concedes by round and motive, answers verified quotes, 36% cap). `view_for` gives Books with
     `reconciled=True` (Campus CU, Harbor, Ladder) the reconciled passport
+  - `fairness.py`: internal fairness check (not a legal review): `matrix()` every persona x every market lender
+    (POLICIES with BOOKS, read at run time), `blindness()` (protected applicant data swapped via `PerturbedSource`,
+    decisions/prices must not move), `proxy_check()`, `consistency()` (twins), `disparity()` thin/no-file vs others
   - `reconcile.py`: bureau reconciliation: an item one bureau reports while another bureau with a file doesn't is
     "unconfirmed"; reconciled counts = what two bureaus agree on
   - `borrower.py`: `RuleBorrower` stand-in agent (+ `GullibleBorrower` for the injection scenario)
@@ -68,11 +71,12 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
   - `intake.py`: `MandateChat`: the person chats with their agent; Claude (or a regex fallback) fills the mandate
     fields, code clamps them and builds a `Mandate` once amount, max APR and term are known
 - `app/main.py`: FastAPI: `/api/personas`, `/api/decide/{P}`, `/api/scorecard`,
-  `/api/exchange/{P}?scenario=...&watchdog=1&review=0` (watchdog on by default; `review=1` = Claude pass),
+  `/api/fairness` (fairness report, cached), `/api/exchange/{P}?scenario=...&watchdog=1&review=0` (watchdog on by default; `review=1` = Claude pass),
   `/api/exchange/{P}/stream?...&pace=0.6` (same session as server-sent events, one per referee event, then
   `result` and `done`; `live=1` uses `FallbackSource`: live sandbox per product, saved sample if a call fails, every
   fallback listed in `live_note`), `POST /api/chat/mandate {"messages": [{"role": "user"|"agent", "content"}]}`
 - `app/static/index.html`: screening view
+- `app/static/fairness.html` (`/fairness`): the fairness matrix, test results and disparity table; linked from the demo footer
 - `app/static/exchange.html`: borrower app: chat -> limits (monthly payment first) -> live market -> deal / no deal /
   blocked, plus the "How your deal was made" judge panel. http://127.0.0.1:8000/static/exchange.html
 - `docs/crs-brief.md`: what CRS wants / what the sandbox has
@@ -80,7 +84,7 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
 ## Commands
 ```
 pip install -r requirements.txt
-pytest                                        # 170 offline tests
+pytest                                        # 181 offline tests
 python -m exchange.demo P01                   # one market session in the terminal
 python -m exchange.demo P01 --scenario injection
 python -m exchange.demo P03 --max-apr 16 --json
