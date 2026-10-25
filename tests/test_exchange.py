@@ -91,5 +91,15 @@ def test_referee_rejects_wrong_role_and_mismatched_terms():
 def test_api_exchange_endpoint():
     d = client.get("/api/exchange/P03").json()
     assert d["deal"]["lender"] == "campus_cu" and d["events"][0]["kind"] == "gate"
-    assert client.get("/api/exchange/P01?scenario=injection").json()["blocked"]
+    assert client.get("/api/exchange/P01?scenario=injection&watchdog=0").json()["blocked"]
     assert client.get("/api/exchange/P01?scenario=nope").status_code == 404
+
+
+def test_api_exchange_watchdog_on_by_default():
+    d = client.get("/api/exchange/P01?scenario=injection").json()
+    assert [x["agent"] for x in d["excluded"]] == ["quickcash"] and d["watchdog"]
+    assert d["deal"]["lender"] == "prime_bank"
+    d = client.get("/api/exchange/P17").json()
+    assert any(f["detector"] == "bureau_disagreement" for f in d["watchdog"])
+    assert not client.get("/api/exchange/P17?watchdog=0").json()["watchdog"]
+    assert "drift" in client.get("/api/exchange/scenarios").json()["scenarios"]
