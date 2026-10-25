@@ -224,6 +224,8 @@
   .ccard.deal .pay { font-size:34px; font-weight:800; letter-spacing:-.02em; }
   .ccard.deal .saved { color:var(--c-ok); font-weight:700; }
   .msg.alertmsg { background:var(--c-alert); color:var(--c-alert-fg); border:1px solid #FF453A; }
+  .msg.status { display:flex; align-items:center; gap:8px; color:var(--c-sub); }  /* the one line that updates while the agent works */
+  .msg.status .spin { width:16px; height:16px; border-width:2px; }
   .chat .tap:active { background:rgba(127,127,127,.15); }
   .chat .tap .chev { color:var(--c-sub); }
   .chat .detail { background:transparent; border-top:.5px solid var(--c-line); color:var(--c-fg); }
@@ -801,11 +803,18 @@ function chatView() {
   const put = el => msgs.insertBefore(el, chips);
   const bubble = (role, text) => { const b = h("div", {class: "msg " + (role === "user" ? "me" : "them")}, text); put(b); appear(b).catch(() => {}); scroll(); return b; };
   const setChips = list => { chips.replaceChildren(...list.map(t => { const b = h("button", {type: "button"}, t); b.onclick = () => submit(t); return b; })); scroll(); };
+  let followUp = null;  // set once there's a result: turns the person's reply into the explanation they asked for
   const hello = `Hi ${first(D.P.name)}! I'm your loan agent. Tell me how much you need and what it's for, and I'll shop lenders for you.`;
   CHAT.push({role: "agent", content: hello}); bubble("agent", hello); setChips(CHIPS.start);
   async function submit(text) {
     text = text.trim(); if (!text) return;
     if (text === "Start a new request") return chatView();
+    if (followUp) {  // after a result, replies ask for an explanation instead of starting a new loan conversation
+      const act = followUp(text);
+      input.value = ""; chips.replaceChildren(); bubble("user", text);
+      try { await act(); } catch (e) { if (e !== STOP) throw e; }
+      return;
+    }
     input.value = ""; send.disabled = true; chips.replaceChildren();
     CHAT.push({role: "user", content: text}); bubble("user", text);
     const typing = h("div", {class: "msg them typing"}, h("i"), h("i"), h("i")); put(typing); scroll();
@@ -850,111 +859,119 @@ function chatView() {
     };
   }
 
-  // ---- after Start shopping, the agent reports in the chat: a live progress card, an offers card, the blocked
-  // offer, short negotiation updates and a deal card. Every card row and alert opens details when tapped.
+  // ---- after Start shopping: one status line while the agent works, then the result, then an offer to explain.
+  // The person asks for the breakdown or the negotiation if they want it; nothing extra is pushed on them.
   async function shopInChat() {
     input.disabled = true; send.disabled = true; input.placeholder = "Your agent is shopping...";
     $("#log").replaceChildren();
     const say = async (text, cls = "") => {  // the agent "types" for a beat, then posts
       const typing = h("div", {class: "msg them typing"}, h("i"), h("i"), h("i")); put(typing); scroll();
-      await wait(650); typing.remove();
+      await wait(600); typing.remove();
       const b = h("div", {class: "msg them " + cls}, text); put(b); appear(b).catch(() => {}); scroll(); return b;
     };
-    const card = (title, rows = []) => { const c = h("div", {class: "ccard"}, h("div", {class: "hd"}, title), ...rows); put(c); appear(c).catch(() => {}); scroll(); return c; };
-    const STEPS = ["Checking your details", "Shopping", "Negotiating", "Done"], DETAILS = [detailChecks, detailShopping, detailNegotiation, detailDone];
-    const rows = STEPS.map(s => h("div", {class: "crow off"}, h("span", {class: "st"}, h("span", {class: "wait"})), h("span", {class: "k"}, s)));
-    const step = (i, state) => { const r = rows[i]; r.classList.toggle("off", state === "wait");
-      r.firstChild.replaceChildren(state === "run" ? h("span", {class: "spin"}) : state === "ok" ? h("span", {class: "done"}, icon("check", 20))
-        : state === "fail" ? h("span", {class: "fail"}, icon("x", 20)) : h("span", {class: "wait"}));
-      if (state === "ok" || state === "fail") tappable(r, DETAILS[i]); };
-    const finish = () => { input.disabled = false; send.disabled = false; input.placeholder = "iMessage"; setChips(["Start a new request"]); };
-    const gate = D.ex.events.find(e => e.kind === "gate").data;
+    const infoCard = (title, nodes) => { const c = h("div", {class: "ccard"}, h("div", {class: "hd"}, title), h("div", {class: "detail", style: "border-top:0"}, nodes));
+      put(c); appear(c).catch(() => {}); scroll(); return c; };
+    const label = h("span", {}, "Checking your details..."), status = h("div", {class: "msg them status"}, h("span", {class: "spin"}), label);
+    const gate = D.ex.events.find(e => e.kind === "gate").data, atk = attackMsg(), lid = focusLender(), name = LENDERS[lid] || lid;
+    const deal = D.ex.deal, dis = D.ex.events.find(x => x.kind === "disclosure");
 
-    // 1. identity and credit
-    await say("On it! First I'm checking your identity and credit with CRS. It's a soft pull, so your score isn't affected.");
-    card(`Shopping for ${money(M.amount)}`, rows);
-    step(0, "run");
+    // working: one line that updates in place (the laptop's activity log still gets every step)
+    await say("On it. I'll let you know when I have an answer.");
+    put(status); appear(status).catch(() => {}); scroll();
     logAdd("Agent → CRS", `Checked identity and credit: ${gate.crs_products.length} CRS checks (AtData fraud risk, TransUnion identity, phone owner, 3 credit bureaus).`, "", "id");
-    await wait(2000);
+    await wait(1800);
     if (!D.ex.admitted) {
-      step(0, "fail");
-      tappable(await say("I couldn't verify your identity, so I stopped here. No lender has seen your application.", "alertmsg"), detailChecks);
+      status.remove();
       logAdd("Referee", "Stopped at the gate: identity checks failed. No lender sees anything.", "bad", "shield");
-      return finish();
+      await say("I couldn't verify your identity, so I stopped. No lender saw your application.", "alertmsg");
+      return ask("Want to see what the checks found?", {"Show me why": showChecks});
     }
-    step(0, "ok");
     const s = scoreOf(D.P);
     logAdd("CRS", s == null ? "Identity verified. No credit score on file." : `Identity verified. Credit score ${s}.`, "good", "check");
-    await say(`You're verified${s == null ? "" : ` (credit score ${s})`}. Now I'm asking ${D.lenderIds.length} lenders. They only see a summary: your name, SSN and address stay hidden.`);
-
-    // 2. offers
-    step(1, "run");
+    label.textContent = "Asking lenders for offers...";
     logAdd("Agent → lenders", `Sent a credit passport to ${D.lenderIds.length} lenders. Name, SSN and address stay hidden.`, "", "hidden");
-    const offers = card("Offers");
     for (const e of replies(0)) {
-      const d = e.data, off = d.type === "OFFER", inj = off && isInjected(d);
-      await wait(800);
-      const row = h("div", {class: "crow" + (off ? "" : " dead")}, icon("bank", 16), h("span", {class: "k"}, LENDERS[d.sender] || d.sender),
-        off ? h("b", {class: inj ? "red" : ""}, pct(d.terms.apr), inj ? [" ", icon("warn", 14)] : null) : h("b", {}, "declined"));
-      offers.append(tappable(row, () => detailOffer(d))); appear(row).catch(() => {}); scroll();
-      logAdd(LENDERS[d.sender] || d.sender, off ? `Offered ${pct(d.terms.apr)} for ${d.terms.term_months} months${inj ? ", with a hidden instruction in the text" : ""}.` : "Declined.", inj ? "bad" : "", "bank");
+      const d = e.data, inj = d.type === "OFFER" && isInjected(d);
+      await wait(350);
+      logAdd(LENDERS[d.sender] || d.sender, d.type === "OFFER" ? `Offered ${pct(d.terms.apr)} for ${d.terms.term_months} months${inj ? ", with a hidden instruction in the text" : ""}.` : "Declined.", inj ? "bad" : "", "bank");
     }
-    const atk = attackMsg();
     if (atk) {
-      await wait(900);
-      logAdd("Agent", `Tried to accept ${pct(atk.data.terms.apr)} from ${LENDERS[atk.data.to]}: it obeyed the hidden instruction.`, "bad", "robot");
       const br = breach(atk.data.terms);
-      const warn = await say(`Heads up: ${LENDERS[atk.data.to]} hid an instruction in its offer to trick me into accepting ${pct(atk.data.terms.apr)}. `
-        + `I fell for it, but the exchange's referee blocked it because ${br.offer} is over your ${br.limit} limit. Nothing was signed.`, "alertmsg");
-      tappable(warn, () => detailBlocked(atk)); shake(warn);
+      logAdd("Agent", `Tried to accept ${pct(atk.data.terms.apr)} from ${LENDERS[atk.data.to]}: it obeyed the hidden instruction.`, "bad", "robot");
       logAdd("Referee", `Blocked: ${br.offer} is over the ${br.limit} limit (${atk.verdict.code}).`, "bad", "shield");
-      await wait(1200);
+      await wait(500);
     }
-    step(1, "ok");
-
-    // 3. negotiation: one short update per lender reply
-    step(2, "run");
-    const lid = focusLender(), after = (atk || {round: 0}).round, name = LENDERS[lid] || lid;
-    const open = D.msgs.find(e => e.round === 0 && e.data.sender === lid && e.data.type === "OFFER");
-    if (open) await say(`${name} has the best real offer at ${pct(open.data.terms.apr)}. Let me see if they'll go lower.`);
-    let asked = null;
-    for (const e of D.msgs.filter(x => x.round > after && (x.data.sender === lid || x.data.to === lid))) {
+    label.textContent = "Negotiating the best rate...";
+    for (const e of D.msgs.filter(x => x.round > (atk || {round: 0}).round && (x.data.sender === lid || x.data.to === lid))) {
       const d = e.data;
-      if (d.sender === "borrower" && d.type === "COUNTER") {
-        asked = d; logAdd(`Agent → ${name}`, `Asked for ${pct(d.terms.apr)}${d.terms.autopay ? " with autopay" : ""}.`, "", "chat"); continue;
-      }
-      if (d.type === "OFFER") {
-        logAdd(name, `Agreed to ${pct(d.terms.apr)}.`, "", "bank");
-        await wait(500);
-        await say(`I asked for ${asked ? pct(asked.terms.apr) : "less"}${asked && asked.terms.autopay ? " with autopay" : ""}. They came down to ${pct(d.terms.apr)} (${money(monthly(d.terms.amount, d.terms.apr, d.terms.term_months), 2)}/month).`);
-      } else if (d.type === "DECLINE" && d.sender === lid) {
-        await say(`${name} won't go any lower.`);
-      }
+      await wait(450);
+      if (d.sender === "borrower" && d.type === "COUNTER") logAdd(`Agent → ${name}`, `Asked for ${pct(d.terms.apr)}${d.terms.autopay ? " with autopay" : ""}.`, "", "chat");
+      else if (d.type === "OFFER") logAdd(name, `Agreed to ${pct(d.terms.apr)}.`, "", "bank");
     }
-    step(2, "ok");
+    await wait(500);
+    status.remove();
 
-    // 4. result
-    const deal = D.ex.deal, dis = D.ex.events.find(x => x.kind === "disclosure");
+    // the result first
     if (!deal) {
-      step(3, "fail");
-      tappable(await say("No offer fit your limits, so I walked away instead of breaking your rules. "
-        + (M.max_payment ? "A higher monthly limit or a longer loan might get you an offer." : `Raising your highest rate above ${M.max_apr}% might get you an offer.`), "alertmsg"), detailDone);
       logAdd("Agent", "Walked away: nothing fit the limits.", "", "robot");
-      return finish();
+      await say("I couldn't find a loan that fits your limits, so I didn't accept anything. "
+        + (M.max_payment ? "A higher monthly limit or a longer loan might get you an offer." : `Raising your highest rate above ${M.max_apr}% might get you an offer.`), "alertmsg");
+    } else {
+      const t = deal.terms, pay = dis ? dis.data.monthly_payment : monthly(t.amount, t.apr, t.term_months);
+      const saved = dis && dis.data.summary.join(" ").match(/saves \$([\d,.]+)/);
+      logAdd(`Agent → ${deal.lender_name}`, `Accepted ${pct(t.apr)}: inside every limit.`, "good", "check");
+      await say(`Good news: you're approved with ${deal.lender_name}.` + (saved ? ` I negotiated it down, which saves you $${saved[1]} over the loan.` : ""));
+      const dc = h("div", {class: "ccard deal"}, h("div", {class: "hd"}, `${deal.lender_name} · simulated lender`),
+        h("div", {class: "body"}, h("div", {class: "pay"}, money(pay), h("span", {style: "font-size:15px;font-weight:600"}, " / month")),
+          h("div", {}, `${money(t.amount)} at ${pct(t.apr)} for ${t.term_months} months`)));
+      put(dc); appear(dc).catch(() => {}); pop(dc); scroll();
     }
-    step(3, "ok");
-    const t = deal.terms, saved = dis && dis.data.summary.join(" ").match(/saves \$([\d,.]+)/), traded = dis ? dis.data.summary.slice(1).filter(x => !/saves/.test(x)) : [];
-    logAdd(`Agent → ${deal.lender_name}`, `Accepted ${pct(t.apr)}: inside every limit.`, "good", "check");
-    await say("Done! I accepted the best offer that fits all your limits:");
-    const dc = h("div", {class: "ccard deal"}, h("div", {class: "hd"}, `${deal.lender_name} · simulated lender`),
-      h("div", {class: "body"}, h("div", {class: "pay"}, money(dis ? dis.data.monthly_payment : monthly(t.amount, t.apr, t.term_months)), h("span", {style: "font-size:15px;font-weight:600"}, " / month")),
-        h("div", {}, `${money(t.amount)} at ${pct(t.apr)} for ${t.term_months} months`),
-        saved ? h("div", {class: "saved"}, `Saved $${saved[1]} vs the best first offer`) : null,
-        traded.map(x => h("div", {class: "dnote", style: "color:var(--c-sub)"}, x))));
-    const more = h("div", {class: "crow"}, h("span", {class: "k", style: "color:var(--c-chip);font-weight:600"}, "See the full breakdown"));
-    dc.append(tappable(more, detailDone));
-    put(dc); appear(dc).catch(() => {}); pop(dc); scroll();
-    finish();
+    if (atk) await say("I also stopped a lender that tried to trick me into a bad loan. Nothing was signed with them.");
+    return ask("Want a breakdown of what I did, or how I negotiated?", {"Show me the breakdown": showBreakdown, "How did you negotiate?": showNegotiation});
+
+    // ---- explanations, only when asked
+    async function ask(question, options) {
+      const left = {...options};
+      const next = async () => {
+        if (Object.keys(left).length) { await say("Anything else you'd like to see?"); setChips([...Object.keys(left), "No thanks"]); }
+        else { followUp = null; setChips(["Start a new request"]); }
+      };
+      followUp = text => {
+        const t = text.toLowerCase(), keys = Object.keys(left);
+        const pick = keys.find(k => k.toLowerCase() === t)
+          || (/negotiat|haggl|bargain|how did/.test(t) && keys.find(k => /negotiate/i.test(k)))
+          || (/breakdown|detail|what did|show|offer|why|check|explain/.test(t) && keys.find(k => /breakdown|why/i.test(k)));
+        if (pick) { const f = left[pick]; delete left[pick]; return async () => { await f(); await next(); }; }
+        if (/^(no|nah|nope)\b|no thanks|i'?m good|all good|that'?s all|thank/.test(t)) return noThanks;
+        if (/new|again|start over|another/.test(t)) return chatView;
+        return async () => { await say("I can show you a breakdown of what I did, or how I negotiated. Which would you like?"); setChips([...Object.keys(left), "No thanks"]); };
+      };
+      await say(question);
+      input.disabled = false; send.disabled = false; input.placeholder = "iMessage";
+      setChips([...Object.keys(left), "No thanks"]);
+    }
+    async function noThanks() { followUp = null; await say("Sounds good! I'm here if you need anything else."); setChips(["Start a new request"]); }
+    async function showChecks() { await say("Here's what the checks found:"); infoCard("Identity and credit checks", detailChecks()); }
+    async function showBreakdown() {
+      await say("Here's everything I did, step by step:");
+      infoCard("1. Checked your identity and credit", detailChecks());
+      infoCard("2. Sent lenders a summary, not your identity", detailShopping());
+      const offers = h("div", {class: "ccard"}, h("div", {class: "hd"}, "3. The offers that came back"));
+      for (const e of replies(0)) {
+        const d = e.data, off = d.type === "OFFER", inj = off && isInjected(d);
+        offers.append(tappable(h("div", {class: "crow" + (off ? "" : " dead")}, icon("bank", 16), h("span", {class: "k"}, LENDERS[d.sender] || d.sender),
+          off ? h("b", {class: inj ? "red" : ""}, pct(d.terms.apr), inj ? [" ", icon("warn", 14)] : null) : h("b", {}, "declined")), () => detailOffer(d)));
+      }
+      put(offers); appear(offers).catch(() => {}); scroll();
+      if (atk) {
+        const br = breach(atk.data.terms);
+        tappable(await say(`${LENDERS[atk.data.to]} hid an instruction in its offer to trick me into accepting ${pct(atk.data.terms.apr)}. I fell for it, `
+          + `but the exchange's referee blocked it because ${br.offer} is over your ${br.limit} limit.`, "alertmsg"), () => detailBlocked(atk));
+      }
+      infoCard(deal ? "4. The deal" : "4. Why I walked away", detailDone());
+      await say("Tap any offer or the warning for more detail.");
+    }
+    async function showNegotiation() { await say(`Here's how it went with ${name}:`); infoCard(`Negotiating with ${name}`, detailNegotiation()); }
   }
 
   send.onclick = () => submit(input.value);
