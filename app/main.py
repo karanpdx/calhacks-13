@@ -423,6 +423,17 @@ def safety_report(fresh: int = 0):
 @app.get("/safety")
 def safety_page():
     return FileResponse(os.path.join(STATIC, "safety.html"))
+@app.get("/api/lender/{lender_id}")
+def lender_queue(lender_id: str):
+    """One lender's queue across every admitted sandbox session, from that lender's side only: passport (as it priced
+    it), its own offers and books, anonymous verified quotes, outcome, and pre-funding exceptions. No names or ids."""
+    from exchange import lender_view
+    try:
+        return {"notice": NOTICE, **lender_view.queue(lender_id)}
+    except KeyError:
+        raise HTTPException(404, f"unknown lender {lender_id!r}")
+
+
 @app.get("/lender")
 def lender_page():
     """Lender operations dashboard prototype for monitoring and exception triage."""

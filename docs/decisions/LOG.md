@@ -2,6 +2,9 @@
 
 Important decisions, newest first. Format and rules: [PROCESS.md](PROCESS.md).
 
+## 2026-10-25: Lender console shows real sessions from the lender's side only
+`/lender` is built from the 17 admitted sandbox sessions per lender: passport as that lender priced it, its own offers and books, anonymous quotes, outcome; hashed ids, no names, never who won. Why: the mockup showed applicant names, which contradicted our own privacy rule. Gave up: the mockup's polished fake metrics.
+
 ## 2026-10-25: Safety case page runs every attack live instead of describing defenses
 `/safety` maps 11 threats to 10 layers, and each card's evidence comes from running that attack against the referee on page load (one also with the watchdog off, to show the layers are independent). Why: claims can't drift from the code, and judges see proof, not promises. Gave up: the scoreboard uses the scripted attacker unless a saved Claude run exists.
 

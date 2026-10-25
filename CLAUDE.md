@@ -89,7 +89,9 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
   replayable transcript, red-team scoreboard
 - `app/static/fairness.html` (`/fairness`): the fairness matrix, test results and disparity table; linked from the demo footer
 - `app/static/demo.html`: `/phone` is the sole borrower experience: agent chat, limits, shopping, results, explanations, EN/ES and narration (`approval=1`: the person accepts the loan). `/demo` retains scenes 1-4, Everyone / Borrower / Lender views and phone pairing (`/api/pair`).
-- `app/static/lender.html`, `lender.css`, `lender.js`: separate lender monitoring and exception workspace. The retired borrower dashboard and old exchange page redirect to `/phone`.
+- `app/static/lender.html`, `lender.css`, `lender.js` (`/lender?lender=campus_cu`): lender console built from real
+  sessions via `/api/lender/{id}` (`exchange/lender_view.py`): one lender's side only (passport as it priced it, its
+  offers, books, anonymous quotes, outcome, pre-funding exceptions); hashed application ids, no names or persona ids. The retired borrower dashboard and old exchange page redirect to `/phone`.
 - `docs/crs-brief.md`: what CRS wants / what the sandbox has
 
 ## Commands
