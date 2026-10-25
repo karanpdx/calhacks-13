@@ -82,21 +82,21 @@ announced on Oct 19 (a waitlist page, not built). Our own product and name; neve
   `session_id`); nothing settles until `POST /api/session/{id}/approve {"offer_id"}` or `/decline` (sessions in memory)
 - `app/static/index.html`: screening view
 - `app/static/fairness.html` (`/fairness`): the fairness matrix, test results and disparity table; linked from the demo footer
-- `app/static/demo.html` (`/demo`, `/phone`): the demo: scenes 1-4 with Everyone / Borrower / Lender views, the
-  iPhone chat with the agent (`approval=1`: the person accepts the loan), phone pairing (`/api/pair`)
+- `app/static/demo.html`: `/phone` is the sole borrower experience: agent chat, limits, shopping, results, explanations, EN/ES and narration (`approval=1`: the person accepts the loan). `/demo` retains scenes 1-4, Everyone / Borrower / Lender views and phone pairing (`/api/pair`).
+- `app/static/lender.html`, `lender.css`, `lender.js`: separate lender monitoring and exception workspace. The retired borrower dashboard and old exchange page redirect to `/phone`.
 - `docs/crs-brief.md`: what CRS wants / what the sandbox has
 
 ## Commands
 ```
 pip install -r requirements.txt
-pytest                                        # 192 offline tests
+pytest                                        # offline samples and stub models; no paid APIs
 python -m exchange.demo P01                   # one market session in the terminal
 python -m exchange.demo P01 --scenario injection
 python -m exchange.demo P03 --max-apr 16 --json
 python -m exchange.demo P17 --watchdog             # bureau disagreement flags + what to do
 python -m exchange.demo P01 --scenario drift --watchdog --review   # + Claude review (needs ANTHROPIC_API_KEY)
 uvicorn app.main:app --reload                 # http://127.0.0.1:8000
-# live CRS: export CRS_USER/CRS_PASS, put the Postman collection in crs/, open /demo (live by default; /demo?live=0 for samples)
+# live CRS: export CRS_USER/CRS_PASS, put the Postman collection in crs/, open /phone or /demo (live by default; ?live=0 for samples)
 ```
 
 ## Agent interfaces (how to plug in Claude-powered agents)

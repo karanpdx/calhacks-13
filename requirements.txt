@@ -3,4 +3,4 @@ uvicorn
 requests
 pytest
 httpx
-anthropic
+anthropic>=0.120.2,<1

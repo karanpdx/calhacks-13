@@ -35,7 +35,7 @@ The original milestone recorded a working agent-to-agent credit marketplace on `
 | Attack scenarios: bait_switch, injection, data_grab, drift | `exchange/scenarios.py` | Done |
 | API returning the full event log | `app/main.py` | Done |
 | Terminal demo | `python -m exchange.demo` | Done |
-| Exchange web page | `app/static/exchange.html` | Present; mandate chat and event streaming also exist; deployment/live-run readiness not verified in this review |
+| Borrower agent chat | `app/static/demo.html` at `/phone` | Sole borrower interface; separate dashboard and legacy exchange page removed. Mandate chat and event streaming APIs remain available. |
 | Live CRS sandbox run | `--live` | **Not yet verified** |
 
 **Results on the sample personas:** P01 prime: Prime Bank opens at 11.22% and ends at 10.17%. P03 (22, thin file): the credit union beats Prime's quote, 10.59% to 8.69%, and restructures to 48 months when she sets a $150 monthly limit. P04 (recent immigrant, no file) gets only an identity-based offer, which fits a 20% limit. P05 (subprime) walks away because nothing fits. P13 is blocked as fraud. P17's single-bureau collection is explained with how to dispute it.
@@ -54,7 +54,7 @@ The web page is done (Mohammed) and lenders now negotiate from real lending econ
 
 | Time | Task | Owner | Done when |
 | --- | --- | --- | --- |
-| Now-2 AM | **DONE (Mohammed)** at `/static/exchange.html`: chat to set limits, live market over a stream, deal / no deal / blocked screens, the "How your deal was made" judge panel; simulated items labeled | | P01 injection and P13 look right on a laptop screen |
+| Now-2 AM | **DONE (Mohammed)** in the original exchange page (now retired in favor of `/phone`): chat to set limits, live market over a stream, deal / no deal / blocked screens, the "How your deal was made" judge panel; simulated items labeled | | P01 injection and P13 look right on a laptop screen |
 | Now-11 PM | **Real-key Claude run**: `python -m exchange.demo P01 --scenario claude --watchdog` with `ANTHROPIC_API_KEY` | | Claude agents negotiate and the referee still holds |
 | Now-11 PM | **Live CRS run**: `python -m exchange.demo P01 --live` with the sandbox login | | One persona runs on live sandbox calls |
 | Before midnight | **Devpost draft** submitted: name, one-liner, what it does, how it's built, CRS products used, what's simulated | | Draft visible on Devpost |
@@ -104,6 +104,8 @@ Lead with one sentence judges can repeat: *CRS announced an agent-to-agent credi
 **Questions to prepare for:** Why not let Claude be the referee? What stops a lender from lying in free text? How would real lenders join? What's simulated? How is this different from a comparison site?
 
 ## Product flow and implementation priorities
+
+**Current product direction:** [Agent chat and lender app](connected-apps-plan.md). `/phone` is the sole borrower experience; the standalone borrower dashboard and old exchange page have been removed. The lender app remains separate. Shared application state and live updates remain planned work; lender staff monitor agents and handle exceptions.
 
 Research checked Oct 24, 2026. This section records the intended borrower and lender experience and the next implementation priorities. It takes precedence over the older sequencing below where they differ. It describes planned behavior, not features already shipped.
 
@@ -159,7 +161,7 @@ Code inspected: `exchange/borrower.py`, `exchange/llm_agents.py`, `exchange/refe
 - **Offer guarantees need a defined scope.** Current offers can be withdrawn, and the inspected terms do not carry an expiry. Define validity, conditions and withdrawal rules before claiming offers remain binding. Keep prequalification separate from a lender commitment.
 - **APR needs correction before real comparisons.** `finance.monthly_payment()` uses `Terms.apr` as the amortization interest rate, then `total_cost()` adds a fee separately. With applicable finance charges this is not a complete disclosed APR calculation [3]. Distinguish contractual interest rate, APR, gross principal, net proceeds and fee treatment; use validated cash-flow calculations without double-counting fees.
 - **36% is an exchange policy cap.** It is not proof that a product is lawful in every jurisdiction. Partner and product review must establish the applicable limits.
-- **The roadmap's page status is stale.** `app/static/exchange.html`, mandate chat and an SSE endpoint exist. Their presence does not establish deployed readiness or a verified live CRS/Claude run. The historical test count above was not rerun for this documentation update.
+- **The roadmap's page status is stale.** The original exchange page, mandate chat and an SSE endpoint existed at that review. The standalone page has since been retired in favor of `/phone`. Their presence does not establish deployed readiness or a verified live CRS/Claude run. The historical test count above was not rerun for this documentation update.
 
 ### Build order and completion checks
 
@@ -299,7 +301,7 @@ Goal: go from a sandbox demo to something real lenders and borrowers could use. 
 **Engineering**
 
 - Move from one in-process session to a service: a message bus, a durable event log, sessions that survive restarts.
-- Real-time UI over the event stream (first version done: server-sent events in the borrower app).
+- Real-time UI over the event stream (event-stream API exists; connect it to the agent chat).
 - Load test: many borrowers and dozens of lenders at once.
 - Observability: latency, blocks, flags, exclusions, outcomes per lender.
 

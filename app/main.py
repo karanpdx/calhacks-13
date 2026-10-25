@@ -13,10 +13,10 @@ import secrets
 import threading
 from collections import OrderedDict
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, Literal
 
-from fastapi import Body, FastAPI, HTTPException
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi import Body, FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, StreamingResponse, Response, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
@@ -120,6 +120,7 @@ from exchange.scenarios import build as build_scenario, SCENARIOS  # noqa: E402
 from exchange.watchdog import ClaudeReview  # noqa: E402
 from exchange import hood, person as person_view  # noqa: E402
 from exchange.adversary import report as red_team_report  # noqa: E402
+from exchange import i18n  # noqa: E402
 
 
 @app.get("/api/exchange/scenarios")
@@ -127,13 +128,14 @@ def exchange_scenarios():
     return {"scenarios": SCENARIOS, "lenders": {i: name for i, (name, _) in POLICIES.items()}}
 
 
-def _views(ex):
-    """The two readable views of a finished session: the person's screen and the judges' "under the hood" panel.
+def _views(ex, lang="en"):
+    """Borrower, observer and optional red-team projections of the session.
     A bug in either never breaks the session result itself."""
     out = {}
     for key, build in (("person", person_view.build), ("under_the_hood", hood.build), ("red_team", red_team_report)):
         try:
-            out[key] = build(ex)
+            view = build(ex, lang=lang) if key == "person" else build(ex)
+            out[key] = i18n.hood_view(view, ex, lang) if key == "under_the_hood" else view
         except Exception:
             log.exception("building %s view failed", key)
             out[key] = None
@@ -178,7 +180,8 @@ def _live_note(ex, note):
 @app.get("/api/exchange/{persona}")
 def exchange(persona: str, scenario: str = "normal", amount: float = 5000, min_amount: float = 3000,
              max_apr: float = 18.0, min_term: int = 12, max_term: int = 48, autopay: int = 1, max_fee: float = 0,
-             live: int = 0, watchdog: int = 1, review: int = 0, max_payment: Optional[float] = None, approval: int = 0):
+             live: int = 0, watchdog: int = 1, review: int = 0, max_payment: Optional[float] = None, approval: int = 0,
+             lang: Literal["en", "es"] = "en"):
     """Run one market session. Returns the full event log (gate, passport, every message with the referee's verdict,
     settlement, disclosure), plus `person` (the borrower's plain-English screen: deal, no deal or blocked) and
     `under_the_hood` (the judges' panel: plain-words feed, exclusions, which CRS product drove each decision).
@@ -190,12 +193,18 @@ def exchange(persona: str, scenario: str = "normal", amount: float = 5000, min_a
     ex, note = _exchange(persona, scenario, amount, min_amount, max_apr, min_term, max_term, autopay, max_fee, live,
                          watchdog, review, max_payment, approval)
     ex.run()
-    return _respond(ex, scenario, note, _hold(ex, note))
+    return _respond(ex, scenario, note, _hold(ex, note, lang), lang)
 
 
-def _respond(ex, scenario, note, sid=None):
-    return {"notice": NOTICE, "scenario": scenario, "live_note": _live_note(ex, note), "data_source": ex.source.name,
-            "session_id": sid, **ex.result(), **_views(ex)}
+def _presentation_note(ex, note, lang):
+    note = _live_note(ex, note)
+    return i18n.localized("event.source_note", lang) if lang == "es" and note else note
+
+
+def _respond(ex, scenario, note, sid=None, lang="en"):
+    return {"notice": i18n.localized("notice", lang), "scenario": scenario,
+            "live_note": _presentation_note(ex, note, lang), "data_source": ex.source.name,
+            "session_id": sid, "lang": lang, **ex.result(), **_views(ex, lang)}
 
 
 class Approval(BaseModel):
@@ -203,30 +212,30 @@ class Approval(BaseModel):
 
 
 @app.post("/api/session/{sid}/approve")
-def approve(sid: str, body: Approval):
+def approve(sid: str, body: Approval, lang: Optional[Literal["en", "es"]] = None):
     """The person approves their agent's recommendation: the referee checks it's that exact offer, still waiting and
     inside the mandate, then settles. Returns the finished session (same shape as /api/exchange/{persona})."""
     with SESSION_LOCK:
-        ex, note = _session(sid)
+        ex, note, session_lang = _session(sid)
         v = ex.approve(body.offer_id)
         if v.ok:
             SESSIONS.pop(sid, None)
     if not v.ok:
         raise HTTPException(409, v.reason)
-    return _respond(ex, ex.scenario, note)
+    return _respond(ex, ex.scenario, note, lang=lang or session_lang)
 
 
 @app.post("/api/session/{sid}/decline")
-def decline(sid: str):
+def decline(sid: str, lang: Optional[Literal["en", "es"]] = None):
     """The person turns down the recommendation: nothing is signed. Returns the finished session."""
     with SESSION_LOCK:
-        ex, note = _session(sid)
+        ex, note, session_lang = _session(sid)
         v = ex.decline()
         if v.ok:
             SESSIONS.pop(sid, None)
     if not v.ok:
         raise HTTPException(409, v.reason)
-    return _respond(ex, ex.scenario, note)
+    return _respond(ex, ex.scenario, note, lang=lang or session_lang)
 
 
 def _session(sid):
@@ -241,14 +250,15 @@ SESSIONS, MAX_SESSIONS = OrderedDict(), 200
 SESSION_LOCK = threading.Lock()  # one decision per session, even on a double tap
 
 
-def _hold(ex, note):
+def _hold(ex, note, lang="en"):
     """Keep a session that's waiting for approval; returns its id (unguessable), or None if nothing is waiting."""
     if not ex.awaiting_approval():
         return None
     sid = secrets.token_urlsafe(16)
-    SESSIONS[sid] = (ex, note)
-    while len(SESSIONS) > MAX_SESSIONS:
-        SESSIONS.popitem(last=False)
+    with SESSION_LOCK:
+        SESSIONS[sid] = (ex, note, lang)
+        while len(SESSIONS) > MAX_SESSIONS:
+            SESSIONS.popitem(last=False)
     return sid
 
 
@@ -260,7 +270,8 @@ def _sse(event, data):
 async def exchange_stream(persona: str, scenario: str = "normal", amount: float = 5000, min_amount: float = 3000,
                           max_apr: float = 18.0, min_term: int = 12, max_term: int = 48, autopay: int = 1,
                           max_fee: float = 0, live: int = 0, watchdog: int = 1, review: int = 0, pace: float = 0.6,
-                          max_payment: Optional[float] = None, approval: int = 0):
+                          max_payment: Optional[float] = None, approval: int = 0,
+                          lang: Literal["en", "es"] = "en"):
     """The same session as /api/exchange/{persona}, streamed as server-sent events while it runs.
 
     Events, in order: `meta` (scenario, notice, live note), then one event per referee log entry named after its
@@ -279,7 +290,7 @@ async def exchange_stream(persona: str, scenario: str = "normal", amount: float 
         plain-words feed item, and hand it to the event loop."""
         copy = json.loads(json.dumps(e, default=str))
         try:
-            copy["view"] = hood.describe(copy, ex)
+            copy["view"] = i18n.event_view(copy, ex, lang) if lang == "es" else hood.describe(copy, ex)
         except Exception:
             log.exception("describing event %s failed", e.get("seq"))
             copy["view"] = None
@@ -290,18 +301,22 @@ async def exchange_stream(persona: str, scenario: str = "normal", amount: float 
     async def run():
         try:
             r = await asyncio.to_thread(ex.run)
-            views = await asyncio.to_thread(_views, ex)
+            views = await asyncio.to_thread(_views, ex, lang)
             q.put_nowait(("result", {**{k: v for k, v in r.items() if k != "events"}, **views,
-                                     "live_note": _live_note(ex, note), "data_source": ex.source.name,
-                                     "session_id": _hold(ex, note)}))
+                                     "live_note": _presentation_note(ex, note, lang), "data_source": ex.source.name,
+                                     "lang": lang, "session_id": _hold(ex, note, lang)}))
         except Exception as e:  # the type only: never leak credentials or vendor bodies into the stream
-            q.put_nowait(("error", {"error": type(e).__name__, "note": "The session stopped; nothing was settled."}))
-        q.put_nowait(None)
+            q.put_nowait(("error", {"error": type(e).__name__, "note": i18n.localized("event.error", lang)}))
+        finally:
+            # A held session can later be approved in another request/event loop.
+            # Its finished stream must no longer receive those new engine events.
+            ex.listener = None
+            q.put_nowait(None)
 
     async def events():
         task = asyncio.create_task(run())
         try:
-            yield _sse("meta", {"notice": NOTICE, "persona": persona, "scenario": scenario, "live_note": note,
+            yield _sse("meta", {"notice": i18n.localized("notice", lang), "persona": persona, "scenario": scenario, "live_note": (i18n.localized("event.source_note", lang) if lang == "es" and note else note), "lang": lang,
                                 "data_source": ex.source.name,
                                 "mandate": {**vars(ex.mandate), "allow": sorted(ex.mandate.allow)}})
             while (item := await q.get()) is not None:
@@ -327,6 +342,7 @@ class ChatTurn(BaseModel):
 
 class ChatRequest(BaseModel):
     messages: list[ChatTurn] = Field(default_factory=list, max_length=40)
+    lang: Literal["en", "es"] = "en"
 
 
 @app.post("/api/chat/mandate")
@@ -335,12 +351,30 @@ def chat_mandate(req: ChatRequest):
     agent's reply, the limits understood so far, what's still missing, and a `mandate` once it's `ready`. Pass the
     mandate's fields to /api/exchange/{persona}/stream to send the agent to the market. Uses Claude when
     ANTHROPIC_API_KEY is set, otherwise a rule-based parser (`source` says which)."""
-    return {"notice": NOTICE, **MandateChat().turn([m.model_dump() for m in req.messages])}
+    return {"notice": i18n.localized("notice", req.lang), "lang": req.lang,
+            **MandateChat().turn([m.model_dump() for m in req.messages], lang=req.lang)}
+
+
+@app.get("/api/i18n.js")
+def borrower_catalog():
+    """Public presentation copy only; no credentials or applicant data."""
+    return Response("window.BORROWER_MESSAGES=" + json.dumps(i18n.catalog(), ensure_ascii=False) + ";",
+                    media_type="application/javascript", headers={"Cache-Control": "no-cache"})
 
 
 @app.get("/")
 def index():
     return FileResponse(os.path.join(STATIC, "index.html"))
+
+
+@app.get("/exchange", include_in_schema=False)
+@app.get("/borrower", include_in_schema=False)
+@app.get("/static/exchange.html", include_in_schema=False)
+@app.get("/static/borrower.html", include_in_schema=False)
+def retired_borrower_page(request: Request):
+    """Old borrower bookmarks now enter the sole borrower experience: agent chat."""
+    query = request.url.query
+    return RedirectResponse("/phone" + ("?" + query if query else ""), status_code=307)
 
 
 @app.get("/demo")
@@ -369,6 +403,10 @@ def fairness_report():
     proxy-field and consistency tests and the thin-file disparity report. Saved samples only. Internal check, not a
     legal fair-lending review."""
     return {"notice": NOTICE, **fairness.report()}
+@app.get("/lender")
+def lender_page():
+    """Lender operations dashboard prototype for monitoring and exception triage."""
+    return FileResponse(os.path.join(STATIC, "lender.html"))
 
 
 # ---------------------------------------------------------------- phone pairing (demo only)

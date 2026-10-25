@@ -10,31 +10,31 @@
           --green:#157347; --green-soft:#EAF6EF; --red:#B4232B; --red-soft:#FDECEC; --navy:#0F1B2D; --ios-blue:#0A66D8; }
   * { box-sizing:border-box; }
   html, body { height:100%; }
-  body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  body { margin:0; background:var(--bg); color:var(--ink); font:1rem/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
          display:flex; flex-direction:column; overflow:hidden; }
   header { background:var(--navy); color:#fff; padding:9px 28px; display:flex; align-items:center; gap:14px; flex-wrap:wrap; }
-  header .brand { font-weight:800; font-size:17px; }
-  header label { display:flex; align-items:center; gap:8px; font-size:13px; color:#C9D3E3; }
-  header select { font:inherit; font-size:14px; padding:5px 8px; border-radius:8px; border:1px solid #52627A; background:#1C2C44; color:#fff; max-width:270px; }
+  header .brand { font-weight:800; font-size:1.062rem; }
+  header label { display:flex; align-items:center; gap:8px; font-size:0.8125rem; color:#C9D3E3; }
+  header select { font:inherit; font-size:0.875rem; padding:5px 8px; border-radius:8px; border:1px solid #52627A; background:#1C2C44; color:#fff; max-width:270px; }
   nav { display:flex; gap:8px; margin-left:auto; }
   nav button { width:34px; height:34px; border-radius:50%; border:1px solid #52627A; background:transparent; color:#E6ECF5; font:inherit; font-weight:700; cursor:pointer; }
   nav button[aria-current="step"] { background:#fff; color:var(--navy); border-color:#fff; }
-  #src { display:inline-flex; align-items:center; gap:7px; font-size:13px; font-weight:700; padding:5px 12px; border-radius:99px; background:#2A3A52; color:#C9D3E3; }
+  #src { display:inline-flex; align-items:center; gap:7px; font-size:0.8125rem; font-weight:700; padding:5px 12px; border-radius:99px; background:#2A3A52; color:#C9D3E3; }
   #src i { width:9px; height:9px; border-radius:50%; background:#8A96A8; }
   #src.live { background:#E3F5EA; color:#0E5233; } #src.live i { background:#1F9D55; animation:blink 1.6s infinite; }
   @keyframes blink { 50% { opacity:.3; } }
   .intro { text-align:center; padding:14px 20px 0; }
-  .intro h1 { margin:0; font-size:32px; font-weight:800; letter-spacing:-.02em; }
-  .intro p { margin:2px 0 0; font-size:17px; color:var(--mute); }
+  .intro h1 { margin:0; font-size:2rem; font-weight:800; letter-spacing:-.02em; }
+  .intro p { margin:2px 0 0; font-size:1.062rem; color:var(--mute); }
   .seg { display:inline-flex; background:#E6E9EE; border-radius:99px; padding:3px; margin-top:10px; }
-  .seg button { font:inherit; font-size:14px; font-weight:700; border:0; background:transparent; color:var(--mute); padding:6px 16px; border-radius:99px; cursor:pointer; }
+  .seg button { font:inherit; font-size:0.875rem; font-weight:700; border:0; background:transparent; color:var(--mute); padding:6px 16px; border-radius:99px; cursor:pointer; }
   .seg button[aria-pressed="true"] { background:#fff; color:var(--ink); box-shadow:0 1px 4px rgba(16,36,62,.15); }
   main { flex:1; min-height:0; width:100%; max-width:1300px; margin:0 auto; padding:16px 28px;
          display:grid; grid-template-columns:1fr 1.15fr 1fr; gap:28px; align-items:start; }
   .lane { display:flex; flex-direction:column; gap:12px; align-items:stretch; }
-  .lane-t { text-align:center; font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); }
+  .lane-t { text-align:center; font-size:0.75rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); }
   footer { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:6px 28px 14px; max-width:1300px; width:100%; margin:0 auto; }
-  footer .fine { font-size:12px; color:var(--mute); }
+  footer .fine { font-size:0.75rem; color:var(--mute); }
   footer button { font:inherit; font-weight:700; min-height:46px; padding:0 22px; border-radius:12px; cursor:pointer; }
   #next { background:var(--blue); color:#fff; border:0; display:inline-flex; gap:8px; align-items:center; }
   #back { background:#fff; color:var(--blue); border:1px solid #C9D8F5; }
@@ -54,59 +54,59 @@
   .tile.dead { opacity:.4; filter:grayscale(1); } .tile.won { border:2px solid var(--green); background:var(--green-soft); }
   .ico { width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:var(--blue-soft); color:var(--blue); }
   .ico.round { border-radius:50%; } .ico.grey { background:#EEF0F3; color:var(--mute); } .ico.red { background:var(--red-soft); color:var(--red); }
-  .tname { font-weight:700; font-size:16px; } .tsub { font-size:13px; color:var(--mute); }
-  .big { font-size:30px; font-weight:800; letter-spacing:-.02em; margin-left:auto; }
-  .say { font-size:14px; font-style:italic; }
+  .tname { font-weight:700; font-size:1rem; } .tsub { font-size:0.8125rem; color:var(--mute); }
+  .big { font-size:1.875rem; font-weight:800; letter-spacing:-.02em; margin-left:auto; }
+  .say { font-size:0.875rem; font-style:italic; }
   /* the market has up to seven lenders: compact tiles so they all fit on a laptop screen */
   #L { gap:8px; } #L .tile { padding:7px 14px; } #L .ico { width:34px; height:34px; border-radius:10px; }
-  #L .tname { font-size:15px; } #L .big { font-size:23px; } #L .tile .stamp { font-size:13px; top:-9px; }
+  #L .tname { font-size:0.9375rem; } #L .big { font-size:1.438rem; } #L .tile .stamp { font-size:0.8125rem; top:-9px; }
   #hub { align-self:center; display:flex; flex-direction:column; align-items:center; gap:5px; }
   #hub .shield { width:76px; height:76px; border-radius:22px; background:var(--blue); color:#fff; display:flex; align-items:center; justify-content:center; transition:background .5s; }
   #hub.bad .shield { background:var(--red); } #hub.good .shield { background:var(--green); }
-  #hubSt { font-size:15px; font-weight:700; color:var(--mute); min-height:21px; }
+  #hubSt { font-size:0.9375rem; font-weight:700; color:var(--mute); min-height:21px; }
   .panel { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px 16px; position:relative; }
   .grid { display:grid; gap:9px 8px; align-items:center; }
-  .grid .lbl { display:flex; align-items:center; gap:10px; font-weight:600; font-size:15px; }
+  .grid .lbl { display:flex; align-items:center; gap:10px; font-weight:600; font-size:0.9375rem; }
   .grid .lbl .ico { width:34px; height:34px; border-radius:10px; }
-  .grid .hd { text-align:center; font-size:13px; font-weight:700; color:var(--mute); }
-  .res { display:flex; flex-direction:column; align-items:center; font-size:12px; color:var(--mute); }
+  .grid .hd { text-align:center; font-size:0.8125rem; font-weight:700; color:var(--mute); }
+  .res { display:flex; flex-direction:column; align-items:center; font-size:0.75rem; color:var(--mute); }
   .badge { width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; background:#EEF0F3; color:var(--mute); flex-shrink:0; }
   .badge.good { background:var(--green); color:#fff; } .badge.bad { background:var(--red); color:#fff; }
   .spin { width:20px; height:20px; border-radius:50%; border:3px solid #C9D8F5; border-top-color:var(--blue); animation:spin .8s linear infinite; flex-shrink:0; }
   @keyframes spin { to { transform:rotate(360deg); } }
-  .vs { display:flex; align-items:center; justify-content:center; gap:16px; } .vs .n { font-size:38px; font-weight:800; letter-spacing:-.03em; }
-  .vs .cap { font-size:13px; color:var(--mute); text-align:center; }
-  .doc-h { display:flex; align-items:center; gap:8px; font-weight:700; } .doc-t { font-size:19px; font-weight:800; margin:4px 0 6px; }
+  .vs { display:flex; align-items:center; justify-content:center; gap:16px; } .vs .n { font-size:2.375rem; font-weight:800; letter-spacing:-.03em; }
+  .vs .cap { font-size:0.8125rem; color:var(--mute); text-align:center; }
+  .doc-h { display:flex; align-items:center; gap:8px; font-weight:700; } .doc-t { font-size:1.188rem; font-weight:800; margin:4px 0 6px; }
   .bars i { display:block; height:7px; border-radius:4px; background:#EEF0F3; margin:5px 0; } .bars i:nth-child(2) { width:85%; } .bars i:nth-child(3) { width:60%; }
-  .hidden-line { color:#FBFBFB; font-size:7px; line-height:1.3; transition:all 1.4s ease; border-radius:10px; }
-  .hidden-line.shown { color:#7E1218; font-size:14px; font-weight:600; background:var(--red-soft); padding:8px 10px; margin-top:4px; }
-  .doc-cap { display:flex; align-items:center; gap:6px; margin-top:8px; font-size:13px; font-weight:700; color:var(--mute); } .doc-cap.alarm { color:var(--red); }
+  .hidden-line { color:#FBFBFB; font-size:0.4375rem; line-height:1.3; transition:all 1.4s ease; border-radius:10px; }
+  .hidden-line.shown { color:#7E1218; font-size:0.875rem; font-weight:600; background:var(--red-soft); padding:8px 10px; margin-top:4px; }
+  .doc-cap { display:flex; align-items:center; gap:6px; margin-top:8px; font-size:0.8125rem; font-weight:700; color:var(--mute); } .doc-cap.alarm { color:var(--red); }
   .thread { display:flex; flex-direction:column; gap:6px; }
-  .thread .hd { display:flex; justify-content:space-between; font-size:12px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--mute); }
-  .bub { max-width:85%; padding:5px 12px; border-radius:14px; font-size:13px; white-space:nowrap; }
-  .bub b { font-size:18px; margin-right:6px; }
+  .thread .hd { display:flex; justify-content:space-between; font-size:0.75rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--mute); }
+  .bub { max-width:85%; padding:5px 12px; border-radius:14px; font-size:0.8125rem; white-space:nowrap; }
+  .bub b { font-size:1.125rem; margin-right:6px; }
   .bub.me { align-self:flex-start; background:var(--blue-soft); color:#13306F; border-bottom-left-radius:4px; }
   .bub.them { align-self:flex-end; background:#EEF0F3; border-bottom-right-radius:4px; }
   .bub.yes { background:var(--green); color:#fff; }
-  .note { font-size:14px; color:var(--mute); text-align:center; padding:10px; }
-  .pill { display:inline-flex; align-items:center; gap:6px; font-size:14px; font-weight:700; padding:4px 12px; border-radius:99px; background:#EEF0F3; }
+  .note { font-size:0.875rem; color:var(--mute); text-align:center; padding:10px; }
+  .pill { display:inline-flex; align-items:center; gap:6px; font-size:0.875rem; font-weight:700; padding:4px 12px; border-radius:99px; background:#EEF0F3; }
 
   /* lender dashboard */
   .dev-wrap { display:flex; flex-direction:column; align-items:center; gap:10px; max-height:100%; }
-  .dev-label { display:flex; align-items:center; gap:7px; font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); }
+  .dev-label { display:flex; align-items:center; gap:7px; font-size:0.75rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); }
   .dash { width:820px; max-width:100%; height:440px; border-radius:16px; border:1px solid var(--line); background:#fff; overflow:hidden;
           display:flex; flex-direction:column; box-shadow:0 18px 40px rgba(16,36,62,.14); }
-  .dash-top { background:var(--navy); color:#fff; padding:11px 16px; display:flex; align-items:center; gap:10px; font-size:14px; }
+  .dash-top { background:var(--navy); color:#fff; padding:11px 16px; display:flex; align-items:center; gap:10px; font-size:0.875rem; }
   .dash-top span { color:#C9D3E3; } .dash.evil .dash-top { background:#5C1015; }
-  .simtag { margin-left:auto; font-size:11px; font-weight:700; color:#6B4700 !important; background:#FFF4D6; border-radius:4px; padding:1px 6px; }
+  .simtag { margin-left:auto; font-size:0.6875rem; font-weight:700; color:#6B4700 !important; background:#FFF4D6; border-radius:4px; padding:1px 6px; }
   .dash-body { flex:1; min-height:0; padding:18px; display:grid; grid-template-columns:1fr 1fr; gap:16px; align-items:start; }
   .dcard { border:1px solid var(--line); border-radius:14px; padding:14px 16px; display:flex; flex-direction:column; gap:8px; }
-  .dcard h3 { margin:0; font-size:13px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--mute); }
+  .dcard h3 { margin:0; font-size:0.8125rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--mute); }
   .redact { display:inline-block; background:#121826; color:transparent; border-radius:3px; user-select:none; }
-  .kv2 { display:grid; grid-template-columns:1fr auto; gap:6px 12px; font-size:15px; } .kv2 .v { font-weight:700; text-align:right; }
+  .kv2 { display:grid; grid-template-columns:1fr auto; gap:6px 12px; font-size:0.9375rem; } .kv2 .v { font-weight:700; text-align:right; }
   .verdict-bad { border:2px solid var(--red); background:var(--red-soft); color:#7E1218; }
   .verdict-ok { border:2px solid var(--green); background:var(--green-soft); color:#0E5233; }
-  .code { font-family:ui-monospace,Consolas,monospace; font-size:13px; font-weight:700; }
+  .code { font-family:ui-monospace,Consolas,monospace; font-size:0.8125rem; font-weight:700; }
   .p-row { display:flex; align-items:center; gap:10px; }
 
   /* iPhone */
@@ -118,20 +118,20 @@
   .screen { position:relative; height:100%; border-radius:44px; overflow:hidden; background:#F2F2F7; display:flex; flex-direction:column;
             font-family:-apple-system,"SF Pro Text",system-ui,"Segoe UI",sans-serif; }
   .island { position:absolute; top:10px; left:50%; transform:translateX(-50%); width:31%; height:26px; border-radius:20px; background:#000; z-index:3; }
-  .status { height:46px; flex-shrink:0; display:flex; align-items:flex-end; justify-content:space-between; padding:0 26px 6px 30px; font-size:14px; font-weight:600; }
+  .status { height:46px; flex-shrink:0; display:flex; align-items:flex-end; justify-content:space-between; padding:0 26px 6px 30px; font-size:0.875rem; font-weight:600; }
   .status .ic { display:flex; gap:5px; align-items:center; }
   .app { flex:1; min-height:0; overflow-y:auto; padding:6px 14px 26px; scrollbar-width:none; display:flex; flex-direction:column; gap:10px; }
   .app::-webkit-scrollbar { display:none; } .app > *, #app > div > * { flex-shrink:0; }
   .homebar { position:absolute; bottom:7px; left:50%; transform:translateX(-50%); width:36%; height:5px; border-radius:3px; background:#111; z-index:3; }
-  .ios-sub { font-size:13px; color:#6C6C70; }
-  .ios-title { font-size:26px; font-weight:800; letter-spacing:-.02em; line-height:1.15; }
-  .ios-sec { font-size:12px; font-weight:600; color:#6C6C70; text-transform:uppercase; letter-spacing:.04em; margin:4px 4px -4px; }
+  .ios-sub { font-size:0.8125rem; color:#6C6C70; }
+  .ios-title { font-size:1.625rem; font-weight:800; letter-spacing:-.02em; line-height:1.15; }
+  .ios-sec { font-size:0.75rem; font-weight:600; color:#6C6C70; text-transform:uppercase; letter-spacing:.04em; margin:4px 4px -4px; }
   .ios-group { background:#fff; border-radius:13px; overflow:hidden; }
-  .ios-row { display:flex; align-items:center; gap:10px; padding:10px 12px; font-size:15px; border-top:.5px solid #E2E2E7; min-height:44px; }
+  .ios-row { display:flex; align-items:center; gap:10px; padding:10px 12px; font-size:0.9375rem; border-top:.5px solid #E2E2E7; min-height:44px; }
   .ios-row:first-child { border-top:0; }
   .ios-row .k { flex:1; } .ios-row .v { font-weight:700; }
   .stepper { display:flex; align-items:center; gap:8px; }
-  .stepper button { width:30px; height:30px; border-radius:50%; border:0; background:#E9E9EE; font-size:18px; font-weight:700; color:var(--ios-blue); cursor:pointer; }
+  .stepper button { width:30px; height:30px; border-radius:50%; border:0; background:#E9E9EE; font-size:1.125rem; font-weight:700; color:var(--ios-blue); cursor:pointer; }
   input[type=range] { width:100%; accent-color:var(--ios-blue); }
   .ios-row select { font:inherit; border:0; background:transparent; color:var(--ios-blue); font-weight:600; text-align:right; }
   .switch { position:relative; width:46px; height:28px; flex-shrink:0; }
@@ -140,20 +140,20 @@
   .switch span::after { content:""; position:absolute; top:2px; left:2px; width:24px; height:24px; border-radius:50%; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,.2); transition:left .3s; }
   .switch input:checked + span { background:#34C759; } .switch input:checked + span::after { left:20px; }
   .switch input:focus-visible + span { outline:2px solid var(--ios-blue); outline-offset:2px; }
-  .ios-btn { font:inherit; font-size:17px; font-weight:700; border:0; border-radius:14px; background:var(--ios-blue); color:#fff; min-height:50px; cursor:pointer; }
+  .ios-btn { font:inherit; font-size:1.062rem; font-weight:700; border:0; border-radius:14px; background:var(--ios-blue); color:#fff; min-height:50px; cursor:pointer; }
   .ios-btn:disabled { opacity:.45; cursor:default; }
   .ios-btn.dock { position:sticky; bottom:0; box-shadow:0 -10px 16px #F2F2F7, 0 6px 14px rgba(10,102,216,.3); }
   .ios-row { padding:8px 12px; min-height:42px; }
   .ios-btn.ghost { background:#fff; color:var(--ios-blue); }
   .wants { display:flex; flex-wrap:wrap; gap:5px; }
-  .wants span { font-size:12px; font-weight:700; background:#fff; border-radius:99px; padding:3px 9px; }
+  .wants span { font-size:0.75rem; font-weight:700; background:#fff; border-radius:99px; padding:3px 9px; }
   .steps .ios-row .st { width:24px; height:24px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .steps .done { color:#34C759; } .steps .fail { color:#FF3B30; } .steps .wait { width:12px; height:12px; border-radius:50%; border:2px solid #C7C7CC; }
   .steps .ios-row.off { color:#A1A1A6; }
   .orow b { margin-left:auto; } .orow.dead { color:#A1A1A6; } .orow .red { color:#FF3B30; }
-  .alert { background:#FFF0EF; border:1.5px solid #FF3B30; color:#8E1C14; border-radius:13px; padding:10px 12px; font-size:14px; }
+  .alert { background:#FFF0EF; border:1.5px solid #FF3B30; color:#8E1C14; border-radius:13px; padding:10px 12px; font-size:0.875rem; }
   .good-card { background:#fff; border:2px solid #34C759; border-radius:13px; padding:12px; }
-  .big-pay { font-size:38px; font-weight:800; letter-spacing:-.03em; line-height:1.1; }
+  .big-pay { font-size:2.375rem; font-weight:800; letter-spacing:-.03em; line-height:1.1; }
 
   /* iMessage-style chat with the agent */
   .app.chatmode { padding:0; overflow:hidden; gap:0; }
@@ -170,17 +170,17 @@
                 align-items:center; justify-content:center; box-shadow:0 2px 10px rgba(0,0,0,.18); }
   .pill { display:inline-flex; align-items:center; gap:4px; border-radius:99px; background:var(--c-pill); color:var(--c-pill-fg);
           -webkit-backdrop-filter:saturate(180%) blur(18px); backdrop-filter:saturate(180%) blur(18px); box-shadow:0 1px 6px rgba(0,0,0,.12); }
-  .chat-h .nm { font-size:14px; font-weight:600; padding:4px 12px; }
-  .chat-h .side { position:absolute; top:8px; height:36px; padding:0 12px; font-size:14px; font-weight:600; }
+  .chat-h .nm { font-size:0.875rem; font-weight:600; padding:4px 12px; }
+  .chat-h .side { position:absolute; top:8px; height:36px; padding:0 12px; font-size:0.875rem; font-weight:600; }
   .chat-h .side.l { left:10px; } .chat-h .side.r { right:10px; }
-  .chat-h .side select { position:absolute; inset:0; opacity:0; width:100%; font-size:16px; }  /* tap the pill: the iPhone's own picker opens */
+  .chat-h .side select { position:absolute; inset:0; opacity:0; width:100%; font-size:1rem; }  /* tap the pill: the iPhone's own picker opens */
   .chat-h .dot { width:8px; height:8px; border-radius:50%; background:#30D158; }
   .msgs { flex:1; min-height:0; overflow-y:auto; padding:96px 10px 6px; display:flex; flex-direction:column; gap:3px; scrollbar-width:none; }
   .msgs::-webkit-scrollbar { display:none; }
   .msgs > * { flex-shrink:0; }  /* bubbles and cards keep their full height; the conversation scrolls instead */
-  .sysnote { align-self:center; text-align:center; font-size:12px; color:var(--c-sub); margin:4px 0 8px; }
+  .sysnote { align-self:center; text-align:center; font-size:0.75rem; color:var(--c-sub); margin:4px 0 8px; }
   .sysnote button { font:inherit; color:var(--c-chip); background:none; border:0; padding:0; cursor:pointer; }
-  .msg { max-width:78%; padding:7px 12px; border-radius:18px; font-size:15px; line-height:1.3; word-wrap:break-word; white-space:pre-wrap; }
+  .msg { max-width:78%; padding:7px 12px; border-radius:18px; font-size:0.9375rem; line-height:1.3; word-wrap:break-word; white-space:pre-wrap; }
   .msg.them { align-self:flex-start; background:var(--c-them); color:var(--c-them-fg); border-bottom-left-radius:5px; }
   .msg.me { align-self:flex-end; background:#0A84FF; color:#fff; border-bottom-right-radius:5px; }
   .msg + .msg.me, .msg.me + .msg.them, .msg.them + .msg.me { margin-top:6px; }
@@ -189,25 +189,25 @@
   .msg.typing i:nth-child(2) { animation-delay:.2s; } .msg.typing i:nth-child(3) { animation-delay:.4s; }
   @keyframes dot { 0%, 60%, 100% { opacity:.35; transform:translateY(0); } 30% { opacity:1; transform:translateY(-3px); } }
   .plan { align-self:stretch; margin:8px 2px 4px; border-radius:18px; padding:14px; background:var(--c-card); display:flex; flex-direction:column; gap:8px; }
-  .plan .t { font-size:13px; font-weight:700; color:var(--c-sub); text-transform:uppercase; letter-spacing:.04em; }
-  .plan .r { display:flex; justify-content:space-between; font-size:15px; } .plan .r b { font-weight:700; }
-  .plan .fine { font-size:12px; color:var(--c-sub); }
+  .plan .t { font-size:0.8125rem; font-weight:700; color:var(--c-sub); text-transform:uppercase; letter-spacing:.04em; }
+  .plan .r { display:flex; justify-content:space-between; font-size:0.9375rem; } .plan .r b { font-weight:700; }
+  .plan .fine { font-size:0.75rem; color:var(--c-sub); }
   /* suggestions are quick replies at the end of the conversation (they scroll with it), not a fixed strip */
   .chips { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:6px; padding:8px 0 2px; align-self:stretch; }
   .chips:empty { display:none; }
-  .chips button { font:inherit; font-size:14px; white-space:nowrap; border:1px solid var(--c-chip); background:transparent; color:var(--c-chip); border-radius:99px; padding:6px 12px; cursor:pointer; }
+  .chips button { font:inherit; font-size:0.875rem; white-space:nowrap; border:1px solid var(--c-chip); background:transparent; color:var(--c-chip); border-radius:99px; padding:6px 12px; cursor:pointer; }
   .composer { display:flex; align-items:center; gap:8px; padding:6px 10px 26px; background:var(--c-bg); }
   body[data-mode="phone"] .composer { padding-bottom:calc(10px + env(safe-area-inset-bottom)); }
-  .composer input { flex:1; min-width:0; font:inherit; font-size:15px; border:1px solid var(--c-line); background:var(--c-field); color:var(--c-fg);
+  .composer input { flex:1; min-width:0; font:inherit; font-size:0.9375rem; border:1px solid var(--c-line); background:var(--c-field); color:var(--c-fg);
                     border-radius:20px; padding:8px 14px; outline:none; }
   .composer input::placeholder { color:var(--c-sub); }
   .composer input:focus { border-color:#0A84FF; }
   .composer button { width:32px; height:32px; border-radius:50%; border:0; background:#0A84FF; color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; }
   .composer button:disabled { background:#C7C7CC; }
   /* on a real phone: iOS-size text, and dark mode when the iPhone is in dark mode */
-  body[data-mode="phone"] .msg { font-size:17px; padding:8px 13px; }
-  body[data-mode="phone"] .composer input { font-size:17px; }
-  body[data-mode="phone"] .detail .msg { font-size:14px; padding:5px 10px; }
+  body[data-mode="phone"] .msg { font-size:1.062rem; padding:8px 13px; }
+  body[data-mode="phone"] .composer input { font-size:1.062rem; }
+  body[data-mode="phone"] .detail .msg { font-size:0.875rem; padding:5px 10px; }
   @media (prefers-color-scheme: dark) {
     body[data-mode="phone"] .chat { --c-bg:#000; --c-them:#26252A; --c-them-fg:#fff; --c-fg:#fff; --c-sub:#8D8D93; --c-pill:rgba(44,44,46,.72);
       --c-pill-fg:#fff; --c-line:#3A3A3C; --c-field:#000; --c-card:#1C1C1E; --c-chip:#409CFF; --c-fade:0,0,0; }
@@ -215,13 +215,13 @@
   /* cards the agent posts in the chat while it shops (progress, offers, deal); rows open details when tapped */
   .chat { --c-alert:#FFF0EF; --c-alert-fg:#8E1C14; --c-ok:#34C759; }
   .ccard { align-self:stretch; background:var(--c-card); border-radius:18px; overflow:hidden; margin:6px 0 4px; }
-  .ccard .hd { padding:10px 14px 6px; font-size:12px; font-weight:700; color:var(--c-sub); text-transform:uppercase; letter-spacing:.04em; }
-  .ccard .crow { display:flex; align-items:center; gap:10px; padding:10px 14px; border-top:.5px solid var(--c-line); font-size:15px; }
+  .ccard .hd { padding:10px 14px 6px; font-size:0.75rem; font-weight:700; color:var(--c-sub); text-transform:uppercase; letter-spacing:.04em; }
+  .ccard .crow { display:flex; align-items:center; gap:10px; padding:10px 14px; border-top:.5px solid var(--c-line); font-size:0.9375rem; }
   .ccard .crow .k { flex:1; } .ccard .crow.off { opacity:.45; } .ccard .crow.dead { color:var(--c-sub); }
   .ccard .crow b.red { color:#FF453A; }
   .ccard.deal { border:2px solid var(--c-ok); padding-bottom:4px; }
   .ccard.deal .body { padding:2px 14px 10px; display:flex; flex-direction:column; gap:3px; }
-  .ccard.deal .pay { font-size:34px; font-weight:800; letter-spacing:-.02em; }
+  .ccard.deal .pay { font-size:2.125rem; font-weight:800; letter-spacing:-.02em; }
   .ccard.deal .saved { color:var(--c-ok); font-weight:700; }
   .msg.alertmsg { background:var(--c-alert); color:var(--c-alert-fg); border:1px solid #FF453A; }
   .msg.status { display:flex; align-items:center; gap:8px; color:var(--c-sub); }  /* the one line that updates while the agent works */
@@ -247,24 +247,24 @@
   .alert.tap, .good-card.tap { position:relative; padding-right:30px; }
   .alert.tap .chev, .good-card.tap .chev { position:absolute; right:9px; top:11px; margin:0; }
   .alert.tap:active { background:#FFE5E3; } .good-card.tap:active { background:#F4FBF6; }
-  .detail { background:#FAFAFC; border-top:.5px solid #E2E2E7; padding:8px 12px 10px; font-size:13px; color:#3A3A3C; display:flex; flex-direction:column; gap:5px; }
+  .detail { background:#FAFAFC; border-top:.5px solid #E2E2E7; padding:8px 12px 10px; font-size:0.8125rem; color:#3A3A3C; display:flex; flex-direction:column; gap:5px; }
   .detail.card { border:1px solid #E2E2E7; border-radius:12px; background:#fff; }
   .drow { display:flex; justify-content:space-between; gap:10px; } .drow b { text-align:right; } .drow b.red { color:#FF3B30; }
   .dnote { color:#6C6C70; }
   .dq { font-style:italic; background:#FFF0EF; color:#8E1C14; border-radius:8px; padding:6px 8px; }
-  .detail .msg { font-size:13px; max-width:88%; padding:5px 10px; }
-  .dh { font-size:11px; font-weight:700; color:#6C6C70; text-transform:uppercase; letter-spacing:.04em; margin-top:4px; }
+  .detail .msg { font-size:0.8125rem; max-width:88%; padding:5px 10px; }
+  .dh { font-size:0.6875rem; font-weight:700; color:#6C6C70; text-transform:uppercase; letter-spacing:.04em; margin-top:4px; }
 
   /* agent activity, beside the phone */
   .log { width:390px; max-width:100%; max-height:640px; align-self:center; height:100%; display:flex; flex-direction:column; gap:10px; }
-  .log h2 { margin:0; font-size:13px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); display:flex; align-items:center; gap:8px; }
+  .log h2 { margin:0; font-size:0.8125rem; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--mute); display:flex; align-items:center; gap:8px; }
   .log ol { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:8px; overflow-y:auto; scrollbar-width:thin; }
-  .log li { display:flex; gap:10px; align-items:flex-start; background:#fff; border:1px solid var(--line); border-radius:14px; padding:10px 12px; font-size:14px; }
+  .log li { display:flex; gap:10px; align-items:flex-start; background:#fff; border:1px solid var(--line); border-radius:14px; padding:10px 12px; font-size:0.875rem; }
   .log li .ico { width:32px; height:32px; border-radius:9px; }
   .log li.ref { border-color:#C9D8F5; } .log li.bad { border-color:var(--red); background:var(--red-soft); }
   .log li.good { border-color:var(--green); background:var(--green-soft); }
-  .log li .who { font-size:12px; font-weight:700; color:var(--mute); }
-  .log .empty { color:var(--mute); font-size:14px; padding:6px 2px; }
+  .log li .who { font-size:0.75rem; font-weight:700; color:var(--mute); }
+  .log .empty { color:var(--mute); font-size:0.875rem; padding:6px 2px; }
 
   /* /phone: the borrower app alone, full screen on a real phone */
   body[data-mode="phone"] { height:100dvh; background:#F2F2F7; display:flex !important; flex-direction:column; overflow:hidden !important; }
@@ -275,14 +275,14 @@
   body[data-mode="phone"] header { padding:8px 12px; gap:8px; flex-wrap:nowrap; }
   body[data-mode="phone"] header .brand { display:none; }
   body[data-mode="phone"] header label { flex:1; min-width:0; }
-  body[data-mode="phone"] header select { width:100%; max-width:none; font-size:16px; }
+  body[data-mode="phone"] header select { width:100%; max-width:none; font-size:1rem; }
   /* the top bar floats too (blurred), so the screen below it is all content */
   body[data-mode="phone"] { --hdr:48px; }
   body[data-mode="phone"] header { position:absolute; top:0; left:0; right:0; z-index:6; height:var(--hdr);
                                    background:rgba(15,27,45,.84); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px); }
   /* iPhone Safari zooms into any text box or dropdown under 16px when it's tapped */
-  body[data-mode="phone"] .composer input, body[data-mode="phone"] .ios-row select { font-size:16px; }
-  body[data-mode="phone"] #src { font-size:11px; padding:3px 8px; white-space:nowrap; flex-shrink:0; }
+  body[data-mode="phone"] .composer input, body[data-mode="phone"] .ios-row select { font-size:1rem; }
+  body[data-mode="phone"] #src { font-size:0.6875rem; padding:3px 8px; white-space:nowrap; flex-shrink:0; }
   body[data-mode="phone"] #phoneView { display:flex !important; padding:0 !important; flex:1; min-height:0; }
   body[data-mode="phone"] .iphone { height:100%; max-height:none; aspect-ratio:auto; width:100%; padding:0; border-radius:0; background:none; box-shadow:none; }
   body[data-mode="phone"] .iphone::before, body[data-mode="phone"] .iphone::after { display:none; }
@@ -292,13 +292,14 @@
   body[data-mode="phone"] .ios-btn.dock { bottom:calc(8px + env(safe-area-inset-bottom)); }
 
   #fx { position:fixed; inset:0; pointer-events:none; z-index:50; }
-  .token { position:fixed; left:0; top:0; padding:6px 13px; border-radius:99px; background:var(--blue); color:#fff; font-size:14px; font-weight:800;
+  .token { position:fixed; left:0; top:0; padding:6px 13px; border-radius:99px; background:var(--blue); color:#fff; font-size:0.875rem; font-weight:800;
            white-space:nowrap; box-shadow:0 8px 22px rgba(16,36,62,.28); }
   .token.good { background:var(--green); } .token.bad { background:var(--red); } .token.grey { background:#6B7480; }
   .stamp { position:absolute; right:12px; top:-12px; border:3px solid currentColor; border-radius:8px; padding:2px 10px; font-weight:900;
-           letter-spacing:.06em; font-size:16px; background:#fff; transform:rotate(-8deg); }
+           letter-spacing:.06em; font-size:1rem; background:#fff; transform:rotate(-8deg); }
   .stamp.good { color:var(--green); } .stamp.bad { color:var(--red); }
 </style>
+<link rel="stylesheet" href="/static/chat-access.css">
 </head>
 <body data-view="all">
 <header>
@@ -328,9 +329,9 @@
   <div class="iphone" aria-label="Borrower's phone">
     <div class="screen"><div class="island"></div>
       <div class="status"><span>9:41</span><span class="ic" data-status></span></div>
-      <div class="app" id="app"></div><div class="homebar"></div></div>
+      <div class="app" id="app" role="region" aria-label="Borrower" tabindex="-1"></div><div class="homebar"></div></div>
   </div>
-  <div class="log"><h2><span data-icon="robot"></span>What the agent is doing</h2><ol id="log"></ol></div>
+  <div class="log"><h2><span data-icon="robot"></span>What the agent is doing</h2><ol id="log" role="log" aria-live="polite" aria-relevant="additions text"></ol></div>
 </div>
 
 <footer>
@@ -340,13 +341,15 @@
 </footer>
 <div id="fx" aria-hidden="true"></div>
 
+<script src="/api/i18n.js"></script>
+<script src="/static/chat-access.js"></script>
 <script>
 // ------------------------------------------------------------------ helpers
 const $ = s => document.querySelector(s);
 function h(tag, attrs, ...kids) {  // strings become text nodes: agent text can never inject markup
   const el = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs || {})) { if (k === "class") el.className = v; else if (v != null && v !== false) el.setAttribute(k, v); }
-  for (const k of kids.flat()) if (k != null && k !== false) el.append(k instanceof Node ? k : String(k));
+  for (const k of kids.flat()) if (k != null && k !== false) el.append(k instanceof Node ? k : ((attrs || {})["data-source-record"] || /\bme\b/.test((attrs || {}).class || "") ? String(k) : BorrowerUI.text(k)));
   return el;
 }
 const ICONS = {
@@ -379,8 +382,8 @@ document.querySelectorAll("[data-icon]").forEach(e => e.append(icon(e.dataset.ic
 $("[data-status]").innerHTML = '<svg width="17" height="11" viewBox="0 0 17 11" aria-hidden="true"><rect x="0" y="7" width="3" height="4" rx="1"/><rect x="4.5" y="5" width="3" height="6" rx="1"/><rect x="9" y="2.5" width="3" height="8.5" rx="1"/><rect x="13.5" y="0" width="3" height="11" rx="1"/></svg>'
   + '<svg width="15" height="11" viewBox="0 0 15 11" aria-hidden="true"><path d="M7.5 2.2c2.1 0 4 .8 5.4 2.1l1.1-1.1A9.2 9.2 0 0 0 1 3.2l1.1 1.1a7.6 7.6 0 0 1 5.4-2.1zm0 3.1c1.2 0 2.4.5 3.2 1.3l1.1-1.1a6.2 6.2 0 0 0-8.6 0l1.1 1.1c.8-.8 2-1.3 3.2-1.3zm0 3.1c.4 0 .8.2 1.1.5L7.5 10 6.4 8.9c.3-.3.7-.5 1.1-.5z"/></svg>'
   + '<svg width="26" height="12" viewBox="0 0 26 12" aria-hidden="true"><rect x=".5" y=".5" width="22" height="11" rx="3" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="17" height="8" rx="1.8"/><rect x="23.5" y="4" width="1.8" height="4" rx=".9" opacity=".4"/></svg>';
-const money = (n, d = 0) => "$" + Number(n).toLocaleString("en-US", {minimumFractionDigits: d, maximumFractionDigits: d});
-const pct = n => (Math.round(n * 100) / 100).toFixed(2).replace(/0$/, "") + "%";
+const money = (n, d = 0) => BorrowerUI.money(n, d);
+const pct = n => Number(n).toLocaleString(BorrowerUI.lang === "es" ? "es-ES" : "en-US", {maximumFractionDigits: 2}) + "%";
 const first = name => String(name || "").split(" ")[0];
 const monthly = (amt, apr, n) => { const r = apr / 1200; return r ? amt * r / (1 - (1 + r) ** -n) : amt / n; };
 const get = async u => { const r = await fetch(u); if (!r.ok) throw new Error(`${r.status} ${u}`); return r.json(); };
@@ -390,9 +393,9 @@ const get = async u => { const r = await fetch(u); if (!r.ok) throw new Error(`$
 const STOP = Symbol("stop"), reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
 let run = 0, speed = 1, cur = 0;
 const alive = id => { if (id !== run) throw STOP; };
-async function wait(ms) { const id = run; if (speed) await new Promise(r => setTimeout(r, ms * speed)); alive(id); }
+async function wait(ms) { const id = run; if (speed && !reduced) await new Promise(r => setTimeout(r, ms * speed)); alive(id); }
 async function anim(el, kf, ms, easing = "cubic-bezier(.2,.8,.2,1)") {
-  const id = run, a = el.animate(kf, {duration: speed ? ms * speed : 0, easing, fill: "forwards"});
+  const id = run, a = el.animate(kf, {duration: speed && !reduced ? ms * speed : 0, easing, fill: "forwards"});
   try { await a.finished; } catch (e) { /* cancelled */ }
   alive(id); return a;
 }
@@ -400,10 +403,10 @@ const appear = el => anim(el, [{opacity: 0, transform: "translateY(10px)"}, {opa
 const vanish = el => anim(el, [{opacity: 1}, {opacity: 0, transform: "scale(.96)"}], 450).then(() => el.remove());
 function shake(el) { if (speed && !reduced) el.animate([{transform: "translateX(0)"}, {transform: "translateX(-8px)"}, {transform: "translateX(8px)"},
   {transform: "translateX(-5px)"}, {transform: "translateX(0)"}], {duration: 420}); }
-const pop = el => { if (speed) el.animate([{transform: "scale(.94)"}, {transform: "scale(1.03)"}, {transform: "scale(1)"}], {duration: 450}); };
+const pop = el => { if (speed && !reduced) el.animate([{transform: "scale(.94)"}, {transform: "scale(1.03)"}, {transform: "scale(1)"}], {duration: 450}); };
 async function countTo(el, from, to, ms, fmt) {
   const id = run;
-  if (!speed) { el.textContent = fmt(to); return; }
+  if (!speed || reduced) { el.textContent = fmt(to); return; }
   const t0 = performance.now(), d = ms * speed;
   await new Promise(res => { const step = now => { if (id !== run) return res(); const k = Math.min(1, (now - t0) / d), e = 1 - (1 - k) ** 3;
     el.textContent = fmt(from + (to - from) * e); k < 1 ? requestAnimationFrame(step) : res(); }; requestAnimationFrame(step); });
@@ -449,7 +452,7 @@ let D = {}, LENDERS = {}, PEOPLE = [];
 let M = {amount: 5000, min_amount: 3000, max_apr: 18, min_term: 12, max_term: 48, autopay: 1, max_fee: 0, max_payment: null};
 const FOIL = "P13";
 const LIVE = new URLSearchParams(location.search).get("live") === "0" ? "" : "live=1";
-const LABEL = {APPROVE: "strong credit", REVIEW: "needs a closer look", DECLINE: "likely turned down", NO_FILE: "no credit file yet"};
+const LABEL = {APPROVE: BorrowerUI.message("strong credit"), REVIEW: BorrowerUI.message("needs a closer look"), DECLINE: BorrowerUI.message("likely turned down"), NO_FILE: BorrowerUI.message("no credit file yet")};
 const scoreOf = d => { const s = Object.values(d.scores || {}).filter(x => typeof x === "number"); return s.length ? Math.min(...s) : null; };
 const admitted = () => D.ex.admitted;
 const attackMsg = () => D.msgs.find(x => !x.verdict.ok);
@@ -458,11 +461,12 @@ const isInjected = d => /ignore/i.test(d.text || "");
 function focusLender() {  // the lender the story follows: the winner, else the best honest opening offer
   if (D.ex.deal) return D.ex.deal.lender;
   if (D.ex.awaiting_approval) return D.ex.awaiting_approval.lender;
+  if (D.ex.awaiting_approval) return D.ex.awaiting_approval.lender;
   const offers = replies(0).filter(e => e.data.type === "OFFER" && !isInjected(e.data)).sort((a, b) => a.data.terms.apr - b.data.terms.apr);
   return offers.length ? offers[0].data.sender : D.lenderIds[0];
 }
 function mandateQuery() {
-  const q = {scenario: "demo", watchdog: 0, amount: M.amount, min_amount: Math.min(M.min_amount ?? 3000, M.amount), max_apr: M.max_apr,
+  const q = {lang: BorrowerUI.lang, scenario: "demo", watchdog: 0, amount: M.amount, min_amount: Math.min(M.min_amount ?? 3000, M.amount), max_apr: M.max_apr,
              min_term: M.min_term, max_term: M.max_term, autopay: M.autopay, max_fee: M.max_fee};
   if (M.max_payment) q.max_payment = M.max_payment;
   return new URLSearchParams(q) + (LIVE ? "&" + LIVE : "");
@@ -470,7 +474,7 @@ function mandateQuery() {
 // How an offer breaks the person's limits, for the "31.9% > 18%" style comparison: rate or monthly payment.
 function breach(t) {
   const m = D.ex.mandate, pay = monthly(t.amount, t.apr, t.term_months);
-  if (m.max_payment && pay > m.max_payment && t.apr <= m.max_apr) return {offer: `${money(pay)}/mo`, limit: `${money(m.max_payment)}/mo`, what: "monthly limit"};
+  if (m.max_payment && pay > m.max_payment && t.apr <= m.max_apr) return {offer: BorrowerUI.message("{v0}/mo", {v0: money(pay)}), limit: BorrowerUI.message("{v0}/mo", {v0: money(m.max_payment)}), what: "monthly limit"};
   return {offer: pct(t.apr), limit: `${m.max_apr}%`, what: "rate limit"};
 }
 async function loadPerson(pid) {
@@ -482,7 +486,8 @@ async function loadPerson(pid) {
 // approval: the agent only recommends; the person accepts or turns it down (POST /api/session/{id}/approve|decline)
 async function loadExchange(approval) { useExchange(await get(`/api/exchange/${D.pid}?${mandateQuery()}${approval ? "&approval=1" : ""}`)); }
 async function decide(accept) {
-  const pick = D.ex.awaiting_approval, url = `/api/session/${D.ex.session_id}/${accept ? "approve" : "decline"}`;
+  BorrowerUI.stopReading();
+  const pick = D.ex.awaiting_approval, url = `/api/session/${D.ex.session_id}/${accept ? "approve" : "decline"}?lang=${BorrowerUI.lang}`;
   const r = await fetch(url, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({offer_id: pick.offer_id})});
   if (!r.ok) throw new Error(`${r.status} ${url}`);
   useExchange(await r.json());
@@ -496,7 +501,7 @@ function showSource() {
   const gate = D.ex.events.find(e => e.kind === "gate"), srcs = [D.P.source, gate ? gate.data.source : "samples"].concat(D.F ? [D.F.source] : []);
   const live = srcs.filter(s => s === "live").length, el = $("#src");
   el.className = live === srcs.length ? "live" : "";
-  el.querySelector("span").textContent = live === srcs.length ? "Live · CRS sandbox" : live ? "Partly live · CRS sandbox" : "Saved CRS sandbox data";
+  el.querySelector("span").textContent = live === srcs.length ? BorrowerUI.message("Live · CRS sandbox") : live ? BorrowerUI.message("Partly live · CRS sandbox") : BorrowerUI.message("Saved CRS sandbox data");
   el.title = D.P.live_note || D.ex.live_note || "";
 }
 
@@ -505,7 +510,7 @@ function personTile(d, fake) {
   const s = scoreOf(d);
   return h("div", {class: "tile", id: fake ? "pF" : "pP"},
     h("div", {class: "ico round" + (fake ? " grey" : "")}, icon("user", 26)),
-    h("div", {}, h("div", {class: "tname"}, fake ? `"${d.name}"` : d.name), h("div", {class: "tsub"}, s == null ? "no credit score" : "credit score")),
+    h("div", {}, h("div", {class: "tname"}, fake ? `"${d.name}"` : d.name), h("div", {class: "tsub"}, s == null ? BorrowerUI.message("no credit score") : "credit score")),
     h("div", {class: "big"}, s == null ? "-" : String(s)));
 }
 function lenderTile(id) {
@@ -516,7 +521,7 @@ const L = id => $("#l-" + id);
 function agentSay(text, tone = "") {
   let a = $("#agent");
   if (!a) { a = h("div", {class: "tile", id: "agent"}, h("div", {class: "ico"}, icon("robot", 24)),
-                  h("div", {}, h("div", {class: "tname"}, `${first(D.P.name)}'s AI agent`), h("div", {class: "say"}))); $("#B").append(a); }
+                  h("div", {}, h("div", {class: "tname"}, BorrowerUI.message("{v0}'s AI agent", {v0: first(D.P.name)})), h("div", {class: "say"}))); $("#B").append(a); }
   a.className = "tile" + (tone ? " " + tone : "");
   a.querySelector(".say").textContent = text;
   return a;
@@ -532,18 +537,18 @@ async function showLender(card, d, prev, ms = 900) {
   if (d.type !== "OFFER") return;
   rate.hidden = false;
   if (isInjected(d)) { card.classList.add("bad"); card.querySelector(".ico").className = "ico red"; st.replaceChildren(icon("warn", 13), " hidden instruction"); }
-  else { st.textContent = `${d.terms.term_months} months` + (d.terms.autopay ? " · autopay" : ""); card.querySelector(".ico").className = "ico"; }
+  else { st.textContent = BorrowerUI.message("{v0} months", {v0: d.terms.term_months}) + (d.terms.autopay ? " · autopay" : ""); card.querySelector(".ico").className = "ico"; }
   await countTo(rate, prev != null ? prev : 0, d.terms.apr, ms, pct);
 }
 
 // ------------------------------------------------------------------ scene 1: who's real?
 function checks(d) {
-  const ff = d.fraud_finder || {}, age = n => n == null ? "" : n >= 365 ? `${Math.floor(n / 365)} yr` : `${n} days`;
+  const ff = d.fraud_finder || {}, age = n => n == null ? "" : n >= 365 ? BorrowerUI.message("{v0} yr", {v0: Math.floor(n / 365)}) : BorrowerUI.message("{v0} days", {v0: n});
   return [
-    ["id", "Identity", {good: !d.id_codes.length}],
+    ["id", BorrowerUI.message("Identity"), {good: !d.id_codes.length}],
     ["alert", "Fraud risk", {good: ff.risk_score == null || ff.risk_score < 70, note: ff.risk_score != null ? String(ff.risk_score) : ""}],
-    ["mail", "Email age", {good: ff.email_age_days == null || ff.email_age_days >= 30, note: age(ff.email_age_days)}],
-    ["phone", "Phone owner", {good: ff.phone_owner_matches !== false}],
+    ["mail", BorrowerUI.message("Email age"), {good: ff.email_age_days == null || ff.email_age_days >= 30, note: age(ff.email_age_days)}],
+    ["phone", BorrowerUI.message("Phone owner"), {good: ff.phone_owner_matches !== false}],
   ];
 }
 const result = () => h("div", {class: "res"}, h("div", {class: "badge"}, h("span", {class: "spin"})), h("span", {class: "nt"}, ""));
@@ -579,7 +584,7 @@ async function scene1() {
 }
 
 // ------------------------------------------------------------------ scene 2: offers arrive
-async function blockedNote() { const n = h("div", {class: "panel note"}, `${first(D.P.name)} was blocked at the gate. Nothing else happens: no lender sees anything.`); $("#R").append(n); await appear(n); }
+async function blockedNote() { const n = h("div", {class: "panel note"}, BorrowerUI.message("{v0} was blocked at the gate. Nothing else happens: no lender sees anything.", {v0: first(D.P.name)})); $("#R").append(n); await appear(n); }
 async function scene2() {
   const pf = $("#pF"); if (pf) await vanish(pf);
   $("#R").replaceChildren(); hub("");
@@ -590,7 +595,7 @@ async function scene2() {
     h("div", {}, h("div", {class: "tname"}, "Highest rate allowed"), h("div", {class: "tsub"}, `${money(m.amount)} loan`)), h("div", {class: "big", id: "maxApr"}, `${m.max_apr}%`));
   $("#B").append(rule); await appear(rule);
   const pass = h("div", {class: "tile", id: "pass"}, h("div", {class: "ico"}, icon("hidden", 24)),
-    h("div", {}, h("div", {class: "tname"}, "Credit passport"), h("div", {class: "tsub"}, "name, SSN, address hidden")));
+    h("div", {}, h("div", {class: "tname"}, BorrowerUI.message("Credit passport")), h("div", {class: "tsub"}, "name, SSN, address hidden")));
   $("#B").append(pass); await appear(pass); await wait(400);
   hub("Passport to lenders");
   await fly(pass, $("#L"), "PASSPORT");
@@ -598,7 +603,7 @@ async function scene2() {
   await wait(400);
   for (const e of replies(0)) {
     const d = e.data, card = L(d.sender);
-    hub("Checking");
+    hub(BorrowerUI.message("Checking"));
     await fly(card, pp, d.type === "OFFER" ? pct(d.terms.apr) : "NO", d.type === "DECLINE" ? "grey" : "", false, 800);
     await showLender(card, d);
     await wait(250);
@@ -611,14 +616,14 @@ async function scene3() {
   $("#R").replaceChildren(); hub("");
   if (!admitted()) return blockedNote();
   const e = attackMsg();
-  if (!e) { hub("No attack in this run"); return; }
+  if (!e) { hub(BorrowerUI.message("No attack in this run")); return; }
   const d = e.data, card = L(d.to), t = d.terms;
   const offer = D.msgs.find(x => x.data.sender === d.to && x.data.type === "OFFER").data;
   const cut = offer.text.toUpperCase().indexOf("SYSTEM NOTE"), hiddenText = cut >= 0 ? offer.text.slice(cut) : offer.text;
   await appear(agentSay(`Reading the ${LENDERS[d.to] || ""} offer...`));
   const hid = h("div", {class: "hidden-line"}, hiddenText), cap = h("div", {class: "doc-cap"}, icon("user", 15), "What a person sees");
   const doc = h("div", {class: "panel"}, h("div", {class: "doc-h"}, icon("bank", 18), LENDERS[d.to] || d.to),
-    h("div", {class: "doc-t"}, `${money(t.amount)} · ${pct(t.apr)} APR`), h("div", {class: "bars"}, h("i"), h("i"), h("i")), hid, cap);
+    h("div", {class: "doc-t"}, BorrowerUI.message("{v0} · {v1} APR", {v0: money(t.amount), v1: pct(t.apr)})), h("div", {class: "bars"}, h("i"), h("i"), h("i")), hid, cap);
   $("#R").append(doc); await appear(doc);
   card.classList.add("warn");
   await wait(1700);
@@ -627,7 +632,7 @@ async function scene3() {
   await wait(1800); shake(hid); await wait(1000);
   agentSay(`"${d.text}"`, "warn");
   await wait(1400);
-  hub("Checking");
+  hub(BorrowerUI.message("Checking"));
   const tok = await fly($("#agent"), null, `ACCEPT ${pct(t.apr)}`, "bad", true);
   const br = breach(t);
   const panel = h("div", {class: "panel", style: "text-align:center"},
@@ -647,9 +652,9 @@ async function scene4() {
   $("#R").replaceChildren(); hub("");
   if (!admitted()) return blockedNote();
   const after = (attackMsg() || {round: 0}).round, lid = focusLender(), pa = $("#agent") || $("#pP"), rates = {};
-  for (const id of D.lenderIds) { const r = L(id).querySelector(".rate"); if (!r.hidden) rates[id] = parseFloat(r.textContent); }
+  for (const id of D.lenderIds) { const r = L(id).querySelector(".rate"); if (!r.hidden) rates[id] = parseFloat(r.textContent.replace(",", ".")); }
   agentSay("Negotiating...");
-  hub("Negotiating");
+  hub(BorrowerUI.message("Negotiating"));
   const thread = h("div", {class: "panel thread"}, h("div", {class: "hd"}, h("span", {}, "Agent"), h("span", {}, LENDERS[lid] || lid)));
   $("#R").append(thread); await appear(thread);
   const say = async (mine, big, small, yes) => { const b = h("div", {class: `bub ${mine ? "me" : "them"}${yes ? " yes" : ""}`}, h("b", {}, big), small || null); thread.append(b); await appear(b); };
@@ -662,10 +667,10 @@ async function scene4() {
       if (!mine && d.type === "OFFER") { await showLender(card, d, rates[other], 300); rates[other] = d.terms.apr; }
       continue;
     }
-    hub("Checking");
+    hub(BorrowerUI.message("Checking"));
     await fly(mine ? pa : card, mine ? card : pa, d.type === "ACCEPT" ? "ACCEPT" : mine ? `${pct(d.terms.apr)}?` : pct(d.terms.apr), d.type === "ACCEPT" ? "good" : "");
     if (d.type === "ACCEPT") await say(true, "Deal", `at ${pct(d.terms.apr)}`, true);
-    else if (mine && d.terms) await say(true, `${pct(d.terms.apr)}?`, d.terms.autopay ? "with autopay" : "");
+    else if (mine && d.terms) await say(true, `${pct(d.terms.apr)}?`, d.terms.autopay ? BorrowerUI.message("with autopay") : "");
     else if (d.type === "OFFER") { await say(false, pct(d.terms.apr), "agreed"); await showLender(card, d, rates[lid], 1200); rates[lid] = d.terms.apr; }
     if (mine && d.type === "ACCEPT" && e.verdict.ok) { card.classList.add("won"); hub("Deal", "good"); await stamp(card, "DEAL", "good"); }
     await wait(350);
@@ -678,7 +683,7 @@ async function scene4() {
   agentSay("Done: inside the limits.", "ok");
   const t = deal.terms, pay = h("span", {}, "$0"), save = h("span", {}, "$0"), saved = dis && dis.data.summary.join(" ").match(/saves \$([\d,.]+)/);
   const card = h("div", {class: "tile won", style: "flex-direction:column;align-items:flex-start;gap:4px"}, h("div", {class: "tsub"}, deal.lender_name),
-    h("div", {style: "font-size:26px;font-weight:800"}, `${money(t.amount)} at ${pct(t.apr)}`),
+    h("div", {style: "font-size:1.625rem;font-weight:800"}, BorrowerUI.message("{v0} at {v1}", {v0: money(t.amount), v1: pct(t.apr)})),
     h("div", {style: "display:flex;gap:8px;flex-wrap:wrap"}, h("span", {class: "pill"}, pay, " / month"),
       saved ? h("span", {class: "pill", style: "background:var(--green);color:#fff"}, "saved ", save) : null));
   $("#B").append(card); await appear(card);
@@ -690,8 +695,8 @@ async function scene4() {
 function frame(label, lid, tone = "") {
   const screen = h("div", {class: "dash-body"});
   $("#persp").replaceChildren(h("div", {class: "dev-wrap"}, h("div", {class: "dev-label"}, icon("bank", 15), label),
-    h("div", {class: "dash" + (tone ? " " + tone : "")}, h("div", {class: "dash-top"}, icon("bank", 18), h("b", {}, LENDERS[lid] || lid || "A lender"),
-      h("span", {}, "Lender dashboard"), h("span", {class: "simtag"}, "SIMULATED LENDER")), screen)));
+    h("div", {class: "dash" + (tone ? " " + tone : "")}, h("div", {class: "dash-top"}, icon("bank", 18), h("b", {}, LENDERS[lid] || lid || BorrowerUI.message("A lender")),
+      h("span", {}, "Lender dashboard"), h("span", {class: "simtag"}, BorrowerUI.message("SIMULATED LENDER"))), screen)));
   return screen;
 }
 async function add(parent, el, pause = 0) {
@@ -714,30 +719,30 @@ async function lScene2() {
   const lid = focusLender(), s = frame("Lender's view", lid), p = D.ex.passport;
   if (!admitted()) { await add(s, h("div", {class: "dcard"}, h("h3", {}, "Applications"), "Nothing to review: the applicant was blocked at the gate.")); return; }
   const pass = await add(s, h("div", {class: "dcard"}, h("h3", {}, "Applicant's credit passport"),
-    h("div", {class: "kv2"}, h("span", {}, "Score band"), h("span", {class: "v"}, p.score_band || "none"), h("span", {}, "Accounts"), h("span", {class: "v"}, p.accounts),
-      h("span", {}, "History"), h("span", {class: "v"}, p.file_age_years != null ? `${p.file_age_years} yrs` : "none"),
-      h("span", {}, "Identity"), h("span", {class: "v"}, p.identity), h("span", {}, "Late payments"), h("span", {class: "v"}, p.late_payments))), 500);
-  for (const [k, w] of [["Name", "xxxxxxxxxxxx"], ["SSN", "xxx-xx-xxxx"], ["Address", "xxxxxxxxxxxxxxx"]])  // blacked out: never sent to lenders
+    h("div", {class: "kv2"}, h("span", {}, BorrowerUI.message("Score band")), h("span", {class: "v"}, p.score_band || "none"), h("span", {}, BorrowerUI.message("Accounts")), h("span", {class: "v"}, p.accounts),
+      h("span", {}, BorrowerUI.message("History")), h("span", {class: "v"}, p.file_age_years != null ? BorrowerUI.message("{v0} yrs", {v0: p.file_age_years}) : "none"),
+      h("span", {}, BorrowerUI.message("Identity")), h("span", {class: "v"}, p.identity), h("span", {}, BorrowerUI.message("Late payments")), h("span", {class: "v"}, p.late_payments))), 500);
+  for (const [k, w] of [["Name", "xxxxxxxxxxxx"], [BorrowerUI.message("SSN"), "xxx-xx-xxxx"], ["Address", "xxxxxxxxxxxxxxx"]])  // blacked out: never sent to lenders
     await add(pass, h("div", {class: "kv2"}, h("span", {}, k), h("span", {class: "v"}, h("span", {class: "redact"}, w))), 300);
   const offer = D.msgs.find(e => e.round === 0 && e.data.sender === lid);
   if (!offer) return;
   const why = offer.data.text.replace(/^[^:]+:\s*/, "").split(". ")[0];
-  const dec = await add(s, h("div", {class: "dcard"}, h("h3", {}, "Your decision"), h("div", {class: "p-row"}, icon(offer.data.type === "OFFER" ? "check" : "x", 18), why)), 800);
+  const dec = await add(s, h("div", {class: "dcard"}, h("h3", {}, BorrowerUI.message("Your decision")), h("div", {class: "p-row"}, icon(offer.data.type === "OFFER" ? "check" : "x", 18), why)), 800);
   if (offer.data.type === "OFFER") {
-    await add(dec, h("div", {style: "font-size:28px;font-weight:800"}, `Offer ${pct(offer.data.terms.apr)}`), 400);
+    await add(dec, h("div", {style: "font-size:1.75rem;font-weight:800"}, `Offer ${pct(offer.data.terms.apr)}`), 400);
     await add(dec, h("div", {class: "p-row tsub"}, icon("key", 15), offer.verdict.ok ? "Signed and passed the exchange" : offer.verdict.code));
   }
 }
 async function lScene3() {
   const e = admitted() && attackMsg();
-  if (!e) { const s = frame("Lender's view", focusLender()); await add(s, h("div", {class: "dcard"}, h("h3", {}, "Nothing to show"), "No attack in this run.")); return; }
+  if (!e) { const s = frame("Lender's view", focusLender()); await add(s, h("div", {class: "dcard"}, h("h3", {}, "Nothing to show"), BorrowerUI.message("No attack in this run."))); return; }
   const lid = e.data.to, s = frame("Attacker's view", lid, "evil");
   const offer = D.msgs.find(x => x.data.sender === lid && x.data.type === "OFFER").data, cut = offer.text.toUpperCase().indexOf("SYSTEM NOTE");
-  await add(s, h("div", {class: "dcard"}, h("h3", {}, "Your offer"), h("div", {style: "font-size:28px;font-weight:800"}, pct(offer.terms.apr)), h("div", {class: "tsub"}, "Offer text"),
-    h("div", {style: "font-size:14px"}, cut >= 0 ? offer.text.slice(0, cut) : offer.text,
+  await add(s, h("div", {class: "dcard"}, h("h3", {}, BorrowerUI.message("Your offer")), h("div", {style: "font-size:1.75rem;font-weight:800"}, pct(offer.terms.apr)), h("div", {class: "tsub"}, "Offer text"),
+    h("div", {style: "font-size:0.875rem"}, cut >= 0 ? offer.text.slice(0, cut) : offer.text,
       cut >= 0 ? h("span", {style: "background:var(--red);color:#fff;border-radius:4px;padding:0 3px"}, offer.text.slice(cut)) : null)), 1100);
   const inbox = await add(s, h("div", {class: "dcard"}, h("h3", {}, "Incoming"), h("div", {class: "p-row"}, h("span", {class: "spin"}), `ACCEPT ${pct(e.data.terms.apr)} from the borrower's agent`)), 1700);
-  const v = await add(inbox, h("div", {class: "dcard verdict-bad"}, h("div", {class: "p-row"}, icon("x", 20), h("b", {style: "font-size:19px"}, "Rejected by the exchange")),
+  const v = await add(inbox, h("div", {class: "dcard verdict-bad"}, h("div", {class: "p-row"}, icon("x", 20), h("b", {style: "font-size:1.188rem"}, "Rejected by the exchange")),
     h("div", {class: "code"}, e.verdict.code), h("div", {}, "Above the borrower's limit. The exchange never acts on message text.")));
   inbox.querySelector(".spin").replaceWith(icon("x", 18)); shake(v);
 }
@@ -745,22 +750,22 @@ async function lScene4() {
   const lid = focusLender(), s = frame("Lender's view", lid);
   if (!admitted()) { await add(s, h("div", {class: "dcard"}, h("h3", {}, "Nothing to negotiate"), "No applicant reached the market.")); return; }
   const after = (attackMsg() || {round: 0}).round;
-  const thread = await add(s, h("div", {class: "dcard thread"}, h("div", {class: "hd"}, h("span", {}, "Borrower's agent"), h("span", {}, "You"))));
+  const thread = await add(s, h("div", {class: "dcard thread"}, h("div", {class: "hd"}, h("span", {}, "Borrower's agent"), h("span", {}, BorrowerUI.message("You")))));
   const say = (mine, big, small, yes) => add(thread, h("div", {class: `bub ${mine ? "me" : "them"}${yes ? " yes" : ""}`}, h("b", {}, big), small || null), 650);
   const open = D.msgs.find(e => e.round === 0 && e.data.sender === lid && e.data.type === "OFFER");
   if (open) await say(false, pct(open.data.terms.apr), "your offer");
   for (const e of D.msgs.filter(x => x.round > after && (x.data.sender === lid || x.data.to === lid))) {
     const d = e.data, mine = d.sender === "borrower";
-    if (d.type === "ACCEPT") await say(true, "Accepted", pct(d.terms.apr), true);
-    else if (mine && d.terms) await say(true, `${pct(d.terms.apr)}?`, d.terms.autopay ? "with autopay" : "");
+    if (d.type === "ACCEPT") await say(true, BorrowerUI.message("Accepted"), pct(d.terms.apr), true);
+    else if (mine && d.terms) await say(true, `${pct(d.terms.apr)}?`, d.terms.autopay ? BorrowerUI.message("with autopay") : "");
     else if (d.type === "OFFER") await say(false, pct(d.terms.apr), "you agreed");
   }
   const deal = D.ex.deal;
   await add(s, deal && deal.lender === lid
-    ? h("div", {class: "dcard verdict-ok"}, h("div", {class: "p-row"}, icon("check", 20), h("b", {style: "font-size:19px"}, "New loan")),
-        h("div", {style: "font-size:24px;font-weight:800"}, `${money(deal.terms.amount)} at ${pct(deal.terms.apr)}`),
-        h("div", {class: "p-row tsub"}, h("span", {class: "simtag", style: "margin:0"}, "SIMULATED"), "full credit file unlocked, funding, bureau reporting"))
-    : h("div", {class: "dcard"}, h("h3", {}, "Outcome"), deal ? `The borrower chose ${deal.lender_name}.` : "No deal: nothing fit the borrower's limits."));
+    ? h("div", {class: "dcard verdict-ok"}, h("div", {class: "p-row"}, icon("check", 20), h("b", {style: "font-size:1.188rem"}, "New loan")),
+        h("div", {style: "font-size:1.5rem;font-weight:800"}, BorrowerUI.message("{v0} at {v1}", {v0: money(deal.terms.amount), v1: pct(deal.terms.apr)})),
+        h("div", {class: "p-row tsub"}, h("span", {class: "simtag", style: "margin:0"}, BorrowerUI.message("SIMULATED")), "full credit file unlocked, funding, bureau reporting"))
+    : h("div", {class: "dcard"}, h("h3", {}, "Outcome"), deal ? BorrowerUI.message("The borrower chose {v0}.", {v0: deal.lender_name}) : "No deal: nothing fit the borrower's limits."));
 }
 
 // ------------------------------------------------------------------ borrower view: the person's iPhone
@@ -772,8 +777,8 @@ function logAdd(who, text, kind = "", ic = "robot") {
   li.scrollIntoView({block: "nearest"});
 }
 function wantsChips() {
-  return h("div", {class: "wants"}, h("span", {}, money(M.amount)), M.max_payment ? h("span", {}, `≤ ${money(M.max_payment)}/mo`) : null,
-    M.max_apr < 36 || !M.max_payment ? h("span", {}, `≤ ${M.max_apr}% APR`) : null, h("span", {}, `${M.min_term}–${M.max_term} months`),
+  return h("div", {class: "wants"}, h("span", {}, money(M.amount)), M.max_payment ? h("span", {}, BorrowerUI.message("≤ {v0}/mo", {v0: money(M.max_payment)})) : null,
+    M.max_apr < 36 || !M.max_payment ? h("span", {}, BorrowerUI.message("≤ {v0}% APR", {v0: M.max_apr})) : null, h("span", {}, BorrowerUI.message("{v0}–{v1} months", {v0: M.min_term, v1: M.max_term})),
     h("span", {}, M.autopay ? "autopay OK" : "no autopay"), h("span", {}, M.max_fee ? "fees OK" : "no fees"));
 }
 
@@ -782,41 +787,42 @@ let CHAT = [], warmed = false;
 function warmChat() {  // the first Claude call is slow (connection setup); make it before the person types
   if (warmed) return; warmed = true;
   fetch("/api/chat/mandate", {method: "POST", headers: {"Content-Type": "application/json"},
-                              body: JSON.stringify({messages: [{role: "user", content: "hello"}]})}).catch(() => {});
+                              body: JSON.stringify({lang: BorrowerUI.lang, messages: [{role: "user", content: "hello"}]})}).catch(() => {});
 }
-const CHIPS = {start: ["$5,000 for a laptop", "$3,000 for car repairs", "$8,000 to cover tuition"],
-               payment: ["$150 a month", "$200 a month", "$300 a month"], term: ["1 to 2 years", "Up to 3 years", "Up to 4 years"],
-               more: ["Autopay is fine", "No fees please"]};
+const CHIPS = {start: [BorrowerUI.message("$5,000 for a laptop"), BorrowerUI.message("$3,000 for car repairs"), BorrowerUI.message("$8,000 to cover tuition")],
+               payment: [BorrowerUI.message("$150 a month"), BorrowerUI.message("$200 a month"), BorrowerUI.message("$300 a month")], term: [BorrowerUI.message("1 to 2 years"), BorrowerUI.message("Up to 3 years"), BorrowerUI.message("Up to 4 years")],
+               more: [BorrowerUI.message("Autopay is fine"), BorrowerUI.message("No fees please")]};
 function chatView() {
+  BorrowerUI.stopReading();
   run++; speed = 1; CHAT = []; warmChat();
-  $("#log").replaceChildren(h("li", {class: "empty"}, "The agent is chatting with the person to learn their limits."));
+  $("#log").replaceChildren(h("li", {class: "empty"}, BorrowerUI.message("The agent is chatting with the person to learn their limits.")));
   app().classList.add("chatmode"); document.body.classList.add("chatting");
-  const msgs = h("div", {class: "msgs", role: "log", "aria-live": "polite"}), chips = h("div", {class: "chips"});
-  const input = h("input", {type: "text", placeholder: "iMessage", "aria-label": "Message your agent", enterkeyhint: "send"});
-  const send = h("button", {type: "button", "aria-label": "Send"}, icon("up", 18));
+  const msgs = h("div", {class: "msgs", role: "log", "aria-live": "polite", "aria-label": BorrowerUI.message("Conversation with your agent")}), chips = h("div", {class: "chips"});
+  const input = h("input", {type: "text", placeholder: "iMessage", "aria-label": BorrowerUI.message("Message your agent"), enterkeyhint: "send"});
+  const send = h("button", {type: "button", "aria-label": BorrowerUI.message("Send")}, icon("up", 18));
   // header pills, iMessage style: who you are (tap to switch person), the agent in the middle, live/saved data on the right
-  const who = h("select", {"aria-label": "Switch person"}, PEOPLE.map(p => h("option", {value: p.id}, p.name)));
+  const who = h("select", {"aria-label": BorrowerUI.message("Switch person")}, PEOPLE.map(p => h("option", {value: p.id}, p.name)));
   who.value = D.pid;
   who.onchange = () => { $("#who").value = who.value; $("#who").dispatchEvent(new Event("change")); };
   const live = $("#src").classList.contains("live");
-  const form = h("button", {type: "button"}, "Use a form instead"); form.onclick = phoneForm;
+  const form = h("button", {type: "button"}, BorrowerUI.message("Use a form instead")); form.onclick = phoneForm;
   app().replaceChildren(h("div", {class: "chat"},
     h("div", {class: "chat-h"},
       h("label", {class: "pill side l"}, "‹ " + first(D.P.name), who),
-      h("span", {class: "pill side r", title: $("#src").title || ""}, h("span", {class: "dot", style: live ? "" : "background:#8E8E93"}), live ? "Live" : "Saved"),
-      h("div", {class: "av"}, icon("robot", 24)), h("div", {class: "pill nm"}, "Your loan agent ›")),
+      h("span", {class: "pill side r", title: $("#src").title || ""}, h("span", {class: "dot", style: live ? "" : "background:#8E8E93"}), live ? BorrowerUI.message("Live") : BorrowerUI.message("Saved")),
+      h("div", {class: "av"}, icon("robot", 24)), h("div", {class: "pill nm"}, BorrowerUI.message("Your loan agent ›"))),
     msgs, h("div", {class: "composer"}, input, send)));
-  msgs.append(h("div", {class: "sysnote"}, "AI agent · only acts inside your limits", h("br"), form), chips);  // quick replies stay last
-  const scroll = () => msgs.scrollTo({top: msgs.scrollHeight, behavior: "smooth"});
+  msgs.append(h("div", {class: "sysnote"}, BorrowerUI.message("AI agent · only acts inside your limits"), h("br"), form), chips);  // quick replies stay last
+  const scroll = () => msgs.scrollTo({top: msgs.scrollHeight, behavior: BorrowerUI.reduced() ? "auto" : "smooth"});
   const put = el => msgs.insertBefore(el, chips);
   const bubble = (role, text) => { const b = h("div", {class: "msg " + (role === "user" ? "me" : "them")}, text); put(b); appear(b).catch(() => {}); scroll(); return b; };
   const setChips = list => { chips.replaceChildren(...list.map(t => { const b = h("button", {type: "button"}, t); b.onclick = () => submit(t); return b; })); scroll(); };
   let followUp = null;  // set once there's a result: turns the person's reply into the explanation they asked for
-  const hello = `Hi ${first(D.P.name)}! I'm your loan agent. Tell me how much you need and what it's for, and I'll shop lenders for you.`;
+  const hello = BorrowerUI.message("Hi {v0}! I'm your loan agent. Tell me how much you need and what it's for, and I'll shop lenders for you.", {v0: first(D.P.name)});
   CHAT.push({role: "agent", content: hello}); bubble("agent", hello); setChips(CHIPS.start);
   async function submit(text) {
     text = text.trim(); if (!text) return;
-    if (text === "Start a new request") return chatView();
+    if (BorrowerUI.matches(text, "Start a new request")) return chatView();
     if (followUp) {  // after a result, replies ask for an explanation instead of starting a new loan conversation
       const act = followUp(text);
       input.value = ""; chips.replaceChildren(); bubble("user", text);
@@ -828,10 +834,10 @@ function chatView() {
     const typing = h("div", {class: "msg them typing"}, h("i"), h("i"), h("i")); put(typing); scroll();
     let r;
     try {
-      const res = await fetch("/api/chat/mandate", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({messages: CHAT})});
+      const res = await fetch("/api/chat/mandate", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({lang: BorrowerUI.lang, messages: CHAT})});
       if (!res.ok) throw new Error(res.status);
       r = await res.json();
-    } catch (e) { typing.remove(); bubble("agent", "Sorry, I couldn't reach the exchange. Try again?"); send.disabled = false; return; }
+    } catch (e) { typing.remove(); bubble("agent", BorrowerUI.message("Sorry, I couldn't reach the exchange. Try again?")); send.disabled = false; return; }
     await new Promise(res => setTimeout(res, 400));  // a beat of "typing"
     typing.remove();
     CHAT.push({role: "agent", content: r.reply}); bubble("agent", r.reply);
@@ -840,25 +846,25 @@ function chatView() {
     setChips([...(CHIPS[r.missing[0]] || []), ...CHIPS.more]);
   }
   function showPlan(m) {
-    input.blur();  // close the keyboard so the whole plan card is visible
+    // Keep keyboard focus on the confirmed plan below.
     const autopay = (m.allow || []).includes("autopay");
-    const go = h("button", {type: "button", class: "ios-btn"}, "Start shopping"), edit = h("button", {type: "button", class: "ios-btn ghost", style: "min-height:40px;font-size:15px"}, "Change something");
-    const plan = h("div", {class: "plan"}, h("div", {class: "t"}, "Here's what I'll do"),
-      h("div", {class: "r"}, h("span", {}, "Borrow"), h("b", {}, m.min_amount && m.min_amount < m.amount ? `${money(m.min_amount)}–${money(m.amount)}` : money(m.amount))),
-      m.max_payment ? h("div", {class: "r"}, h("span", {}, "Never pay more than"), h("b", {}, `${money(m.max_payment)}/month`)) : null,
-      m.max_apr < 36 ? h("div", {class: "r"}, h("span", {}, "Highest rate"), h("b", {}, `${m.max_apr}%`)) : null,
-      h("div", {class: "r"}, h("span", {}, "Pay it back over"), h("b", {}, `${m.min_term}–${m.max_term} months`)),
-      h("div", {class: "r"}, h("span", {}, "Autopay"), h("b", {}, autopay ? "OK" : "No")),
-      h("div", {class: "r"}, h("span", {}, "Fees"), h("b", {}, m.max_fee ? `up to ${money(m.max_fee)}` : "None")),
-      h("div", {class: "fine"}, "Starting checks your identity and credit with a soft pull (your score isn't affected). Nothing is signed outside these limits."),
+    const go = h("button", {type: "button", class: "ios-btn"}, BorrowerUI.message("Start shopping")), edit = h("button", {type: "button", class: "ios-btn ghost", style: "min-height:40px;font-size:0.9375rem"}, BorrowerUI.message("Change something"));
+    const plan = h("div", {class: "plan"}, h("div", {class: "t"}, BorrowerUI.message("Here's what I'll do")),
+      h("div", {class: "r"}, h("span", {}, BorrowerUI.message("Borrow")), h("b", {}, m.min_amount && m.min_amount < m.amount ? `${money(m.min_amount)}–${money(m.amount)}` : money(m.amount))),
+      m.max_payment ? h("div", {class: "r"}, h("span", {}, BorrowerUI.message("Never pay more than")), h("b", {}, BorrowerUI.message("{v0}/month", {v0: money(m.max_payment)}))) : null,
+      m.max_apr < 36 ? h("div", {class: "r"}, h("span", {}, BorrowerUI.message("Highest rate")), h("b", {}, `${m.max_apr}%`)) : null,
+      h("div", {class: "r"}, h("span", {}, BorrowerUI.message("Pay it back over")), h("b", {}, BorrowerUI.message("{v0}–{v1} months", {v0: m.min_term, v1: m.max_term}))),
+      h("div", {class: "r"}, h("span", {}, BorrowerUI.message("Autopay")), h("b", {}, autopay ? BorrowerUI.message("OK") : BorrowerUI.message("No"))),
+      h("div", {class: "r"}, h("span", {}, BorrowerUI.message("Fees")), h("b", {}, m.max_fee ? BorrowerUI.message("up to {v0}", {v0: money(m.max_fee)}) : BorrowerUI.message("None"))),
+      h("div", {class: "fine"}, BorrowerUI.message("Starting checks your identity and credit with a soft pull (your score isn't affected). Nothing is signed outside these limits.")),
       go, edit);
-    put(plan); appear(plan).catch(() => {}); scroll();
+    put(plan); appear(plan).catch(() => {}); scroll(); go.focus({preventScroll: true});
     edit.onclick = () => { plan.remove(); input.focus(); setChips(CHIPS.more); };
     go.onclick = async () => {
       M = {amount: m.amount, min_amount: m.min_amount, max_apr: m.max_apr, min_term: m.min_term, max_term: m.max_term,
            autopay: autopay ? 1 : 0, max_fee: m.max_fee || 0, max_payment: m.max_payment || null};
-      go.disabled = true; go.textContent = "Starting...";
-      try { await loadExchange(true); } catch (err) { go.textContent = "Couldn't reach the exchange"; return; }
+      go.disabled = true; go.textContent = BorrowerUI.message("Starting...");
+      try { await loadExchange(true); } catch (err) { go.textContent = BorrowerUI.message("Couldn't reach the exchange"); go.disabled = false; go.focus(); return; }
       shareWithLaptop();
       go.remove(); edit.remove();
       const id = ++run; speed = 1;
@@ -870,7 +876,7 @@ function chatView() {
   // ---- after Start shopping: one status line while the agent works, then the result, then an offer to explain.
   // The person asks for the breakdown or the negotiation if they want it; nothing extra is pushed on them.
   async function shopInChat() {
-    input.disabled = true; send.disabled = true; input.placeholder = "Your agent is shopping...";
+    input.disabled = true; send.disabled = true; input.placeholder = BorrowerUI.message("Your agent is shopping...");
     $("#log").replaceChildren();
     const say = async (text, cls = "") => {  // the agent "types" for a beat, then posts
       const typing = h("div", {class: "msg them typing"}, h("i"), h("i"), h("i")); put(typing); scroll();
@@ -879,123 +885,133 @@ function chatView() {
     };
     const infoCard = (title, nodes) => { const c = h("div", {class: "ccard"}, h("div", {class: "hd"}, title), h("div", {class: "detail", style: "border-top:0"}, nodes));
       put(c); appear(c).catch(() => {}); scroll(); return c; };
-    const label = h("span", {}, "Checking your details..."), status = h("div", {class: "msg them status"}, h("span", {class: "spin"}), label);
+    const label = h("span", {}, BorrowerUI.message("Checking your details...")), status = h("div", {class: "msg them status"}, h("span", {class: "spin"}), label);
     const gate = D.ex.events.find(e => e.kind === "gate").data, atk = attackMsg(), lid = focusLender(), name = LENDERS[lid] || lid;
     let deal = D.ex.deal;
     const pick = D.ex.awaiting_approval;
 
     // working: one line that updates in place (the laptop's activity log still gets every step)
-    await say("On it. I'll let you know when I have an answer.");
+    await say(BorrowerUI.message("On it. I'll let you know when I have an answer."));
     put(status); appear(status).catch(() => {}); scroll();
-    logAdd("Agent → CRS", `Checked identity and credit: ${gate.crs_products.length} CRS checks (AtData fraud risk, TransUnion identity, phone owner, 3 credit bureaus).`, "", "id");
+    logAdd("Agent → CRS", BorrowerUI.message("Checked identity and credit: {v0} CRS checks (AtData fraud risk, TransUnion identity, phone owner, 3 credit bureaus).", {v0: gate.crs_products.length}), "", "id");
     await wait(1800);
     if (!D.ex.admitted) {
       status.remove();
-      logAdd("Referee", "Stopped at the gate: identity checks failed. No lender sees anything.", "bad", "shield");
-      await say("I couldn't verify your identity, so I stopped. No lender saw your application.", "alertmsg");
-      return ask("Want to see what the checks found?", {"Show me why": showChecks});
+      logAdd(BorrowerUI.message("Referee"), BorrowerUI.message("Stopped at the gate: identity checks failed. No lender sees anything."), "bad", "shield");
+      await say(BorrowerUI.message("I couldn't verify your identity, so I stopped. No lender saw your application."), "alertmsg");
+      resultControls(msgs);
+      return ask(BorrowerUI.message("Want to see what the checks found?"), {[BorrowerUI.message("Show me why")]: showChecks});
     }
     const s = scoreOf(D.P);
-    logAdd("CRS", s == null ? "Identity verified. No credit score on file." : `Identity verified. Credit score ${s}.`, "good", "check");
-    label.textContent = "Asking lenders for offers...";
-    logAdd("Agent → lenders", `Sent a credit passport to ${D.lenderIds.length} lenders. Name, SSN and address stay hidden.`, "", "hidden");
+    logAdd("CRS", s == null ? BorrowerUI.message("Identity verified. No credit score on file.") : BorrowerUI.message("Identity verified. Credit score {v0}.", {v0: s}), "good", "check");
+    label.textContent = BorrowerUI.message("Asking lenders for offers...");
+    logAdd("Agent → lenders", BorrowerUI.message("Sent a credit passport to {v0} lenders. Name, SSN and address stay hidden.", {v0: D.lenderIds.length}), "", "hidden");
     for (const e of replies(0)) {
       const d = e.data, inj = d.type === "OFFER" && isInjected(d);
       await wait(350);
-      logAdd(LENDERS[d.sender] || d.sender, d.type === "OFFER" ? `Offered ${pct(d.terms.apr)} for ${d.terms.term_months} months${inj ? ", with a hidden instruction in the text" : ""}.` : "Declined.", inj ? "bad" : "", "bank");
+      logAdd(LENDERS[d.sender] || d.sender, d.type === "OFFER" ? BorrowerUI.message("Offered {v0} for {v1} months{v2}.", {v0: pct(d.terms.apr), v1: d.terms.term_months, v2: inj ? ", with a hidden instruction in the text" : ""}) : BorrowerUI.message("Declined."), inj ? "bad" : "", "bank");
     }
     if (atk) {
       const br = breach(atk.data.terms);
-      logAdd("Agent", `Tried to accept ${pct(atk.data.terms.apr)} from ${LENDERS[atk.data.to]}: it obeyed the hidden instruction.`, "bad", "robot");
-      logAdd("Referee", `Blocked: ${br.offer} is over the ${br.limit} limit (${atk.verdict.code}).`, "bad", "shield");
+      logAdd("Agent", BorrowerUI.message("Tried to accept {v0} from {v1}: it obeyed the hidden instruction.", {v0: pct(atk.data.terms.apr), v1: LENDERS[atk.data.to]}), "bad", "robot");
+      logAdd(BorrowerUI.message("Referee"), BorrowerUI.message("Blocked: {v0} is over the {v1} limit ({v2}).", {v0: br.offer, v1: br.limit, v2: atk.verdict.code}), "bad", "shield");
       await wait(500);
     }
-    label.textContent = "Negotiating the best rate...";
+    label.textContent = BorrowerUI.message("Negotiating the best rate...");
     for (const e of D.msgs.filter(x => x.round > (atk || {round: 0}).round && (x.data.sender === lid || x.data.to === lid))) {
       const d = e.data;
       await wait(450);
-      if (d.sender === "borrower" && d.type === "COUNTER") logAdd(`Agent → ${name}`, `Asked for ${pct(d.terms.apr)}${d.terms.autopay ? " with autopay" : ""}.`, "", "chat");
-      else if (d.type === "OFFER") logAdd(name, `Agreed to ${pct(d.terms.apr)}.`, "", "bank");
+      if (d.sender === "borrower" && d.type === "COUNTER") logAdd(`Agent → ${name}`, BorrowerUI.message("Asked for {v0}{v1}.", {v0: pct(d.terms.apr), v1: d.terms.autopay ? " with autopay" : ""}), "", "chat");
+      else if (d.type === "OFFER") logAdd(name, BorrowerUI.message("Agreed to {v0}.", {v0: pct(d.terms.apr)}), "", "bank");
     }
     await wait(500);
     status.remove();
 
     // the result first
     if (!pick) {
-      logAdd("Agent", "Walked away: nothing fit the limits.", "", "robot");
+      logAdd("Agent", BorrowerUI.message("Walked away: nothing fit the limits."), "", "robot");
       await say("I couldn't find a loan that fits your limits, so I didn't accept anything. "
-        + (M.max_payment ? "A higher monthly limit or a longer loan might get you an offer." : `Raising your highest rate above ${M.max_apr}% might get you an offer.`), "alertmsg");
+        + (M.max_payment ? BorrowerUI.message("A higher monthly limit or a longer loan might get you an offer.") : BorrowerUI.message("Raising your highest rate above {v0}% might get you an offer.", {v0: M.max_apr})), "alertmsg");
     } else {
       // the agent recommends; only the person can accept
       const t = pick.terms, pay = pick.preview.monthly_payment, saved = pick.preview.summary.join(" ").match(/saves \$([\d,.]+)/);
-      logAdd(`Agent → you`, `Recommends ${pick.lender_name} at ${pct(t.apr)}: inside every limit. Waiting for your OK.`, "", "check");
-      await say(`I found your best offer: ${pick.lender_name}.` + (saved ? ` I negotiated it down, which saves you $${saved[1]} over the loan.` : "")
-        + " It fits every limit you set. I won't accept it unless you tell me to.");
-      const hd = h("div", {class: "hd"}, `${pick.lender_name} · simulated lender · waiting for your OK`);
+      logAdd(BorrowerUI.message("Agent → you"), BorrowerUI.message("Recommends {v0} at {v1}: inside every limit. Waiting for your OK.", {v0:pick.lender_name,v1:pct(t.apr)}), "", "check");
+      await say(BorrowerUI.message("I found your best offer: {v0}.", {v0:pick.lender_name}) + (saved ? BorrowerUI.message(" I negotiated it down, which saves you ${v0} over the loan.", {v0:saved[1]}) : "")
+        + BorrowerUI.message(" It fits every limit you set. I won't accept it unless you tell me to."));
+      const hd = h("div", {class: "hd"}, BorrowerUI.message("{v0} · simulated lender · waiting for your OK", {v0:pick.lender_name}));
       const dc = h("div", {class: "ccard"}, hd,
         h("div", {class: "body", style: "padding:2px 14px 10px;display:flex;flex-direction:column;gap:3px"},
-          h("div", {class: "pay", style: "font-size:34px;font-weight:800;letter-spacing:-.02em"}, money(pay), h("span", {style: "font-size:15px;font-weight:600"}, " / month")),
-          h("div", {}, `${money(t.amount)} at ${pct(t.apr)} for ${t.term_months} months${t.autopay ? ", with autopay" : ""}${t.fee ? `, ${money(t.fee)} fee` : ", no fee"}`)));
-      put(dc); appear(dc).catch(() => {}); scroll();
+          h("div", {class: "pay", style: "font-size:2.125rem;font-weight:800;letter-spacing:-.02em"}, money(pay), h("span", {style: "font-size:.9375rem;font-weight:600"}, " " + BorrowerUI.message("/ month"))),
+          h("div", {}, BorrowerUI.message("{v0} at {v1} for {v2} months", {v0:money(t.amount),v1:pct(t.apr),v2:t.term_months})),
+          drow(BorrowerUI.message("Autopay"), t.autopay ? BorrowerUI.message("yes") : BorrowerUI.message("no")),
+          drow(BorrowerUI.message("Fee"), money(t.fee || 0))));
+      put(dc); tappable(dc, () => personDetails(D.ex.person)); appear(dc).catch(() => {}); scroll();
+      resultControls(msgs);
       const yes = await new Promise(resolve => {
-        const again = async () => { await say("Tap \"Accept this loan\" to take it, or \"Not now\" to walk away. Nothing happens until you choose."); setChips(["Accept this loan", "Not now"]); };
+        const again = async () => { await say(BorrowerUI.message("Tap \"Accept this loan\" to take it, or \"Not now\" to walk away. Nothing happens until you choose.")); setChips([BorrowerUI.message("Accept this loan"), BorrowerUI.message("Not now")]); };
         followUp = text => {
-          const a = text.toLowerCase();
-          if (/^(accept|yes|yeah|yep|approve|ok|okay|sure|do it|sign|take it)\b/.test(a)) return async () => resolve(true);
-          if (/^(not now|no|nah|nope|decline|don'?t|cancel|pass)\b/.test(a)) return async () => resolve(false);
+          const a = text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+          if (BorrowerUI.matches(text, "Accept this loan") || /^(accept(?: this loan)?|yes(?: please)?|yeah|yep|approve|ok|okay|sure|do it|sign|take it|si(?: por favor)?|acepto|aceptar|apruebo|de acuerdo|adelante)[.!]*$/.test(a)) return async () => resolve(true);
+          if (BorrowerUI.matches(text, "Not now") || /^(not now|no(?: thanks)?|nah|nope|decline|don'?t|cancel|pass|ahora no|no gracias|rechazo|rechazar|cancelar)[.!]*$/.test(a)) return async () => resolve(false);
           return again;
         };
         input.disabled = false; send.disabled = false; input.placeholder = "iMessage";
-        setChips(["Accept this loan", "Not now"]);
+        setChips([BorrowerUI.message("Accept this loan"), BorrowerUI.message("Not now")]);
       });
       followUp = null; input.disabled = true; send.disabled = true;
       try { await decide(yes); } catch (err) {
-        await say("I couldn't reach the exchange, so nothing was signed. You can start a new request.", "alertmsg");
-        setChips(["Start a new request"]); input.disabled = false; send.disabled = false; return;
+        const error = BorrowerUI.message("I couldn't confirm your decision with the exchange. Its status is unknown; don't assume the loan was accepted or declined.");
+        hd.textContent = BorrowerUI.message("{v0} · simulated lender · decision not confirmed", {v0:pick.lender_name});
+        await say(error, "alertmsg");
+        msgs.querySelectorAll('.a11y-read').forEach(button => button.remove());
+        BorrowerUI.announce(error);
+        setChips([BorrowerUI.message("Start a new request")]); input.disabled = false; send.disabled = false; return;
       }
       shareWithLaptop();
+      if (dc.getAttribute("aria-expanded") === "true") dc.click();
       deal = D.ex.deal;
       if (deal) {
-        logAdd(`You → ${deal.lender_name}`, `Accepted ${pct(t.apr)}.`, "good", "check");
-        dc.classList.add("deal"); hd.textContent = `${deal.lender_name} · simulated lender · accepted`; pop(dc);
-        await say(`Done: you're approved with ${deal.lender_name}. You'll pay ${money(pay)} a month.`);
+        logAdd(BorrowerUI.message("You → {v0}", {v0:deal.lender_name}), BorrowerUI.message("Accepted {v0}.", {v0:pct(t.apr)}), "good", "check");
+        dc.classList.add("deal"); hd.textContent = BorrowerUI.message("{v0} · simulated lender · accepted", {v0:deal.lender_name}); pop(dc);
+        await say(BorrowerUI.message("Done: you're approved with {v0}. You'll pay {v1} a month.", {v0:deal.lender_name,v1:money(pay)}));
       } else {
-        logAdd("You", `Turned down ${pick.lender_name}. Nothing was signed.`, "", "robot");
-        hd.textContent = `${pick.lender_name} · simulated lender · turned down`; dc.style.opacity = ".6";
-        await say("OK, I didn't accept it. Nothing was signed, and no lender ran a hard check.");
+        logAdd(BorrowerUI.message("You"), BorrowerUI.message("Turned down {v0}. Nothing was signed.", {v0:pick.lender_name}), "", "robot");
+        hd.textContent = BorrowerUI.message("{v0} · simulated lender · turned down", {v0:pick.lender_name});
+        await say(BorrowerUI.message("OK, I didn't accept it. Nothing was signed, and no lender ran a hard check."));
       }
     }
-    if (atk) await say("I also stopped a lender that tried to trick me into a bad loan. Nothing was signed with them.");
-    return ask("Want a breakdown of what I did, or how I negotiated?", {"Show me the breakdown": showBreakdown, "How did you negotiate?": showNegotiation});
+    if (atk) await say(BorrowerUI.message("I also stopped a lender that tried to trick me into a bad loan. Nothing was signed with them."));
+    resultControls(msgs);
+    return ask(BorrowerUI.message("Want a breakdown of what I did, or how I negotiated?"), {[BorrowerUI.message("Show me the breakdown")]: showBreakdown, [BorrowerUI.message("How did you negotiate?")]: showNegotiation});
 
     // ---- explanations, only when asked
     async function ask(question, options) {
       const left = {...options};
       const next = async () => {
-        if (Object.keys(left).length) { await say("Anything else you'd like to see?"); setChips([...Object.keys(left), "No thanks"]); }
-        else { followUp = null; setChips(["Start a new request"]); }
+        if (Object.keys(left).length) { await say(BorrowerUI.message("Anything else you'd like to see?")); setChips([...Object.keys(left), BorrowerUI.message("No thanks")]); }
+        else { followUp = null; setChips([BorrowerUI.message("Start a new request")]); }
       };
       followUp = text => {
         const t = text.toLowerCase(), keys = Object.keys(left);
         const pick = keys.find(k => k.toLowerCase() === t)
-          || (/negotiat|haggl|bargain|how did/.test(t) && keys.find(k => /negotiate/i.test(k)))
-          || (/breakdown|detail|what did|show|offer|why|check|explain/.test(t) && keys.find(k => /breakdown|why/i.test(k)));
+          || (/negotiat|haggl|bargain|how did|negoci|como/.test(t) && keys.find(k => /negotiate|negoci/i.test(k)))
+          || (/breakdown|detail|what did|show|offer|why|check|explain|pasos|detalle|oferta|por qu|consulta|explica/.test(t) && keys.find(k => /breakdown|why|pasos|por qu/i.test(k)));
         if (pick) { const f = left[pick]; delete left[pick]; return async () => { await f(); await next(); }; }
         if (/^(no|nah|nope)\b|no thanks|i'?m good|all good|that'?s all|thank/.test(t)) return noThanks;
         if (/new|again|start over|another/.test(t)) return chatView;
-        return async () => { await say("I can show you a breakdown of what I did, or how I negotiated. Which would you like?"); setChips([...Object.keys(left), "No thanks"]); };
+        return async () => { await say(BorrowerUI.message("I can show you a breakdown of what I did, or how I negotiated. Which would you like?")); setChips([...Object.keys(left), BorrowerUI.message("No thanks")]); };
       };
       await say(question);
       input.disabled = false; send.disabled = false; input.placeholder = "iMessage";
-      setChips([...Object.keys(left), "No thanks"]);
+      setChips([...Object.keys(left), BorrowerUI.message("No thanks")]);
     }
-    async function noThanks() { followUp = null; await say("Sounds good! I'm here if you need anything else."); setChips(["Start a new request"]); }
-    async function showChecks() { await say("Here's what the checks found:"); infoCard("Identity and credit checks", detailChecks()); }
+    async function noThanks() { followUp = null; await say(BorrowerUI.message("Sounds good! I'm here if you need anything else.")); setChips([BorrowerUI.message("Start a new request")]); }
+    async function showChecks() { await say(BorrowerUI.message("Here's what the checks found:")); infoCard(BorrowerUI.message("Identity and credit checks"), detailChecks()); }
     async function showBreakdown() {
-      await say("Here's everything I did, step by step:");
-      infoCard("1. Checked your identity and credit", detailChecks());
-      infoCard("2. Sent lenders a summary, not your identity", detailShopping());
-      const offers = h("div", {class: "ccard"}, h("div", {class: "hd"}, "3. The offers that came back"));
+      await say(BorrowerUI.message("Here's everything I did, step by step:"));
+      infoCard(BorrowerUI.message("1. Checked your identity and credit"), detailChecks());
+      infoCard(BorrowerUI.message("2. Sent lenders a summary, not your identity"), detailShopping());
+      const offers = h("div", {class: "ccard"}, h("div", {class: "hd"}, BorrowerUI.message("3. The offers that came back")));
       for (const e of replies(0)) {
         const d = e.data, off = d.type === "OFFER", inj = off && isInjected(d);
         offers.append(tappable(h("div", {class: "crow" + (off ? "" : " dead")}, icon("bank", 16), h("span", {class: "k"}, LENDERS[d.sender] || d.sender),
@@ -1004,13 +1020,13 @@ function chatView() {
       put(offers); appear(offers).catch(() => {}); scroll();
       if (atk) {
         const br = breach(atk.data.terms);
-        tappable(await say(`${LENDERS[atk.data.to]} hid an instruction in its offer to trick me into accepting ${pct(atk.data.terms.apr)}. I fell for it, `
-          + `but the exchange's referee blocked it because ${br.offer} is over your ${br.limit} limit.`, "alertmsg"), () => detailBlocked(atk));
+        tappable(await say(BorrowerUI.message("{v0} hid an instruction in its offer to trick me into accepting {v1}. I fell for it, ", {v0: LENDERS[atk.data.to], v1: pct(atk.data.terms.apr)})
+          + BorrowerUI.message("but the exchange's referee blocked it because {v0} is over your {v1} limit.", {v0: br.offer, v1: br.limit}), "alertmsg"), () => detailBlocked(atk));
       }
-      infoCard(deal ? "4. The deal" : "4. Why I walked away", detailDone());
-      await say("Tap any offer or the warning for more detail.");
+      infoCard(deal ? BorrowerUI.message("4. The deal") : BorrowerUI.message("4. Why I walked away"), detailDone());
+      await say(BorrowerUI.message("Tap any offer or the warning for more detail."));
     }
-    async function showNegotiation() { await say(`Here's how it went with ${name}:`); infoCard(`Negotiating with ${name}`, detailNegotiation()); }
+    async function showNegotiation() { await say(BorrowerUI.message("Here's how it went with {v0}:", {v0: name})); infoCard(BorrowerUI.message("Negotiating with {v0}", {v0: name}), detailNegotiation()); }
   }
 
   send.onclick = () => submit(input.value);
@@ -1030,43 +1046,43 @@ function sw(checked, label) {
 }
 function phoneForm() {
   run++; speed = 1;
-  $("#log").replaceChildren(h("li", {class: "empty"}, "Waiting for the person to tap Start shopping."));
+  $("#log").replaceChildren(h("li", {class: "empty"}, BorrowerUI.message("Waiting for the person to tap Start shopping.")));
   const amt = h("span", {class: "v"}, money(M.amount));
-  const stepBtn = (sym, delta) => { const b = h("button", {type: "button", "aria-label": delta > 0 ? "More" : "Less"}, sym);
+  const stepBtn = (sym, delta) => { const b = h("button", {type: "button", "aria-label": delta > 0 ? BorrowerUI.message("More") : BorrowerUI.message("Less")}, sym);
     b.onclick = () => { M.amount = Math.max(500, Math.min(25000, M.amount + delta)); amt.textContent = money(M.amount); }; return b; };
-  const rateV = h("span", {class: "v"}, `${M.max_apr}%`), rate = h("input", {type: "range", min: 5, max: 36, step: 0.5, value: M.max_apr, "aria-label": "Highest rate"});
+  const rateV = h("span", {class: "v"}, `${M.max_apr}%`), rate = h("input", {type: "range", min: 5, max: 36, step: 0.5, value: M.max_apr, "aria-label": BorrowerUI.message("Highest rate")});
   rate.oninput = () => { M.max_apr = Number(rate.value); rateV.textContent = `${M.max_apr}%`; };
-  const term = h("select", {"aria-label": "Loan length"}, [["12-24", "1–2 years"], ["12-36", "1–3 years"], ["12-48", "1–4 years"], ["24-60", "2–5 years"]]
+  const term = h("select", {"aria-label": BorrowerUI.message("Loan length")}, [["12-24", BorrowerUI.message("1–2 years")], ["12-36", BorrowerUI.message("1–3 years")], ["12-48", BorrowerUI.message("1–4 years")], ["24-60", BorrowerUI.message("2–5 years")]]
     .map(([v, t]) => h("option", {value: v}, t)));
   term.value = `${M.min_term}-${M.max_term}`; if (!term.value) term.value = "12-48";
-  const [apS, ap] = sw(M.autopay, "Autopay is OK"), [feeS, fee] = sw(!M.max_fee, "No fees"), [consS, cons] = sw(true, "Allow identity check and soft pull");
-  const go = h("button", {type: "button", class: "ios-btn dock"}, "Start shopping");
+  const [apS, ap] = sw(M.autopay, BorrowerUI.message("Autopay is OK")), [feeS, fee] = sw(!M.max_fee, BorrowerUI.message("No fees")), [consS, cons] = sw(true, BorrowerUI.message("Allow identity check and soft pull"));
+  const go = h("button", {type: "button", class: "ios-btn dock"}, BorrowerUI.message("Start shopping"));
   cons.onchange = () => { go.disabled = !cons.checked; };
   go.onclick = async () => {
     const [a, b] = term.value.split("-").map(Number);
     Object.assign(M, {min_term: a, max_term: b, autopay: ap.checked ? 1 : 0, max_fee: fee.checked ? 0 : 150});
-    go.disabled = true; go.textContent = "Starting...";
+    go.disabled = true; go.textContent = BorrowerUI.message("Starting...");
     M.max_payment = null; M.min_amount = 3000;
-    try { await loadExchange(); } catch (err) { go.textContent = "Couldn't reach the exchange"; return; }
+    try { await loadExchange(); } catch (err) { go.textContent = BorrowerUI.message("Couldn't reach the exchange"); go.disabled = false; go.focus(); return; }
     shareWithLaptop();
     phoneRun();
   };
-  const toChat = h("button", {type: "button", class: "ios-sub", style: "border:0;background:none;color:var(--ios-blue);font:inherit;font-size:13px;cursor:pointer;padding:0"}, "Chat with your agent instead");
+  const toChat = h("button", {type: "button", class: "ios-sub", style: "border:0;background:none;color:var(--ios-blue);font:inherit;font-size:0.8125rem;cursor:pointer;padding:0"}, BorrowerUI.message("Chat with your agent instead"));
   toChat.onclick = chatView;
   app().classList.remove("chatmode"); document.body.classList.remove("chatting");
   app().replaceChildren(
-    h("div", {style: "display:flex;justify-content:space-between;align-items:baseline"}, h("div", {class: "ios-sub"}, `Hi ${first(D.P.name)}`), toChat),
-    h("div", {class: "ios-title"}, "What do you need?"),
-    h("div", {class: "ios-sec"}, "Your loan"),
+    h("div", {style: "display:flex;justify-content:space-between;align-items:baseline"}, h("div", {class: "ios-sub"}, BorrowerUI.message("Hi {v0}", {v0: first(D.P.name)})), toChat),
+    h("div", {class: "ios-title"}, BorrowerUI.message("What do you need?")),
+    h("div", {class: "ios-sec"}, BorrowerUI.message("Your loan")),
     h("div", {class: "ios-group"},
-      h("div", {class: "ios-row"}, h("span", {class: "k"}, "Amount"), h("div", {class: "stepper"}, stepBtn("−", -500), amt, stepBtn("+", 500))),
-      h("div", {class: "ios-row", style: "flex-wrap:wrap"}, h("span", {class: "k"}, "Highest rate"), rateV, rate),
-      h("div", {class: "ios-row"}, h("span", {class: "k"}, "Length"), term)),
-    h("div", {class: "ios-sec"}, "Your agent may"),
-    h("div", {class: "ios-group"}, h("div", {class: "ios-row"}, h("span", {class: "k"}, "Agree to autopay"), apS),
-      h("div", {class: "ios-row"}, h("span", {class: "k"}, "Only no-fee loans"), feeS)),
-    h("div", {class: "ios-group"}, h("div", {class: "ios-row"}, h("span", {class: "k"}, "Check my identity & credit", h("div", {class: "ios-sub"}, "soft pull · score not affected")), consS)),
-    h("div", {class: "ios-sub", style: "text-align:center"}, "Fictional sandbox person · simulated lenders"),
+      h("div", {class: "ios-row"}, h("span", {class: "k"}, BorrowerUI.message("Amount")), h("div", {class: "stepper"}, stepBtn("−", -500), amt, stepBtn("+", 500))),
+      h("div", {class: "ios-row", style: "flex-wrap:wrap"}, h("span", {class: "k"}, BorrowerUI.message("Highest rate")), rateV, rate),
+      h("div", {class: "ios-row"}, h("span", {class: "k"}, BorrowerUI.message("Length")), term)),
+    h("div", {class: "ios-sec"}, BorrowerUI.message("Your agent may")),
+    h("div", {class: "ios-group"}, h("div", {class: "ios-row"}, h("span", {class: "k"}, BorrowerUI.message("Agree to autopay")), apS),
+      h("div", {class: "ios-row"}, h("span", {class: "k"}, BorrowerUI.message("Only no-fee loans")), feeS)),
+    h("div", {class: "ios-group"}, h("div", {class: "ios-row"}, h("span", {class: "k"}, BorrowerUI.message("Check my identity & credit"), h("div", {class: "ios-sub"}, BorrowerUI.message("soft pull · score not affected"))), consS)),
+    h("div", {class: "ios-sub", style: "text-align:center"}, BorrowerUI.message("Fictional sandbox person · simulated lenders")),
     go);
 }
 
@@ -1080,8 +1096,10 @@ function tappable(el, build) {
     if (box) { box.remove(); box = null; el.setAttribute("aria-expanded", "false"); return; }
     const inList = el.parentElement.classList.contains("ios-group") || el.parentElement.classList.contains("ccard");
     box = h("div", {class: "detail" + (inList ? "" : " card")}, build());
+    box.id = "borrower-detail-" + Math.random().toString(36).slice(2);
+    el.setAttribute("aria-controls", box.id);
     el.after(box); el.setAttribute("aria-expanded", "true");
-    box.animate([{opacity: 0, transform: "translateY(-4px)"}, {opacity: 1, transform: "none"}], {duration: 220});
+    if (!reduced) box.animate([{opacity: 0, transform: "translateY(-4px)"}, {opacity: 1, transform: "none"}], {duration: 220});
   };
   el.onclick = toggle;
   el.onkeydown = e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } };
@@ -1089,7 +1107,7 @@ function tappable(el, build) {
 }
 const ID_TEXT = {"2201": "SSN belongs to a different name", "2202": "Birth date doesn't match the SSN", "2301": "SSN belongs to a deceased person",
                  "2401": "Fraud alert on file", "2101": "Address doesn't match the file"};
-const drow = (k, v, red) => h("div", {class: "drow"}, h("span", {}, k), h("b", {class: red ? "red" : ""}, String(v)));
+const drow = (k, v, red) => h("div", {class: "drow"}, h("span", {}, k), h("b", {class: red ? "red" : ""}, BorrowerUI.value(v)));
 const stripName = s => String(s || "").replace(/^[^:]+:\s*/, "");
 function fits(t) {
   const m = D.ex.mandate, pay = monthly(t.amount, t.apr, t.term_months);
@@ -1098,82 +1116,85 @@ function fits(t) {
 }
 function detailChecks() {
   const P = D.P, ff = P.fraud_finder || {}, gate = D.ex.events.find(e => e.kind === "gate").data;
-  const age = n => n == null ? "unknown" : n >= 365 ? `${Math.floor(n / 365)} years` : `${n} days`;
+  const age = n => n == null ? "unknown" : n >= 365 ? BorrowerUI.message("{v0} years", {v0: Math.floor(n / 365)}) : BorrowerUI.message("{v0} days", {v0: n});
   const bureaus = Object.entries(P.scores || {}).map(([b, s]) => `${b} ${s ?? "no file"}`);
   return [
     drow("Identity (TransUnion)", P.id_codes.length ? "problems found" : "verified", P.id_codes.length),
     ...P.id_codes.map(c => h("div", {class: "dnote"}, "• " + (ID_TEXT[c.code] || c.text))),
-    drow("Fraud risk (AtData)", ff.risk_score != null ? `${ff.risk_score} / 100` : "n/a", ff.risk_score >= 70),
-    drow("Email age", age(ff.email_age_days), ff.email_age_days != null && ff.email_age_days < 30),
+    drow(BorrowerUI.message("Fraud risk (AtData)"), ff.risk_score != null ? `${ff.risk_score} / 100` : "n/a", ff.risk_score >= 70),
+    drow(BorrowerUI.message("Email age"), age(ff.email_age_days), ff.email_age_days != null && ff.email_age_days < 30),
     drow("Phone", ff.phone_owner_matches === false ? "not yours" : "yours" + (ff.phone_type ? ` · ${ff.phone_type}` : ""), ff.phone_owner_matches === false),
-    h("div", {class: "dh"}, "Credit bureaus"), ...bureaus.map(b => h("div", {}, b)),
-    ...(gate.findings || []).length ? [h("div", {class: "dh"}, "What CRS noticed"), ...gate.findings.map(f => h("div", {class: "dnote"}, "• " + f.text))] : [],
-    h("div", {class: "dnote"}, (gate.source === "live" ? "Live from the CRS sandbox" : "Saved CRS sandbox data") + " · soft pulls, your score isn't affected"),
+    h("div", {class: "dh"}, BorrowerUI.message("Credit bureaus")), ...bureaus.map(b => h("div", {}, b)),
+    ...(gate.findings || []).length ? [h("div", {class: "dh"}, "What CRS noticed"), ...(D.ex.person ? (D.ex.person.blocked ? D.ex.person.blocked.reasons : D.ex.person.helped) : []).map(text => h("div", {class: "dnote"}, text))] : [],
+    h("div", {class: "dnote"}, (gate.source === "live" ? "Live from the CRS sandbox" : BorrowerUI.message("Saved CRS sandbox data")) + " · soft pulls, your score isn't affected"),
   ];
 }
 function detailShopping() {
   const p = D.ex.passport;
   if (!p) return [h("div", {}, "Nothing was sent: your identity couldn't be verified, so no lender saw anything.")];
-  return [h("div", {}, `Your agent sent the same credit passport to ${D.lenderIds.length} lenders. They never see who else is bidding.`),
-    drow("Score band", p.score_band || "no score"), drow("Accounts", p.accounts),
-    drow("History", p.file_age_years != null ? `${p.file_age_years} years` : "none"), drow("Identity", p.identity), drow("Late payments", p.late_payments),
-    h("div", {class: "dnote"}, "Hidden from lenders: " + (p.withheld || []).join(", "))];
+  return [h("div", {}, BorrowerUI.message("Your agent sent the same credit passport to {v0} lenders. They never see who else is bidding.", {v0: D.lenderIds.length})),
+    drow(BorrowerUI.message("Score band"), p.score_band || "no score"), drow(BorrowerUI.message("Accounts"), p.accounts),
+    drow(BorrowerUI.message("History"), p.file_age_years != null ? BorrowerUI.message("{v0} years", {v0: p.file_age_years}) : "none"), drow(BorrowerUI.message("Identity"), p.identity), drow(BorrowerUI.message("Late payments"), p.late_payments),
+    h("div", {class: "dnote"}, BorrowerUI.message("Lenders see a summary, never your name, SSN or address."))];
 }
 function detailOffer(d) {
-  if (d.type === "DECLINE") return [drow("Decision", "declined", true), h("div", {}, "Why: " + stripName(d.text)),
+  if (d.type === "DECLINE") return [drow("Decision", "declined", true), h("div", {}, BorrowerUI.reason(d.reason_code)),
     h("div", {class: "dnote"}, "Each lender applies its own rules to your credit passport.")];
   const t = d.terms, pay = monthly(t.amount, t.apr, t.term_months), ok = fits(t), out = [
-    drow("Amount", money(t.amount)), drow("Rate", pct(t.apr)), drow("Length", `${t.term_months} months`), drow("Monthly payment", money(pay)),
-    drow("Total you'd repay", money(pay * t.term_months + (t.fee || 0))), drow("Fee", t.fee ? money(t.fee) : "none"),
-    drow("Your limits", ok ? "fits" : "doesn't fit", !ok)];
+    drow(BorrowerUI.message("Amount"), money(t.amount)), drow(BorrowerUI.message("Rate"), pct(t.apr)), drow(BorrowerUI.message("Length"), BorrowerUI.message("{v0} months", {v0: t.term_months})), drow(BorrowerUI.message("Monthly payment"), money(pay)),
+    drow(BorrowerUI.message("Total you'd repay"), money(pay * t.term_months + (t.fee || 0))), drow(BorrowerUI.message("Fee"), t.fee ? money(t.fee) : "none"),
+    drow(BorrowerUI.message("Your limits"), ok ? "fits" : "doesn't fit", !ok)];
   if (isInjected(d)) {
     const cut = d.text.toUpperCase().indexOf("SYSTEM NOTE");
-    out.push(h("div", {class: "dh"}, "Hidden in the offer text"), h("div", {class: "dq"}, `"${cut >= 0 ? d.text.slice(cut) : d.text}"`));
+    out.push(h("div", {class: "dh"}, "Hidden in the offer text"), sourceRecord(cut >= 0 ? d.text.slice(cut) : d.text));
   }
   return out;
 }
 function detailBlocked(atk) {
   return [drow("Your agent tried", `ACCEPT ${pct(atk.data.terms.apr)}`), drow("Referee check", atk.verdict.code, true),
-    h("div", {}, atk.verdict.reason.replace(/^Blocked:\s*/, "")),
+    h("div", {}, (D.ex.person.protection || []).map(p => p.sentence).join(" ")),
     h("div", {class: "dnote"}, "The referee is plain code. It reads only the offer's numbers, never its text, so hidden instructions can't change what it allows.")];
 }
 function detailNegotiation() {
   const lid = focusLender(), after = (attackMsg() || {round: 0}).round, out = [h("div", {class: "dh"}, `With ${LENDERS[lid] || lid}`)];
   const open = D.msgs.find(e => e.round === 0 && e.data.sender === lid && e.data.type === "OFFER");
-  if (open) out.push(h("div", {class: "msg them"}, `${pct(open.data.terms.apr)}: ${stripName(open.data.text).split(". ")[0]}`));
+  if (open) out.push(h("div", {class: "msg them"}, BorrowerUI.message("{v0}", {v0: pct(open.data.terms.apr)})), sourceRecord(open.data.text));
   for (const e of D.msgs.filter(x => x.round > after && (x.data.sender === lid || x.data.to === lid))) {
     const d = e.data, mine = d.sender === "borrower";
-    out.push(h("div", {class: "msg " + (mine ? "me" : "them")}, mine ? (d.type === "ACCEPT" ? `Accept ${pct(d.terms.apr)}` : d.text || `${pct(d.terms.apr)}?`) : stripName(d.text)));
+    out.push(h("div", {class: "msg " + (mine ? "me" : "them")}, d.type === "ACCEPT" ? BorrowerUI.message("Accept") + " " + pct(d.terms.apr) : d.terms ? BorrowerUI.message("{v0}", {v0: pct(d.terms.apr)}) : BorrowerUI.reason(d.reason_code)));
+    if (d.text) out.push(sourceRecord(d.text));
   }
   const others = D.lenderIds.filter(id => id !== lid).map(id => {
     const last = D.msgs.filter(e => e.data.sender === id && e.data.type === "OFFER").pop(), dec = D.msgs.find(e => e.data.sender === id && e.data.type === "DECLINE");
     return drow(LENDERS[id] || id, last ? `${pct(last.data.terms.apr)}${isInjected(last.data) ? " (blocked)" : ""}` : dec ? "declined" : "-", last && isInjected(last.data));
   });
-  if (others.length) out.push(h("div", {class: "dh"}, "Other lenders' best offers"), ...others);
+  if (others.length) out.push(h("div", {class: "dh"}, BorrowerUI.message("Other lenders' best offers")), ...others);
   out.push(h("div", {class: "dnote"}, "Your agent can show a lender a rival's offer; the exchange checks it's real and passes it on without the rival's name."));
   return out;
 }
 function detailDone() {
+  if (D.ex.person) return personDetails(D.ex.person);
   const deal = D.ex.deal, ev = D.ex.events, dis = ev.find(x => x.kind === "disclosure"), set = ev.find(x => x.kind === "settlement"), none = ev.find(x => x.kind === "no_deal");
-  if (!deal) return [h("div", {}, none ? none.data.reason : "No offer fit your limits."),
+  if (!deal) return [h("div", {}, none ? none.data.reason : BorrowerUI.message("No offer fit your limits.")),
     ...replies(0).filter(e => e.data.type === "OFFER" && !isInjected(e.data)).map(e => drow(LENDERS[e.data.sender], `${pct(e.data.terms.apr)} · ${money(monthly(e.data.terms.amount, e.data.terms.apr, e.data.terms.term_months))}/mo`)),
-    h("div", {class: "dnote"}, "Your agent never accepts anything outside your limits, even if that means no loan.")];
+    h("div", {class: "dnote"}, BorrowerUI.message("Your agent never accepts anything outside your limits, even if that means no loan."))];
   const t = deal.terms;
-  return [drow("Lender", deal.lender_name), drow("Amount", money(t.amount)), drow("Rate", pct(t.apr)), drow("Length", `${t.term_months} months`),
-    drow("Monthly payment", money(dis ? dis.data.monthly_payment : monthly(t.amount, t.apr, t.term_months))),
-    dis ? drow("Total interest and fees", money(dis.data.total_interest_and_fees, 2)) : null, drow("Autopay", t.autopay ? "yes" : "no"),
-    ...(dis ? [h("div", {class: "dh"}, "In plain English"), ...dis.data.summary.map(s => h("div", {}, s))] : []),
-    ...(set ? [h("div", {class: "dh"}, "Next steps (simulated)"), ...set.data.steps.map(s => h("div", {class: "dnote"}, "• " + s.replace(/: simulated \(not available in the CRS sandbox\)$/, "")))] : [])];
+  return [drow(BorrowerUI.message("Lender"), deal.lender_name), drow(BorrowerUI.message("Amount"), money(t.amount)), drow(BorrowerUI.message("Rate"), pct(t.apr)), drow(BorrowerUI.message("Length"), BorrowerUI.message("{v0} months", {v0: t.term_months})),
+    drow(BorrowerUI.message("Monthly payment"), money(dis ? dis.data.monthly_payment : monthly(t.amount, t.apr, t.term_months))),
+    dis ? drow(BorrowerUI.message("Total interest and fees"), money(dis.data.total_interest_and_fees, 2)) : null, drow(BorrowerUI.message("Autopay"), t.autopay ? BorrowerUI.message("yes") : BorrowerUI.message("no")),
+    ...(dis ? [h("div", {class: "dh"}, BorrowerUI.message("In plain English")), ...dis.data.summary.map(s => h("div", {}, s))] : []),
+    ...(set ? [h("div", {class: "dh"}, BorrowerUI.message("Next steps (simulated)")), ...set.data.steps.map(s => h("div", {class: "dnote"}, "• " + s.replace(/: simulated \(not available in the CRS sandbox\)$/, "")))] : [])];
 }
 
 async function phoneRun() {
+  BorrowerUI.stopReading();
   const id = ++run; speed = 1;
   try { await phoneStory(); } catch (e) { if (e !== STOP) throw e; }
   finally { if (id === run) speed = 1; }
 }
 async function phoneStory() {
   $("#log").replaceChildren();
-  const STEPS = ["Checking your details", "Shopping", "Negotiating", "Done"];
+  const STEPS = [BorrowerUI.message("Checking your details"), BorrowerUI.message("Shopping"), BorrowerUI.message("Negotiating"), BorrowerUI.message("Done")];
   const rows = STEPS.map(s => h("div", {class: "ios-row off"}, h("span", {class: "st"}, h("span", {class: "wait"})), h("span", {class: "k"}, s)));
   const DETAILS = [detailChecks, detailShopping, detailNegotiation, detailDone];
   const setStep = (i, state) => { const r = rows[i]; r.classList.toggle("off", state === "wait");
@@ -1182,46 +1203,47 @@ async function phoneStory() {
     if (state === "ok" || state === "fail") tappable(r, DETAILS[i]); };  // a finished step can be opened for details
   const area = h("div", {style: "display:flex;flex-direction:column;gap:10px"});
   app().classList.remove("chatmode"); document.body.classList.remove("chatting");
-  app().replaceChildren(h("div", {}, h("div", {class: "ios-sub"}, "You asked for"), wantsChips()),
-    h("div", {class: "ios-title", style: "font-size:22px"}, "Your agent is shopping"), h("div", {class: "ios-group steps"}, rows), area);
+  app().replaceChildren(h("div", {}, h("div", {class: "ios-sub"}, BorrowerUI.message("You asked for")), wantsChips()),
+    h("div", {class: "ios-title", style: "font-size:1.375rem"}, BorrowerUI.message("Your agent is shopping")), h("div", {class: "ios-group steps"}, rows), area);
   const gate = D.ex.events.find(e => e.kind === "gate").data;
   // 1. identity and credit
   setStep(0, "run");
-  logAdd("Agent → CRS", `Checked identity and credit: ${gate.crs_products.length} CRS checks (AtData fraud risk, TransUnion identity, phone owner, 3 credit bureaus).`, "", "id");
+  logAdd("Agent → CRS", BorrowerUI.message("Checked identity and credit: {v0} CRS checks (AtData fraud risk, TransUnion identity, phone owner, 3 credit bureaus).", {v0: gate.crs_products.length}), "", "id");
   await wait(2200);
   if (!D.ex.admitted) {
     setStep(0, "fail");
-    await add(area, tappable(h("div", {class: "alert"}, h("b", {}, "We couldn't verify your identity."), h("div", {}, gate.headline + ". No lender has seen your application.")), detailChecks));
-    logAdd("Referee", "Stopped at the gate: identity checks failed. No lender sees anything.", "bad", "shield");
+    await add(area, tappable(h("div", {class: "alert"}, h("b", {}, BorrowerUI.message("We couldn't verify your identity.")), h("div", {}, gate.headline + ". No lender has seen your application.")), detailChecks));
+    resultControls(area);
+    logAdd(BorrowerUI.message("Referee"), BorrowerUI.message("Stopped at the gate: identity checks failed. No lender sees anything."), "bad", "shield");
     return;
   }
   setStep(0, "ok");
   const s = scoreOf(D.P);
-  logAdd("CRS", s == null ? "Identity verified. No credit score on file." : `Identity verified. Credit score ${s}.`, "good", "check");
+  logAdd("CRS", s == null ? BorrowerUI.message("Identity verified. No credit score on file.") : BorrowerUI.message("Identity verified. Credit score {v0}.", {v0: s}), "good", "check");
   await wait(700);
   // 2. shopping
   setStep(1, "run");
-  logAdd("Agent → lenders", `Sent a credit passport to ${D.lenderIds.length} lenders. Name, SSN and address stay hidden.`, "", "hidden");
-  const list = await add(area, h("div", {class: "ios-group"}, h("div", {class: "ios-row ios-sub"}, "Offers")));
+  logAdd("Agent → lenders", BorrowerUI.message("Sent a credit passport to {v0} lenders. Name, SSN and address stay hidden.", {v0: D.lenderIds.length}), "", "hidden");
+  const list = await add(area, h("div", {class: "ios-group"}, h("div", {class: "ios-row ios-sub"}, BorrowerUI.message("Offers"))));
   for (const e of replies(0)) {
     const d = e.data, off = d.type === "OFFER", inj = off && isInjected(d);
     await wait(900);
     await add(list, tappable(h("div", {class: "ios-row orow" + (off ? "" : " dead")}, icon("bank", 16), LENDERS[d.sender] || d.sender,
       off ? h("b", {class: inj ? "red" : ""}, pct(d.terms.apr), inj ? [" ", icon("warn", 14)] : null) : h("b", {}, "declined")), () => detailOffer(d)));
-    logAdd(LENDERS[d.sender] || d.sender, off ? `Offered ${pct(d.terms.apr)} for ${d.terms.term_months} months${inj ? ", with a hidden instruction in the text" : ""}.` : "Declined.",
+    logAdd(LENDERS[d.sender] || d.sender, off ? BorrowerUI.message("Offered {v0} for {v1} months{v2}.", {v0: pct(d.terms.apr), v1: d.terms.term_months, v2: inj ? ", with a hidden instruction in the text" : ""}) : BorrowerUI.message("Declined."),
       inj ? "bad" : "", "bank");
   }
   const atk = attackMsg();
   if (atk) {
     await wait(1200);
-    logAdd("Agent", `Tried to accept ${pct(atk.data.terms.apr)} from ${LENDERS[atk.data.to]}: it obeyed the hidden instruction.`, "bad", "robot");
+    logAdd("Agent", BorrowerUI.message("Tried to accept {v0} from {v1}: it obeyed the hidden instruction.", {v0: pct(atk.data.terms.apr), v1: LENDERS[atk.data.to]}), "bad", "robot");
     await wait(1300);
     const br = breach(atk.data.terms);
     const al = await add(area, tappable(h("div", {class: "alert"}, h("b", {}, "Blocked a risky offer"),
-      h("div", {}, `${LENDERS[atk.data.to]} hid an instruction telling your agent to accept ${pct(atk.data.terms.apr)} (${br.what === "monthly limit" ? br.offer : "that rate"}). That's over your ${br.limit} limit, so the exchange stopped it. Nothing was signed.`)),
+      h("div", {}, BorrowerUI.message("{v0} hid an instruction telling your agent to accept {v1} ({v2}). That's over your {v3} limit, so the exchange stopped it. Nothing was signed.", {v0: LENDERS[atk.data.to], v1: pct(atk.data.terms.apr), v2: br.what === "monthly limit" ? br.offer : "that rate", v3: br.limit}))),
       () => detailBlocked(atk)));
     shake(al);
-    logAdd("Referee", `Blocked: ${br.offer} is over the ${br.limit} limit (${atk.verdict.code}).`, "bad", "shield");
+    logAdd(BorrowerUI.message("Referee"), BorrowerUI.message("Blocked: {v0} is over the {v1} limit ({v2}).", {v0: br.offer, v1: br.limit, v2: atk.verdict.code}), "bad", "shield");
     await wait(1800);
   }
   setStep(1, "ok");
@@ -1231,15 +1253,15 @@ async function phoneStory() {
   const open = D.msgs.find(e => e.round === 0 && e.data.sender === lid && e.data.type === "OFFER");
   if (open) {
     const t0 = open.data.terms, pay = h("div", {class: "big-pay"}, money(monthly(t0.amount, t0.apr, t0.term_months))), rate = h("b", {}, pct(t0.apr));
-    await add(area, h("div", {class: "ios-group"}, h("div", {class: "ios-row"}, h("span", {class: "k ios-sub"}, `Best so far · ${LENDERS[lid]}`), rate),
-      h("div", {class: "ios-row"}, pay, h("span", {class: "ios-sub"}, "/ month"))));
+    await add(area, h("div", {class: "ios-group"}, h("div", {class: "ios-row"}, h("span", {class: "k ios-sub"}, BorrowerUI.message("Best so far · {v0}", {v0: LENDERS[lid]})), rate),
+      h("div", {class: "ios-row"}, pay, h("span", {class: "ios-sub"}, BorrowerUI.message("/ month")))));
     let prev = t0.apr;
     for (const e of D.msgs.filter(x => x.round > after && (x.data.sender === lid || x.data.to === lid))) {
       const d = e.data;
       await wait(1100);
-      if (d.sender === "borrower" && d.type === "COUNTER") logAdd(`Agent → ${LENDERS[lid]}`, `Asked for ${pct(d.terms.apr)}${d.terms.autopay ? " with autopay" : ""}.`, "", "chat");
+      if (d.sender === "borrower" && d.type === "COUNTER") logAdd(`Agent → ${LENDERS[lid]}`, BorrowerUI.message("Asked for {v0}{v1}.", {v0: pct(d.terms.apr), v1: d.terms.autopay ? " with autopay" : ""}), "", "chat");
       else if (d.type === "OFFER") {
-        logAdd(LENDERS[lid], `Agreed to ${pct(d.terms.apr)}.`, "", "bank");
+        logAdd(LENDERS[lid], BorrowerUI.message("Agreed to {v0}.", {v0: pct(d.terms.apr)}), "", "bank");
         await Promise.all([countTo(rate, prev, d.terms.apr, 1200, pct),
           countTo(pay, monthly(d.terms.amount, prev, d.terms.term_months), monthly(d.terms.amount, d.terms.apr, d.terms.term_months), 1200, n => money(n))]);
         prev = d.terms.apr;
@@ -1249,24 +1271,82 @@ async function phoneStory() {
   setStep(2, "ok");
   // 4. done
   const deal = D.ex.deal, dis = D.ex.events.find(x => x.kind === "disclosure");
+  const pending = D.ex.awaiting_approval;
+  if (pending) {
+    setStep(3, "ok");
+    const t = pending.terms;
+    await add(area, tappable(h("div", {class: "ios-group"},
+      h("div", {class: "ios-row"}, BorrowerUI.message("{v0} · simulated lender · waiting for your OK", {v0:pending.lender_name})),
+      h("div", {class: "ios-row"}, BorrowerUI.message("Waiting for your approval. Nothing is signed.")),
+      drow(BorrowerUI.message("Monthly payment"), money(pending.preview.monthly_payment)),
+      drow(BorrowerUI.message("Yearly rate"), pct(t.apr)),
+      drow(BorrowerUI.message("Fee"), money(t.fee || 0))), detailDone));
+    resultControls(area);
+    return;
+  }
   if (!deal) {
+    const reason = D.ex.person && D.ex.person.no_deal && D.ex.person.no_deal.reasons[0];
+    if (reason && BorrowerUI.matches(reason, "You turned down your agent's recommendation. Nothing was signed.")) {
+      setStep(3, "ok");
+      await add(area, h("div", {class: "ios-group"}, h("div", {class: "ios-row"}, reason)));
+      resultControls(area);
+      return;
+    }
     setStep(3, "fail");
-    await add(area, tappable(h("div", {class: "alert"}, h("b", {}, "No offer fit your limits"), h("div", {}, "Your agent walked away instead of breaking your rules. "
-      + (M.max_payment ? "A higher monthly limit or a longer loan may get an offer." : `Raising your highest rate above ${M.max_apr}% may get an offer.`))), detailDone));
-    logAdd("Agent", "Walked away: nothing fit the limits.", "", "robot");
-    const back = h("button", {type: "button", class: "ios-btn ghost"}, "Change what I want"); back.onclick = () => (M.max_payment ? chatView() : phoneForm()); await add(area, back);
+    await add(area, tappable(h("div", {class: "alert"}, h("b", {}, BorrowerUI.message("No offer fit your limits")), h("div", {}, "Your agent walked away instead of breaking your rules. "
+      + (M.max_payment ? BorrowerUI.message("A higher monthly limit or a longer loan may get an offer.") : BorrowerUI.message("Raising your highest rate above {v0}% may get an offer.", {v0: M.max_apr})))), detailDone));
+    logAdd("Agent", BorrowerUI.message("Walked away: nothing fit the limits."), "", "robot");
+    const back = h("button", {type: "button", class: "ios-btn ghost"}, BorrowerUI.message("Change what I want")); back.onclick = () => (M.max_payment ? chatView() : phoneForm()); await add(area, back);
+    resultControls(area);
     return;
   }
   setStep(3, "ok");
   const t = deal.terms, saved = dis && dis.data.summary.join(" ").match(/saves \$([\d,.]+)/), traded = dis ? dis.data.summary.slice(1).filter(x => !/saves/.test(x)) : [];
-  logAdd(`Agent → ${deal.lender_name}`, `Accepted ${pct(t.apr)}: inside every limit.`, "good", "check");
-  const card = await add(area, h("div", {class: "good-card"}, h("div", {class: "ios-sub"}, `${deal.lender_name} · simulated lender`),
-    h("div", {class: "big-pay"}, money(dis ? dis.data.monthly_payment : monthly(t.amount, t.apr, t.term_months)), h("span", {class: "ios-sub", style: "font-size:15px"}, " / month")),
-    h("div", {}, `${money(t.amount)} at ${pct(t.apr)} for ${t.term_months} months`),
-    saved ? h("div", {style: "color:#248A3D;font-weight:700"}, `Saved $${saved[1]} vs the best first offer`) : null,
-    traded.map(x => h("div", {class: "ios-sub"}, x)), h("div", {class: "ios-sub", style: "color:var(--ios-blue);font-weight:600"}, "Tap for the full breakdown")));
+  logAdd(`Agent → ${deal.lender_name}`, BorrowerUI.message("Accepted {v0}: inside every limit.", {v0: pct(t.apr)}), "good", "check");
+  const card = await add(area, h("div", {class: "good-card"}, h("div", {class: "ios-sub"}, BorrowerUI.message("{v0} · simulated lender", {v0: deal.lender_name})),
+    h("div", {class: "big-pay"}, money(dis ? dis.data.monthly_payment : monthly(t.amount, t.apr, t.term_months)), h("span", {class: "ios-sub", style: "font-size:0.9375rem"}, " / month")),
+    h("div", {}, BorrowerUI.message("{v0} at {v1} for {v2} months", {v0: money(t.amount), v1: pct(t.apr), v2: t.term_months})),
+    saved ? h("div", {style: "color:#248A3D;font-weight:700"}, BorrowerUI.message("Saved ${v0} vs the best first offer", {v0: saved[1]})) : null,
+    (D.ex.person && D.ex.person.deal ? D.ex.person.deal.traded : []).map(x => h("div", {class: "ios-sub"}, x)), h("div", {class: "ios-sub", style: "color:var(--ios-blue);font-weight:600"}, BorrowerUI.message("Tap for the full breakdown"))));
   tappable(card, detailDone);
   pop(card);
+  resultControls(area);
+}
+
+
+function sourceRecord(text) {
+  return h("details", {class: "source-message"}, h("summary", {}, BorrowerUI.message("Original agent message")),
+    h("p", {lang: "en", "data-source-record": "true"}, text));
+}
+function resultControls(parent) {
+  if (!D.ex.person) return;
+  const previous = Array.from(parent.children).find(el => el.classList.contains("a11y-read"));
+  if (previous) { BorrowerUI.announce(BorrowerUI.resultText(D.ex.person).slice(0, 500)); return; }
+  const button = BorrowerUI.narrationButton(parent, () => BorrowerUI.resultText(D.ex.person));
+  const replies = Array.from(parent.children).find(el => el.classList.contains("chips"));
+  parent.insertBefore(button, replies || null);
+  if (document.activeElement === document.body || parent.contains(document.activeElement)) button.focus({preventScroll: true});
+  BorrowerUI.announce(BorrowerUI.resultText(D.ex.person).slice(0, 500));
+}
+function personDetails(p) {
+  const nodes = [];
+  if (p.blocked) for (const text of [p.blocked.headline, ...p.blocked.reasons, p.blocked.if_you, p.blocked.if_not]) nodes.push(h("p", {}, text));
+  if (p.no_deal) {
+    for (const text of p.no_deal.reasons) nodes.push(h("p", {}, text));
+    for (const item of p.no_deal.what_would_change) nodes.push(h("p", {}, item.change + ". " + item.sentence));
+    const b = p.no_deal.bureau_dispute;
+    if (b) for (const text of [b.issue, b.why_may_be_wrong, b.how_to_dispute]) nodes.push(h("p", {}, text));
+  }
+  if (p.deal) {
+    const d = p.deal;
+    nodes.push(h("p", {}, d.headline), drow(BorrowerUI.message("Yearly rate"), pct(d.apr)), drow(BorrowerUI.message("Fee"), money(d.fee)), drow(BorrowerUI.message("Total repayment"), money(d.total_paid)));
+    if (d.saved) nodes.push(h("p", {}, d.saved.sentence));
+    for (const text of d.traded) nodes.push(h("p", {}, text));
+    nodes.push(h("h3", {}, BorrowerUI.message("Next steps (simulated)")));
+    for (const step of d.on_accept) nodes.push(h("p", {}, BorrowerUI.message("Simulated") + ": " + step.text));
+  }
+  for (const item of p.protection) nodes.push(h("p", {}, item.sentence), h("p", {}, item.meaning));
+  return nodes;
 }
 
 // ------------------------------------------------------------------ scenes + controls
@@ -1276,7 +1356,7 @@ const SCENES = [
   {title: () => "An attack", caption: () => "A hidden instruction tricks the agent.", fn: scene3, lfn: lScene3},
   {title: () => "The deal", caption: () => "Negotiated inside the limits.", fn: scene4, lfn: lScene4},
 ];
-$("#steps").replaceChildren(...SCENES.map((s, i) => { const b = h("button", {type: "button", "aria-label": `Scene ${i + 1}`}, String(i + 1)); b.onclick = () => goTo(i); return b; }));
+$("#steps").replaceChildren(...SCENES.map((s, i) => { const b = h("button", {type: "button", "aria-label": BorrowerUI.message("Scene {v0}", {v0: i + 1})}, String(i + 1)); b.onclick = () => goTo(i); return b; }));
 let view = "all";
 // /phone = the borrower app alone on a real phone; /demo?follow=1 = the laptop mirrors whatever the phone runs.
 const MODE = location.pathname.startsWith("/phone") ? "phone" : "desk";
@@ -1304,7 +1384,7 @@ async function follow() {
   $("#title").textContent = "Waiting for the phone...";
   $("#caption").textContent = `On a phone on this network, open ${url}`;
   app().classList.remove("chatmode"); document.body.classList.remove("chatting");
-  app().replaceChildren(h("div", {style: "margin:auto;text-align:center"}, h("div", {class: "ios-title", style: "font-size:20px"}, "Waiting for the phone"),
+  app().replaceChildren(h("div", {style: "margin:auto;text-align:center"}, h("div", {class: "ios-title", style: "font-size:1.25rem"}, "Waiting for the phone"),
     h("div", {class: "ios-sub"}, url)));
   $("#log").replaceChildren(h("li", {class: "empty"}, "When someone taps Start shopping on the phone, the same session plays here."));
   for (;;) {
@@ -1315,7 +1395,7 @@ async function follow() {
     D = {P: p.P, F: p.F, pid: p.pid}; useExchange(p.ex); M = p.M;
     $("#who").value = p.pid; $("#segB").textContent = first(D.P.name);
     if (view !== "b") { view = "b"; document.body.dataset.view = "b"; document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === "b"))); }
-    $("#title").textContent = `${first(D.P.name)}'s phone`;
+    $("#title").textContent = BorrowerUI.message("{v0}'s phone", {v0: first(D.P.name)});
     $("#caption").textContent = "Live from the phone: same session, same numbers.";
     phoneRun();
   }
@@ -1328,7 +1408,7 @@ async function goTo(n) {
   const id = ++run; cur = n;
   [...$("#steps").children].forEach((b, i) => i === n ? b.setAttribute("aria-current", "step") : b.removeAttribute("aria-current"));
   $("#title").textContent = SCENES[n].title(); $("#caption").textContent = SCENES[n].caption();
-  $("#nextLbl").textContent = n < SCENES.length - 1 ? "Next" : "Start over";
+  $("#nextLbl").textContent = n < SCENES.length - 1 ? BorrowerUI.message("Next") : BorrowerUI.message("Start over");
   $("#back").disabled = n === 0;
   try {
     speed = 0; reset();
@@ -1339,8 +1419,8 @@ async function goTo(n) {
   finally { if (id === run) speed = 1; }
 }
 function showPhone() {
-  $("#title").textContent = `${first(D.P.name)}'s phone`;
-  $("#caption").textContent = "Tell the agent what you need, then let it shop.";
+  $("#title").textContent = BorrowerUI.message("{v0}'s phone", {v0: first(D.P.name)});
+  $("#caption").textContent = BorrowerUI.message("Tell the agent what you need, then let it shop.");
   chatView();
 }
 function setView(v) {
@@ -1358,14 +1438,14 @@ document.addEventListener("keydown", e => {
   else if (e.key === "r" || e.key === "R") goTo(cur);
 });
 $("#who").onchange = async () => {
-  run++; $("#title").textContent = "Pulling CRS data..."; $("#caption").textContent = "";
-  try { await loadPerson($("#who").value); } catch (err) { $("#title").textContent = "Couldn't load that person"; $("#caption").textContent = err.message; return; }
+  run++; $("#title").textContent = BorrowerUI.message("Pulling CRS data..."); $("#caption").textContent = "";
+  try { await loadPerson($("#who").value); } catch (err) { $("#title").textContent = BorrowerUI.message("Couldn't load that person"); $("#caption").textContent = err.message; return; }
   $("#segB").textContent = first(D.P.name);
   cur = 0; goTo(0);
 };
 
 (async () => {
-  $("#title").textContent = LIVE ? "Pulling live CRS data..." : "Loading...";
+  $("#title").textContent = LIVE ? BorrowerUI.message("Pulling live CRS data...") : BorrowerUI.message("Loading...");
   try {
     const [people, sc] = await Promise.all([get("/api/personas"), get("/api/exchange/scenarios")]);
     LENDERS = sc.lenders || {}; PEOPLE = people.personas;
@@ -1375,7 +1455,7 @@ $("#who").onchange = async () => {
     $("#segB").textContent = first(D.P.name);
     if (FOLLOW) { setView("b"); follow(); } else goTo(0);
   } catch (err) {
-    $("#title").textContent = "Couldn't load the market";
+    $("#title").textContent = BorrowerUI.message("Couldn't load the market");
     $("#caption").textContent = err.message + ". Is the server running?";
   }
 })();

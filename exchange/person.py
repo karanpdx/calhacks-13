@@ -8,6 +8,7 @@ lenders' own policies on a modified COPY of the passport; they say "would likely
 import copy, re
 from itertools import combinations
 
+from .i18n import t as tr, language, money, count, fmt as _fmt
 from . import finance
 from .lenders import POLICIES
 from .messages import Terms
@@ -24,8 +25,7 @@ def _c(x):
 
 
 def _usd(x):
-    """Whole dollars when there are no cents: "$5,000"; otherwise "$166.07"."""
-    return f"${x:,.0f}" if abs(x - round(x)) < 0.005 else f"${x:,.2f}"
+    return money(x)
 
 
 def _name(agent):
@@ -33,12 +33,12 @@ def _name(agent):
 
 
 def _s(n, word):
-    return f"{n} {word}" + ("" if n == 1 else "s")
+    return count(n, word)
 
 
 def _join(xs):
     xs = list(xs)
-    return xs[0] if len(xs) == 1 else ", ".join(xs[:-1]) + " and " + xs[-1]
+    return xs[0] if len(xs) == 1 else ", ".join(xs[:-1]) + tr(" and ") + xs[-1]
 
 
 def _pay(t):
@@ -61,8 +61,14 @@ def _one_bureau(ex):
             "text": f["text"], "left": max((n for b, n in counts.items() if b not in only), default=0)}
 
 
+def build(ex, lang="en"):
+    """Localized borrower presentation; calculations and raw records stay unchanged."""
+    with language(lang):
+        return _build(ex)
+
+
 # ---------------------------------------------------------------- build
-def build(ex):
+def _build(ex):
     """Call after ex.run(). Returns the person's view (see module docstring); keys are a contract with the UI."""
     pending = getattr(ex, "awaiting_approval", lambda: False)()
     outcome = ("blocked" if not ex.admitted else "awaiting_approval" if pending else "deal" if ex.deal
@@ -82,11 +88,11 @@ def before(m):
     mp = getattr(m, "max_payment", None)
     return {
         "amount": _c(m.amount), "min_amount": _c(m.min_amount),
-        "term": f"{m.min_term} months" if m.min_term == m.max_term else f"{m.min_term} to {m.max_term} months",
+        "term": tr('{v0} months', v0=_fmt(m.min_term, '')) if m.min_term == m.max_term else tr('{v0} to {v1} months', v0=_fmt(m.min_term, ''), v1=_fmt(m.max_term, '')),
         "max_monthly_payment": _c(mp) if mp else None,
         "advanced": {"max_apr": float(m.max_apr), "max_fee": _c(m.max_fee), "autopay_ok": "autopay" in m.allow},
-        "soft_pull": SOFT_PULL,
-        "privacy": PRIVACY,
+        "soft_pull": tr(SOFT_PULL),
+        "privacy": tr(PRIVACY),
     }
 
 
@@ -101,6 +107,7 @@ def _best_first(ex):
 
 def deal(ex):
     t, name = ex.deal["terms"], _name(ex.deal["lender"])
+    pending = getattr(ex, "awaiting_approval", lambda: False)()
     pay, base = _pay(t), _best_first(ex)
     saved = None
     if base:
@@ -108,15 +115,14 @@ def deal(ex):
         amt = finance.total_cost(b) * t.amount / b.amount - finance.total_cost(t)
         if amt >= 1:
             saved = {"amount": _c(amt),
-                     "sentence": f"Your agent saved you ${amt:,.0f} compared with the best first offer "
-                                 f"({b.apr:g}% from {_name(base['lender'])})."}
+                     "sentence": tr('Your agent could save you ${v0} compared with the best first offer ({v1}% from {v2}).' if pending else 'Your agent saved you ${v0} compared with the best first offer ({v1}% from {v2}).', v0=_fmt(amt, ',.0f'), v1=_fmt(b.apr, 'g'), v2=_fmt(_name(base['lender']), ''))}
     return {
         "lender": name, "monthly_payment": _c(pay), "apr": float(t.apr), "term_months": int(t.term_months),
         "amount": _c(t.amount), "fee": _c(t.fee), "total_paid": _c(finance.total_cost(t)),
         "saved": saved,
         "traded": traded(t, base, ex.deal["lender"], ex.mandate),
         "on_accept": on_accept(ex, name, t),
-        "headline": f"{name} lends you {_usd(t.amount)}: {_usd(pay)} a month for {t.term_months} months.",
+        "headline": tr('{v0} offers you {v1}: {v2} a month for {v3} months. Nothing is signed yet.' if pending else '{v0} lends you {v1}: {v2} a month for {v3} months.', v0=_fmt(name, ''), v1=_fmt(_usd(t.amount), ''), v2=_fmt(_usd(pay), ''), v3=_fmt(t.term_months, '')),
     }
 
 
@@ -125,33 +131,32 @@ def traded(t, first, lender, m):
     out, base = [], first["terms"] if first else None
     same = bool(first) and first["lender"] == lender
     if t.autopay:
-        out.append("Agreed to autopay (payments come out automatically each month), which lowered the rate."
+        out.append(tr('Agreed to autopay (payments come out automatically each month), which lowered the rate.')
                    if same and not base.autopay and t.apr < base.apr else
-                   "Agreed to autopay (payments come out automatically each month).")
+                   tr('Agreed to autopay (payments come out automatically each month).'))
     if same and t.term_months > base.term_months:
-        out.append(f"Took a longer loan ({t.term_months} months instead of {base.term_months}), so you pay for longer.")
+        out.append(tr('Took a longer loan ({v0} months instead of {v1}), so you pay for longer.', v0=_fmt(t.term_months, ''), v1=_fmt(base.term_months, '')))
     if (first and not same and base.amount < t.amount
             and finance.cost_per_dollar(base) < finance.cost_per_dollar(t)):
-        out.append(f"Took the full {_usd(t.amount)} at {t.apr:g}% instead of {_usd(base.amount)} at {base.apr:g}% "
-                   f"from {_name(first['lender'])}.")
+        out.append(tr('Took the full {v0} at {v1}% instead of {v2} at {v3}% from {v4}.', v0=_fmt(_usd(t.amount), ''), v1=_fmt(t.apr, 'g'), v2=_fmt(_usd(base.amount), ''), v3=_fmt(base.apr, 'g'), v4=_fmt(_name(first['lender']), '')))
     if t.amount < m.amount:
-        out.append(f"Borrowing {_usd(t.amount)} instead of the {_usd(m.amount)} you asked for.")
+        out.append(tr('Borrowing {v0} instead of the {v1} you asked for.', v0=_fmt(_usd(t.amount), ''), v1=_fmt(_usd(m.amount), '')))
     if t.fee:
-        out.append(f"Pays a one-time {_usd(t.fee)} fee, which is inside your limit.")
+        out.append(tr('Pays a one-time {v0} fee, which is inside your limit.', v0=_fmt(_usd(t.fee), '')))
     return out
 
 
 def on_accept(ex, name, t):
     steps = []
     if (ex.passport or {}).get("verification_required"):
-        why = ("because there's a fraud alert on your file" if _finding(ex, "FRAUD_ALERT_ON_FILE")
-               else "because some identity details need a second look")
-        steps.append(f"First you confirm it's really you, with a few questions or a code, {why}.")
-    steps += [f"{name} runs a hard credit check. Your score may dip a few points.",
-              f"{name} gets your full credit file.",
-              f"{name} sends you {_usd(t.amount)}.",
-              "The new loan shows up at all three credit bureaus. Paying on time builds your credit."]
-    return [{"text": s, "simulated": True} for s in steps]   # none of this happens in the CRS sandbox
+        why = (tr("because there's a fraud alert on your file") if _finding(ex, "FRAUD_ALERT_ON_FILE")
+               else tr('because some identity details need a second look'))
+        steps.append(tr("First you confirm it's really you, with a few questions or a code, {v0}.", v0=_fmt(why, '')))
+    steps += [tr('{v0} runs a hard credit check. Your score may dip a few points.', v0=_fmt(name, '')),
+              tr('{v0} gets your full credit file.', v0=_fmt(name, '')),
+              tr('{v0} sends you {v1}.', v0=_fmt(name, ''), v1=_fmt(_usd(t.amount), '')),
+              tr('The new loan shows up at all three credit bureaus. Paying on time builds your credit.')]
+    return [{"text": tr("Simulated") + ": " + s, "simulated": True} for s in steps]
 
 
 # ---------------------------------------------------------------- protection: real threats only
@@ -162,7 +167,7 @@ def _asked(ex, f):
     out = []
     for m in PERSONAL.finditer(text):
         w = m.group(0).lower()
-        word = "SSN" if ("ssn" in w or "social" in w) else "bank login" if "bank" in w else "date of birth"
+        word = tr('SSN') if ("ssn" in w or "social" in w) else tr('bank login') if "bank" in w else tr('date of birth')
         if word not in out:
             out.append(word)
     return out
@@ -180,18 +185,17 @@ def protection(ex):
     for lid, code in ex.excluded.items():
         n = _name(lid)
         if code == "INJECTION":
-            add(("injection", lid), "high", f"{n} tried to trick your agent with hidden instructions. We removed it.",
-                "Some lenders' agents hide commands in their messages. Here only the loan's numbers count, so it "
-                "couldn't make your agent say yes.")
+            add(("injection", lid), "high", tr('{v0} tried to trick your agent with hidden instructions. We removed it.', v0=_fmt(n, '')),
+                tr("Some lenders' agents hide commands in their messages. Here only the loan's numbers count, so it couldn't make your agent say yes."))
         elif code == "TERMS_WORSENED":
-            add(("worse", lid), "high", f"{n} tried to swap in a worse deal after making an offer. We removed it.",
-                "Once a lender makes an offer here, it can't raise the price. It can only offer you something better.")
+            add(("worse", lid), "high", tr('{v0} tried to swap in a worse deal after making an offer. We removed it.', v0=_fmt(n, '')),
+                tr("Once a lender makes an offer here, it can't raise the price. It can only offer you something better."))
         elif code == "BAD_SIGNATURE":
-            add(("forged", lid), "high", f"{n} sent a message pretending to be someone else. We removed it.",
-                "Every message is checked to prove who sent it, so fakes don't count.")
+            add(("forged", lid), "high", tr('{v0} sent a message pretending to be someone else. We removed it.', v0=_fmt(n, '')),
+                tr("Every message is checked to prove who sent it, so fakes don't count."))
         else:
-            add(("excluded", lid), "high", f"{n} broke the exchange's rules. We removed it.",
-                "Its offers were taken away and it couldn't send anything else.")
+            add(("excluded", lid), "high", tr("{v0} broke the exchange's rules. We removed it.", v0=_fmt(n, '')),
+                tr("Its offers were taken away and it couldn't send anything else."))
 
     # 2. moves the referee blocked (these hold even with the watchdog off)
     for e in ex.events:
@@ -199,21 +203,19 @@ def protection(ex):
             continue
         code, actor, d = e["verdict"]["code"], e["actor"], e["data"]
         if code == "BAD_SIGNATURE" and ex.roles.get(actor) == "borrower":
-            to = f"{_name(d['to'])}'s offer" if d.get("to") in ex.roles else "an offer"
+            to = tr("{v0}'s offer", v0=_fmt(_name(d['to']), '')) if d.get("to") in ex.roles else tr('an offer')
             add(("forged_accept", d.get("to")), "high",
-                f"Someone tried to accept {to} while pretending to be your agent. We blocked it.",
-                "Only your agent can say yes for you, and every message is checked to prove who sent it.")
+                tr('Someone tried to accept {v0} while pretending to be your agent. We blocked it.', v0=_fmt(to, '')),
+                tr('Only your agent can say yes for you, and every message is checked to prove who sent it.'))
         elif code == "BAD_SIGNATURE":
-            add(("forged", actor), "high", f"A fake message claiming to be from {_name(actor)} was blocked.",
-                "Every message is checked to prove who sent it, so fakes don't count.")
+            add(("forged", actor), "high", tr('A fake message claiming to be from {v0} was blocked.', v0=_fmt(_name(actor), '')),
+                tr("Every message is checked to prove who sent it, so fakes don't count."))
         elif code == "TERMS_WORSENED":
-            add(("worse", actor), "high", f"{_name(actor)} tried to swap in a worse deal after making an offer. "
-                                          "We blocked it.",
-                "Once a lender makes an offer here, it can't raise the price. It can only offer you something better.")
+            add(("worse", actor), "high", tr('{v0} tried to swap in a worse deal after making an offer. We blocked it.', v0=_fmt(_name(actor), '')),
+                tr("Once a lender makes an offer here, it can't raise the price. It can only offer you something better."))
         elif code == "OUTSIDE_MANDATE":
-            add(("outside", actor), "high", "Your agent tried to accept a loan outside your limits. We blocked it.",
-                "Your limits are enforced by the exchange, not by the agent. But this agent may not be working for "
-                "you, so be careful trusting it.")
+            add(("outside", actor), "high", tr('Your agent tried to accept a loan outside your limits. We blocked it.'),
+                tr('Your limits are enforced by the exchange, not by the agent. But this agent may not be working for you, so be careful trusting it.'))
 
     # 3. watchdog flags: rule-based, high or medium, never sales pressure
     for e in ex.events:
@@ -225,43 +227,40 @@ def protection(ex):
         det, a, why = f["detector"], f["agent"], f.get("why") or ""
         n = _name(a)
         if det == "injection" and ex.roles.get(a) == "lender":
-            add(("injection", a), "high", f"{n} tried to trick your agent with hidden instructions. We ignored them.",
-                "Here only the loan's numbers count, so hidden instructions can't make your agent say yes.")
+            add(("injection", a), "high", tr('{v0} tried to trick your agent with hidden instructions. We ignored them.', v0=_fmt(n, '')),
+                tr("Here only the loan's numbers count, so hidden instructions can't make your agent say yes."))
         elif det == "injection":
-            add(("injection", a), "high", "Your agent sent a message with hidden instructions in it.",
-                "Only the loan's numbers count here, so the words can't change anything. Keep an eye on this agent.")
+            add(("injection", a), "high", tr('Your agent sent a message with hidden instructions in it.'),
+                tr("Only the loan's numbers count here, so the words can't change anything. Keep an eye on this agent."))
         elif det == "personal_data":
             asked = _asked(ex, f)
             add(("personal", a), "high",
-                f"{n} asked for your {_join(asked) if asked else 'personal details'}. "
-                f"Never share {'it' if len(asked) == 1 else 'them'}.",
-                "Lenders here never need these to make an offer. Asking for them is a common scam. If you accept a "
-                "deal, the lender gets your file through the exchange, not from you.")
+                tr('{v0} asked for your {v1}. Never share {v2}.', v0=_fmt(n, ''), v1=_fmt(_join(asked) if asked else tr('personal details'), ''), v2=_fmt(tr('it') if len(asked) == 1 else tr('them'), '')),
+                tr('Lenders here never need these to make an offer. Asking for them is a common scam. If you accept a deal, the lender gets your file through the exchange, not from you.'))
         elif det == "text_vs_terms" and why.startswith("Text says"):
-            add(("worse", a), "medium", f"{n} said the deal was the same but quietly raised the price.",
-                "Only the numbers in an offer count, not what the message says. Our rules caught the change.")
+            add(("worse", a), "medium", tr('{v0} said the deal was the same but quietly raised the price.', v0=_fmt(n, '')),
+                tr('Only the numbers in an offer count, not what the message says. Our rules caught the change.'))
         elif det == "text_vs_terms" and "fee" in why.lower():
-            add(("fee", a), "medium", f"{n} mentioned a fee that isn't in its offer.",
-                "Only fees written into the offer count. If anyone adds a fee later, you don't have to agree.")
+            add(("fee", a), "medium", tr("{v0} mentioned a fee that isn't in its offer.", v0=_fmt(n, '')),
+                tr("Only fees written into the offer count. If anyone adds a fee later, you don't have to agree."))
         elif det == "text_vs_terms":
-            add(("rate", a), "medium", f"{n}'s message named a different rate than its real offer.",
-                "Trust the numbers in the offer, not the sales message.")
+            add(("rate", a), "medium", tr("{v0}'s message named a different rate than its real offer.", v0=_fmt(n, '')),
+                tr('Trust the numbers in the offer, not the sales message.'))
         elif det == "borrower_drift" and "tried to accept" in why:
-            add(("outside", a), "high", "Your agent tried to accept a loan outside your limits. We blocked it.",
-                "Your limits are enforced by the exchange, not by the agent. But this agent may not be working for "
-                "you, so be careful trusting it.")
+            add(("outside", a), "high", tr('Your agent tried to accept a loan outside your limits. We blocked it.'),
+                tr('Your limits are enforced by the exchange, not by the agent. But this agent may not be working for you, so be careful trusting it.'))
         elif det == "borrower_drift" and "costlier" in why:
             m = re.search(r"about (\$[\d,]+) more", f.get("note") or "")
-            add(("costlier", a), "medium", "Your agent picked a pricier offer when a cheaper one fit your limits.",
-                f"That costs you about {m.group(1)} more over the loan." if m else "That costs you more over the loan.")
+            add(("costlier", a), "medium", tr('Your agent picked a pricier offer when a cheaper one fit your limits.'),
+                tr('That costs you about {v0} more over the loan.', v0=_fmt(m.group(1), '')) if m else tr('That costs you more over the loan.'))
         elif det == "borrower_drift":
-            add(("leak", a), "high", "Your agent told lenders the highest rate you'd accept.",
-                "Lenders could use that to charge you more instead of competing for you.")
+            add(("leak", a), "high", tr("Your agent told lenders the highest rate you'd accept."),
+                tr('Lenders could use that to charge you more instead of competing for you.'))
         elif det == "bureau_disagreement" and ex.deal:   # with no deal, `no_deal.bureau_dispute` covers this
             ob = _one_bureau(ex)
             if ob:
-                add(("bureau",), "medium", f"A collection shows up at only one credit bureau ({_join(ob['bureaus'])}).",
-                    "If it isn't yours or it's already paid, getting it fixed could get you better rates next time.")
+                add(("bureau",), "medium", tr('A collection shows up at only one credit bureau ({v0}).', v0=_fmt(_join(ob['bureaus']), '')),
+                    tr("If it isn't yours or it's already paid, getting it fixed could get you better rates next time."))
     return sorted(items, key=lambda i: SEVERITY[i["severity"]])
 
 
@@ -293,12 +292,12 @@ def _breaks(m, t):
 def _offer_reason(lead, t, kind, m):
     mp = getattr(m, "max_payment", None)
     return {
-        "payment": f"{lead} was {_usd(_pay(t))} a month, above your {_usd(mp or 0)} limit",
-        "apr": f"{lead} was {t.apr:g}% a year, above your {m.max_apr:g}% limit",
-        "amount": f"{lead} was for {_usd(t.amount)}, less than the {_usd(m.min_amount)} you need",
-        "term": f"{lead} was for {t.term_months} months, outside your {m.min_term} to {m.max_term} months",
-        "fee": f"{lead} had a {_usd(t.fee)} fee, above your {_usd(m.max_fee)} limit",
-        "autopay": f"{lead} needed autopay, which you didn't allow",
+        "payment": tr('{v0} was {v1} a month, above your {v2} limit', v0=_fmt(lead, ''), v1=_fmt(_usd(_pay(t)), ''), v2=_fmt(_usd(mp or 0), '')),
+        "apr": tr('{v0} was {v1}% a year, above your {v2}% limit', v0=_fmt(lead, ''), v1=_fmt(t.apr, 'g'), v2=_fmt(m.max_apr, 'g')),
+        "amount": tr('{v0} was for {v1}, less than the {v2} you need', v0=_fmt(lead, ''), v1=_fmt(_usd(t.amount), ''), v2=_fmt(_usd(m.min_amount), '')),
+        "term": tr('{v0} was for {v1} months, outside your {v2} to {v3} months', v0=_fmt(lead, ''), v1=_fmt(t.term_months, ''), v2=_fmt(m.min_term, ''), v3=_fmt(m.max_term, '')),
+        "fee": tr('{v0} had a {v1} fee, above your {v2} limit', v0=_fmt(lead, ''), v1=_fmt(_usd(t.fee), ''), v2=_fmt(_usd(m.max_fee), '')),
+        "autopay": tr("{v0} needed autopay, which you didn't allow", v0=_fmt(lead, '')),
     }[kind]
 
 
@@ -308,30 +307,30 @@ def reasons(ex, live):
         best = min(live.values(), key=lambda o: finance.cost_per_dollar(o["terms"]))
         kinds = _breaks(m, best["terms"])
         if kinds:
-            out.append(_offer_reason("The only offer" if len(live) == 1 else "The best offer", best["terms"], kinds[0], m))
+            out.append(_offer_reason(tr('The only offer') if len(live) == 1 else tr('The best offer'), best["terms"], kinds[0], m))
     ob = _one_bureau(ex)
     if p["no_file"]:
-        out.append("No credit file at any bureau yet")
+        out.append(tr('No credit file at any bureau yet'))
     if p["no_score"]:
-        out.append("No credit score right now")
+        out.append(tr('No credit score right now'))
     if p["thin_file"]:
-        out.append(f"Only {_s(p['accounts'], 'account')} so far")
+        out.append(tr('Only {v0} so far', v0=_fmt(_s(p['accounts'], 'account'), '')))
     if p["collections"]:
-        out.append(f"A collection shows at {_join(ob['bureaus'])} only" if ob
-                   else f"{_s(p['collections'], 'debt')} in collections")
+        out.append(tr('A collection shows at {v0} only', v0=_fmt(_join(ob['bureaus']), '')) if ob
+                   else tr('{v0} in collections', v0=_fmt(_s(p['collections'], 'debt'), '')))
     if p["chargeoffs"]:
-        out.append(f"{_s(p['chargeoffs'], 'past debt')} written off as unpaid")
+        out.append(tr('{v0} written off as unpaid', v0=_fmt(_s(p['chargeoffs'], 'past debt'), '')))
     if p["bankruptcies"]:
-        out.append("A bankruptcy on your file")
+        out.append(tr('A bankruptcy on your file'))
     if p["late_payments"]:
-        out.append(f"{_s(p['late_payments'], 'late payment')}")
+        out.append(tr('{v0}', v0=_fmt(_s(p['late_payments'], 'late payment'), '')))
     if p["score_low"] is not None and p["score_low"] < 700:
-        out.append(f"Lowest credit score is {p['score_low']}")
+        out.append(tr('Lowest credit score is {v0}', v0=_fmt(p['score_low'], '')))
     if p["bureau_disagreements"] and not ob:
-        out.append("The credit bureaus don't all agree about your file")
+        out.append(tr("The credit bureaus don't all agree about your file"))
     if p["identity"] != "strong":
-        out.append("Some identity checks came back unclear")
-    return out[:3] or ["No lender offered a loan inside your limits"]
+        out.append(tr('Some identity checks came back unclear'))
+    return out[:3] or [tr('No lender offered a loan inside your limits')]
 
 
 def _fixes(ex):
@@ -340,20 +339,20 @@ def _fixes(ex):
     p, out = ex.passport, []
     ob = _one_bureau(ex)
     if ob:
-        what = f"{ob['creditor']} collection" if ob["creditor"] else "collection"
+        what = tr('{v0} collection', v0=_fmt(ob['creditor'], '')) if ob["creditor"] else tr('collection')
 
         def fix_bureau(q, ob=ob):
             q["collections"] = min(q["collections"], ob["left"])
             q["bureau_disagreements"] = [d for d in q["bureau_disagreements"] if d != ob["text"]]
-        out.append((f"get the {what} at {_join(ob['bureaus'])} fixed, if it's wrong", fix_bureau))
+        out.append((tr("get the {v0} at {v1} fixed, if it's wrong", v0=_fmt(what, ''), v1=_fmt(_join(ob['bureaus']), '')), fix_bureau))
     elif p["collections"]:
-        out.append((f"clear the {_s(p['collections'], 'collection')} from your file",
+        out.append((tr('clear the {v0} from your file', v0=_fmt(_s(p['collections'], 'collection'), '')),
                     lambda q: q.update(collections=0)))
     if p["thin_file"]:
-        out.append((f"get to 3 accounts in good standing (you have {p['accounts']} now)",
+        out.append((tr('get to 3 accounts in good standing (you have {v0} now)', v0=_fmt(p['accounts'], '')),
                     lambda q: q.update(accounts=3, thin_file=False)))
     if p["no_file"]:
-        out.append(("open your first credit account, such as a secured card, and pay it on time",
+        out.append((tr('open your first credit account, such as a secured card, and pay it on time'),
                     lambda q: q.update(no_file=False, bureaus_with_file=1, accounts=1, thin_file=True, no_score=True)))
     return out
 
@@ -382,8 +381,8 @@ def _path(ex, policy):
                 s = _score_needed(policy, q)
                 if s is None:
                     continue
-                changes.append(f"build a credit score of at least {s}" if p["score_low"] is None
-                               else f"raise your lowest credit score to {s} (it's {p['score_low']} now)")
+                changes.append(tr('build a credit score of at least {v0}', v0=_fmt(s, '')) if p["score_low"] is None
+                               else tr("raise your lowest credit score to {v0} (it's {v1} now)", v0=_fmt(s, ''), v1=_fmt(p['score_low'], '')))
                 q = {**q, "score_low": s, "no_score": False}
             if changes:
                 return changes, policy(q)
@@ -400,19 +399,19 @@ def _best_terms(quote, m):
 def _limit_item(o, m):
     t, n, kinds = o["terms"], _name(o["lender"]), _breaks(m, o["terms"])
     pay = _usd(_pay(t))
-    change = {"payment": f"Allow payments up to {pay} a month", "apr": f"Allow up to {t.apr:g}% a year",
-              "amount": f"Borrow {_usd(t.amount)} instead of at least {_usd(m.min_amount)}",
-              "term": f"Allow a {t.term_months}-month loan", "fee": f"Allow a one-time {_usd(t.fee)} fee",
-              "autopay": "Allow autopay"}
-    sentence = (f"If {_usd(t.amount)} is enough and you could pay {pay} a month for {t.term_months} months, "
-                if "amount" in kinds else f"If you could pay {pay} a month for {t.term_months} months, ")
-    sentence += f"{n} would likely say yes."
+    change = {"payment": tr('Allow payments up to {v0} a month', v0=_fmt(pay, '')), "apr": tr('Allow up to {v0}% a year', v0=_fmt(t.apr, 'g')),
+              "amount": tr('Borrow {v0} instead of at least {v1}', v0=_fmt(_usd(t.amount), ''), v1=_fmt(_usd(m.min_amount), '')),
+              "term": tr('Allow a {v0}-month loan', v0=_fmt(t.term_months, '')), "fee": tr('Allow a one-time {v0} fee', v0=_fmt(_usd(t.fee), '')),
+              "autopay": tr('Allow autopay')}
+    sentence = (tr('If {v0} is enough and you could pay {v1} a month for {v2} months, ', v0=_fmt(_usd(t.amount), ''), v1=_fmt(pay, ''), v2=_fmt(t.term_months, ''))
+                if "amount" in kinds else tr('If you could pay {v0} a month for {v1} months, ', v0=_fmt(pay, ''), v1=_fmt(t.term_months, '')))
+    sentence += tr('{v0} would likely say yes.', v0=_fmt(n, ''))
     if "apr" in kinds:
         close = t.apr - m.max_apr <= 1
-        sentence += f" That's {t.apr:g}% a year, {'just ' if close else ''}above your {m.max_apr:g}% limit."
+        sentence += tr(" That's {v0}% a year, {v1}above your {v2}% limit.", v0=_fmt(t.apr, 'g'), v1=_fmt(tr('just ') if close else '', ''), v2=_fmt(m.max_apr, 'g'))
     if "fee" in kinds:
-        sentence += f" It also has a {_usd(t.fee)} fee."
-    return {"change": " and ".join(change[k] for k in kinds), "lender": n, "sentence": sentence}
+        sentence += tr(' It also has a {v0} fee.', v0=_fmt(_usd(t.fee), ''))
+    return {"change": tr(' and ').join(change[k] for k in kinds), "lender": n, "sentence": sentence}
 
 
 def what_would_change(ex, live):
@@ -434,11 +433,10 @@ def what_would_change(ex, live):
         if not m.allows(_best_terms(quote, m))[0]:
             continue                              # even a great negotiation wouldn't fit the limits
         first = Terms(min(m.amount, quote.max_amount), quote.open_apr, max(m.min_term, min(m.max_term, quote.term)))
-        change = " and ".join(changes)
+        change = tr(' and ').join(changes)
         items.append((_best_terms(quote, m).apr, {
             "change": change[0].upper() + change[1:], "lender": name,
-            "sentence": f"Then {name}'s rules would allow a loan of {_usd(first.amount)}, likely starting around "
-                        f"{_usd(_pay(first))} a month."}))
+            "sentence": tr("Then {v0}'s rules would allow a loan of {v1}, likely starting around {v2} a month.", v0=_fmt(name, ''), v1=_fmt(_usd(first.amount), ''), v2=_fmt(_usd(_pay(first)), ''))}))
     items.sort(key=lambda x: x[0])
     return [i for _, i in items[:3]]
 
@@ -448,19 +446,20 @@ def bureau_dispute(ex):
     if not ob:
         return None
     where, others = _join(ob["bureaus"]), ob["others"]
-    why = (f"{_join(others)} {'doesn' if len(others) == 1 else 'don'}'t show it, so it may be an error or out of date."
-           if others else "Only one bureau reports it, so it may be an error or out of date.")
+    why = ((tr("{v0} doesn't show it, so it may be an error or out of date.", v0=_fmt(_join(others), '')) if len(others) == 1 else tr("{v0} don't show it, so it may be an error or out of date.", v0=_fmt(_join(others), '')))
+           if others else tr('Only one bureau reports it, so it may be an error or out of date.'))
     return {
         "bureau": where,
-        "issue": f"a collection from {ob['creditor']}" if ob["creditor"] else "a collection",
+        "issue": tr('a collection from {v0}', v0=_fmt(ob['creditor'], '')) if ob["creditor"] else tr('a collection'),
         "why_may_be_wrong": why,
-        "how_to_dispute": f"Get your free {where} report at annualcreditreport.com. If the collection isn't yours, "
-                          f"or it's already paid, dispute it online with {where}. They must look into it, usually "
-                          "within 30 days.",
+        "how_to_dispute": tr("Get your free {v0} report at annualcreditreport.com. If the collection isn't yours, or it's already paid, dispute it online with {v1}. They must look into it, usually within 30 days.", v0=_fmt(where, ''), v1=_fmt(where, '')),
     }
 
 
 def no_deal(ex):
+    if getattr(ex, "approval", None) is False:
+        return {"reasons": [tr("You turned down your agent's recommendation. Nothing was signed.")],
+                "what_would_change": [], "bureau_dispute": None}
     live = _live(ex)
     return {"reasons": reasons(ex, live), "what_would_change": what_would_change(ex, live),
             "bureau_dispute": bureau_dispute(ex)}
@@ -473,23 +472,23 @@ def _num(text):
 
 
 BLOCK_REASONS = {
-    "SSN_NAME_MISMATCH": lambda t: "The SSN belongs to someone with a different name.",
-    "DOB_MISMATCH": lambda t: "The date of birth doesn't match the records for this SSN.",
-    "DECEASED": lambda t: "The SSN is listed as belonging to someone who has died.",
-    "FRAUD_ALERT_ON_FILE": lambda t: "There's a fraud alert on the credit file.",
-    "FROZEN": lambda t: "The credit file is frozen.",
-    "FRAUD_SCORE_HIGH": lambda t: f"A fraud check rated this application high risk ({_num(t)} out of 100).",
-    "FRAUD_SCORE_MEDIUM": lambda t: f"A fraud check rated this application medium risk ({_num(t)} out of 100).",
-    "TUMBLING": lambda t: "The same identity is being used with small changes, a common fraud pattern.",
-    "NEW_EMAIL": lambda t: f"The email address is only {_num(t)} days old.",
-    "EMAIL_VELOCITY": lambda t: "The email address is being used on many applications right now.",
-    "PHONE_NOT_APPLICANTS": lambda t: "The phone number belongs to someone else.",
-    "BURNER_PHONE": lambda t: "The phone number is a prepaid or internet line.",
-    "IP_FAR": lambda t: "The application came from far away from the address given.",
-    "CONTACT_BELONGS_TO_OTHER": lambda t: "The phone or email belongs to another person.",
-    "CONTACT_UNKNOWN": lambda t: "The phone and email can't be tied to anyone.",
-    "INQUIRY_BURST": lambda t: f"{_num(t)} credit applications in 30 days.",
-    "SSN_NOT_ON_FILE": lambda t: "The credit bureaus have no record of this SSN.",
+    "SSN_NAME_MISMATCH": lambda t: tr('The SSN belongs to someone with a different name.'),
+    "DOB_MISMATCH": lambda t: tr("The date of birth doesn't match the records for this SSN."),
+    "DECEASED": lambda t: tr('The SSN is listed as belonging to someone who has died.'),
+    "FRAUD_ALERT_ON_FILE": lambda t: tr("There's a fraud alert on the credit file."),
+    "FROZEN": lambda t: tr('The credit file is frozen.'),
+    "FRAUD_SCORE_HIGH": lambda t: tr('A fraud check rated this application high risk ({v0} out of 100).', v0=_fmt(_num(t), '')),
+    "FRAUD_SCORE_MEDIUM": lambda t: tr('A fraud check rated this application medium risk ({v0} out of 100).', v0=_fmt(_num(t), '')),
+    "TUMBLING": lambda t: tr('The same identity is being used with small changes, a common fraud pattern.'),
+    "NEW_EMAIL": lambda t: tr('The email address is only {v0} days old.', v0=_fmt(_num(t), '')),
+    "EMAIL_VELOCITY": lambda t: tr('The email address is being used on many applications right now.'),
+    "PHONE_NOT_APPLICANTS": lambda t: tr('The phone number belongs to someone else.'),
+    "BURNER_PHONE": lambda t: tr('The phone number is a prepaid or internet line.'),
+    "IP_FAR": lambda t: tr('The application came from far away from the address given.'),
+    "CONTACT_BELONGS_TO_OTHER": lambda t: tr('The phone or email belongs to another person.'),
+    "CONTACT_UNKNOWN": lambda t: tr("The phone and email can't be tied to anyone."),
+    "INQUIRY_BURST": lambda t: tr('{v0} credit applications in 30 days.', v0=_fmt(_num(t), '')),
+    "SSN_NOT_ON_FILE": lambda t: tr('The credit bureaus have no record of this SSN.'),
 }
 
 
@@ -497,16 +496,13 @@ def blocked(ex):
     findings = (ex.report or {}).get("findings", [])
     codes = {f["code"] for f in findings}
     if "DECEASED" in codes:
-        out = {"headline": "This SSN is listed as belonging to someone who has died.",
-               "if_you": "If this is your SSN, the record is a mistake. Contact Social Security to fix it, then verify "
-                         "your identity (simulated in this demo).",
-               "if_not": "If this isn't you, someone may be using a deceased person's details. No lender saw anything "
-                         "and nothing was opened."}
+        out = {"headline": tr('This SSN is listed as belonging to someone who has died.'),
+               "if_you": tr('If this is your SSN, the record is a mistake. Contact Social Security to fix it, then verify your identity (simulated in this demo).'),
+               "if_not": tr("If this isn't you, someone may be using a deceased person's details. No lender saw anything and nothing was opened.")}
     else:
-        out = {"headline": "We couldn't confirm this identity.",
-               "if_you": "If this is you, verify your identity (simulated in this demo).",
-               "if_not": "If this isn't you, someone may be using your details. Freeze your credit at all three "
-                         "bureaus; it's free. No lender saw anything."}
+        out = {"headline": tr("We couldn't confirm this identity."),
+               "if_you": tr('If this is you, verify your identity (simulated in this demo).'),
+               "if_not": tr("If this isn't you, someone may be using your details. Freeze your credit at all three bureaus; it's free. No lender saw anything.")}
     rs = [BLOCK_REASONS[f["code"]](f["text"]) for f in findings if f["code"] in BLOCK_REASONS]
     out["reasons"] = list(dict.fromkeys(rs))[:5]
     return out
@@ -518,30 +514,30 @@ def helped(ex):
     ff = ((ex.report or {}).get("signals") or {}).get("fraud_finder") or {}
     out = []
     if p.get("identity") == "strong":
-        out.append("Your identity checks out strongly")
+        out.append(tr('Your identity checks out strongly'))
     if not p.get("no_file", True):
         if not p["late_payments"]:
-            out.append("No late payments")
-        bad = {"collections": "No debts in collections", "chargeoffs": "No debts written off as unpaid",
-               "bankruptcies": "No bankruptcies"}
+            out.append(tr('No late payments'))
+        bad = {"collections": tr('No debts in collections'), "chargeoffs": tr('No debts written off as unpaid'),
+               "bankruptcies": tr('No bankruptcies')}
         if not any(p[k] for k in bad):
-            out.append("No collections, unpaid write-offs or bankruptcies")
+            out.append(tr('No collections, unpaid write-offs or bankruptcies'))
         else:
             out += [text for k, text in bad.items() if not p[k]]
         y = p.get("file_age_years")
         if y:
             months = round(y * 12)
-            out.append(f"{int(y)} years of credit history" if y >= 2 else f"{_s(months, 'month')} of credit history")
+            out.append(tr('{v0} years of credit history', v0=_fmt(int(y), '')) if y >= 2 else tr('{v0} of credit history', v0=_fmt(_s(months, 'month'), '')))
         if p["score_low"] is not None and p["score_low"] >= 700:
-            out.append(f"A good credit score ({p['score_low']})")
+            out.append(tr('A good credit score ({v0})', v0=_fmt(p['score_low'], '')))
         if p["bureaus_with_file"] == 3 and not p["bureau_disagreements"]:
-            out.append("All three credit bureaus agree about you")
+            out.append(tr('All three credit bureaus agree about you'))
     if ff.get("available") and ff.get("risk_score") is not None and ff["risk_score"] < 30:
-        out.append("Fraud checks found nothing unusual")
+        out.append(tr('Fraud checks found nothing unusual'))
     if p.get("no_file") or p.get("thin_file") or p.get("no_score"):   # newcomers: these are what lenders can see
         if ff.get("phone_owner_matches"):
-            out.append("Your phone number is in your name")
+            out.append(tr('Your phone number is in your name'))
         days = ff.get("email_age_days") or 0
         if days >= 365:
-            out.append(f"You've had your email address for over {_s(days // 365, 'year')}")
+            out.append(tr("You've had your email address for over {v0}", v0=_fmt(_s(days // 365, 'year'), '')))
     return out

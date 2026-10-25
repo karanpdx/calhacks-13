@@ -55,3 +55,9 @@ def test_live_without_credentials_says_so_and_uses_samples():
     r = client.get("/api/exchange/P01?live=1").json()
     assert r["data_source"] == "samples" and "CRS_USER" in r["live_note"]
     assert client.get("/api/exchange/P01").json()["live_note"] is None
+
+
+def test_page_passes_live_mode_through():
+    html = client.get("/phone").text
+    assert 'get("live") === "0" ? "" : "live=1"' in html
+    assert '"/api/exchange/' in html and 'id="src"' in html

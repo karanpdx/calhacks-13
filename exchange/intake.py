@@ -11,9 +11,11 @@ limit. The price limit is asked in plain words, the most they could pay each mon
 shows that Mandate back to the person to confirm before anything goes to the market.
 """
 import re
+import unicodedata
 
 from .llm_agents import ClaudeMixin, Fallback
 from .messages import Mandate, APR_CAP
+from .i18n import language, t, money, number
 
 LIMITS = {"amount": (100, 100000), "max_apr": (0.0, APR_CAP), "term": (3, 84), "max_fee": (0, 5000),
           "max_payment": (10, 10000)}
@@ -122,11 +124,45 @@ PAY_BEFORE = re.compile(r"monthly\s+(?:payments?\s+)?(?:(?:of|under|below|around
                         r"(?![\d,.]*\d)(?!\s*(?:%|months?\b|mos?\b|years?\b|yrs?\b))")
 
 
+def _spanish_text(text):
+    """Normalize Spanish phrasing into the existing parser's units, not new limits."""
+    low = ''.join(c for c in unicodedata.normalize('NFD', text.lower()) if not unicodedata.combining(c))
+    if not re.search(r'\b(necesito|dolares?|mes(?:es)?|anos?|pagar|pago|pagos|comision(?:es)?|cargos?|prestamo|mil|gano|ingresos?|sueldo|alquiler)\b', low):
+        return text
+    # Spanish thousands/decimal punctuation, also accepting US dollar notation.
+    def digits(m):
+        value = m.group()
+        if re.fullmatch(r'\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?', value):
+            return value.replace('.', '').replace(',', '.')
+        if ',' in value and not re.fullmatch(r'\d{1,3}(?:,\d{3})+', value):
+            return value.replace(',', '.')
+        return value
+    low = re.sub(r'\d+(?:[.,]\d+)*', digits, low)
+    low = re.sub(r'(\d+(?:\.\d+)?)\s+mil\b', lambda m: str(float(m[1]) * 1000), low)
+    low = re.sub(r'\b(\d[\d,.]*)\s*(?:dolares?|usd)\b', r'$\1', low)
+    low = re.sub(r'\b(?:gano|ingresos?|sueldo|alquiler)\s*(?:de|son|es)?\s*\$?[\d,.]+\s*(?:al|por|cada)\s+mes\b', '', low)
+    low = re.sub(r'\b(necesito|pido|prestamo de|al menos|minimo)\s+(?:de\s+)?(\d[\d,.]*)', r'\1 $\2', low)
+    low = re.sub(r'\b(?:sin|no quiero|no acepto|no permito)\s+(?:los\s+)?pagos?\s+automaticos?\b', 'no autopay', low)
+    low = re.sub(r'\bpagos?\s+automaticos?\b', 'autopay', low)
+    low = re.sub(r'\b(sin|cero|no quiero)\s+(comisiones|cargos)\b', 'no fees', low)
+    low = re.sub(r'\b(comision(?:es)?|cargos?)\s*(?:de|hasta)?\s*', 'fee ', low)
+    low = re.sub(r'\b(?:pago mensual|pago al mes)\s*(?:de|hasta)?', 'monthly payment ', low)
+    low = re.sub(r'\b(?:al|por|cada|a el)\s+mes\b|\bmensuales?\b', 'a month', low)
+    low = re.sub(r'\b(?:gano|ganamos)\b', 'earn', low)
+    low = re.sub(r'\b(?:ingresos?|sueldo)\b', 'income', low)
+    low = re.sub(r'\balquiler\b', 'rent', low)
+    low = re.sub(r'\bpor ciento\b', '%', low)
+    low = re.sub(r'\b(\d+)\s*(?:a|y|hasta)\s*(\d+)\s*(meses|anos)\b', r'\1 to \2 \3', low)
+    low = re.sub(r'\bmeses?\b', 'months', low)
+    low = re.sub(r'\banos?\b', 'years', low)
+    return low
+
+
 def parse(user_texts):
     """Pull the limits out of the person's own messages with regexes. Later messages override earlier ones."""
     f = {}
     for t in user_texts:
-        low = t.lower()
+        low = _spanish_text(t).lower()
         # a monthly payment first, then blank it out so it isn't also read as the loan amount, a fee or a term
         pays = sorted((m.start(), m.end(), m.group(1)) for rx in (PAY_AFTER, PAY_BEFORE) for m in rx.finditer(low))
         pays = [(a, b, v) for a, b, v in pays if _money(v)  # "I earn $3,000 a month" is income, not a limit
@@ -165,7 +201,19 @@ def parse(user_texts):
     return f
 
 
-def rule_reply(fields):
+def rule_reply(fields, lang="en"):
+    if lang == "es":
+        with language(lang):
+            need = missing(fields)
+            if need:
+                return t("intake." + need[0])
+            m = to_mandate(fields)
+            reply = t("intake.summary", amount=money(m.amount), minimum=money(m.min_amount),
+                      months=number(m.max_term), payment=money(m.max_payment) if m.max_payment else t("intake.not_set"),
+                      rate=number(m.max_apr), autopay=t("intake.yes" if "autopay" in m.allow else "intake.no"), fee=money(m.max_fee))
+            if m.max_payment and m.min_amount / m.max_term > m.max_payment:
+                reply += t("intake.too_low")
+            return reply + t("intake.confirm")
     need = missing(fields)
     if need:
         return QUESTIONS[need[0]]
@@ -192,8 +240,11 @@ class MandateChat(ClaudeMixin):
     def __init__(self, client=None):
         self._setup_claude(client)
 
-    def turn(self, messages):
+    def turn(self, messages, lang="en"):
         """messages = [{"role": "user"|"agent", "content": str}, ...], oldest first. Returns the agent's next turn."""
+        if lang not in ("en", "es"):
+            raise ValueError("unsupported language")
+        self.language = lang
         msgs = [{"role": "user" if m.get("role") == "user" else "agent", "content": str(m.get("content", ""))[:MAX_CHARS]}
                 for m in messages[-MAX_TURNS:]]
         try:
@@ -205,7 +256,7 @@ class MandateChat(ClaudeMixin):
         except Exception as e:  # no key, API error, refusal, bad JSON: the person still gets an answer
             self._fell_back(e)
             fields = clean(parse([m["content"] for m in msgs if m["role"] == "user"]))
-            reply, source = rule_reply(fields), "rules"
+            reply, source = rule_reply(fields, lang), "rules"
         m = to_mandate(fields)
         return {"reply": reply, "fields": fields, "missing": missing(fields), "ready": m is not None,
                 "mandate": mandate_dict(m), "source": source}
@@ -214,4 +265,5 @@ class MandateChat(ClaudeMixin):
         if not any(m["role"] == "user" for m in msgs):
             raise Fallback("nothing from the person yet")
         convo = "\n".join(f"{'Person' if m['role'] == 'user' else 'You (agent)'}: {m['content']}" for m in msgs)
-        return self.ask(SYSTEM, "Conversation so far:\n" + convo + "\n\nReturn the fields and your reply as JSON.", SCHEMA)
+        instruction = " Reply in natural, plain Spanish." if getattr(self, "language", "en") == "es" else " Reply in plain English."
+        return self.ask(SYSTEM + instruction, "Conversation so far:\n" + convo + "\n\nReturn the fields and your reply as JSON.", SCHEMA)

@@ -2,6 +2,9 @@
 
 Important decisions, newest first. Format and rules: [PROCESS.md](PROCESS.md).
 
+## 2026-10-25: Integrate human approval with borrower language and accessibility
+Preserve both approval and EN/ES across batch/stream/decision responses, require explicit chat consent in either language, and detach a finished stream's callback before holding its session. Why: resolving only the text conflicts would lose features and streamed decisions crashed against a closed event loop; held sessions remain in memory and engine approval rules are unchanged.
+
 ## 2026-10-25: Removed the /exchange page; /demo is the one front end
 Deleted `app/static/exchange.html` and its route; its API (`/api/exchange/...`, including the stream) stays. Why: two front ends split the demo, and /demo tells the story better. Gave up: the scenario picker and "under the hood" panel that page had (the API still returns `under_the_hood` and `red_team`).
 
@@ -12,6 +15,12 @@ Why: an unscripted attacker is a stronger proof than scripted ones. Gave up: it'
 ## 2026-10-25: The person approves the loan, not their agent
 With `approval=1` (used by the /demo chat) the agent's ACCEPT is only a recommendation; the referee settles only when the person approves that exact offer (`POST /api/session/{id}/approve`, once, inside the mandate) or ends with no deal on decline.
 Why: an agent should never sign a loan for someone, and the roadmap listed the missing approval as the first gap. Gave up: held sessions live in server memory (a restart drops them), and the form path and exchange.html still auto-accept.
+
+## 2026-10-25: Agent chat is the sole borrower interface
+Remove the standalone borrower dashboard and legacy exchange HTML, redirect old page URLs to `/phone`, and keep lender-only assets separate from chat accessibility assets. Why: the chat already handles the borrower journey with less bloat; gave up the duplicate dashboard and its fictional savings features while retaining the shared exchange APIs and summaries.
+
+## 2026-10-25: Borrower language and accessibility share an EN/ES catalog
+Borrower summaries and controls use one deterministic EN/ES catalog, localized numbers, Spanish intake fallback, accessible term explanations and browser speech; signed agent records remain original-language source disclosures. Why: the whole flow works without paid translation or TTS dependencies; gave up: Spanish is machine-assisted and device screen-reader/200% Safari checks still need a human pass.
 
 ## 2026-10-25: Fairness check proves blindness by swapping protected data in the raw CRS responses
 We swap each applicant's name, address, ZIP, DOB, phone and email consistently across every CRS product and require identical decisions and prices, plus twins and a passport proxy scan; disparity compares thin/no-file vs others, labelled "internal check, not a legal fair-lending review".
